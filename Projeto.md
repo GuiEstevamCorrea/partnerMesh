@@ -537,7 +537,7 @@ Informações:
 
 - Permite alterar nome, email, permission, vetor.
 
-### **UC-12 – Alterar Senha**
+### **UC-12 – Alterar Senha - OK**
 
 - Admin global pode forçar reset
 - Usuário pode alterar sua própria
