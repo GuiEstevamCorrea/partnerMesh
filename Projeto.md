@@ -548,7 +548,7 @@ Informações:
 
 ### **UC-14 – Listar Usuários - OK**
 
-### **UC-15 – Obter Dados do Usuário por ID**
+### **UC-15 – Obter Dados do Usuário por ID - OK**
 
 ---
 
