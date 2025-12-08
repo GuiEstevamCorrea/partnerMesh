@@ -542,7 +542,7 @@ Informações:
 - Admin global pode forçar reset
 - Usuário pode alterar sua própria
 
-### **UC-13 – Ativar/Inativar Usuário**
+### **UC-13 – Ativar/Inativar Usuário - OK**
 
 - Respeita restrição: vetor deve ter ao menos 1 admin
 
