@@ -4,6 +4,7 @@ using Application.UseCases.CreateUser.DTO;
 using Application.UseCases.UpdateUser.DTO;
 using Application.UseCases.ChangePassword.DTO;
 using Application.UseCases.ActivateDeactivateUser.DTO;
+using Application.UseCases.ListUsers.DTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -19,17 +20,20 @@ public class UsersController : ControllerBase
     private readonly IUpdateUserUseCase _updateUserUseCase;
     private readonly IChangePasswordUseCase _changePasswordUseCase;
     private readonly IActivateDeactivateUserUseCase _activateDeactivateUserUseCase;
+    private readonly IListUsersUseCase _listUsersUseCase;
 
     public UsersController(
         ICreateUserUseCase createUserUseCase,
         IUpdateUserUseCase updateUserUseCase,
         IChangePasswordUseCase changePasswordUseCase,
-        IActivateDeactivateUserUseCase activateDeactivateUserUseCase)
+        IActivateDeactivateUserUseCase activateDeactivateUserUseCase,
+        IListUsersUseCase listUsersUseCase)
     {
         _createUserUseCase = createUserUseCase;
         _updateUserUseCase = updateUserUseCase;
         _changePasswordUseCase = changePasswordUseCase;
         _activateDeactivateUserUseCase = activateDeactivateUserUseCase;
+        _listUsersUseCase = listUsersUseCase;
     }
 
     /// <summary>
@@ -64,6 +68,67 @@ public class UsersController : ControllerBase
             nameof(GetUser), 
             new { id = result.User!.Id }, 
             result);
+    }
+
+    /// <summary>
+    /// Lista usuários com filtros e paginação
+    /// </summary>
+    /// <param name="name">Filtro por nome (contém)</param>
+    /// <param name="email">Filtro por email (contém)</param>
+    /// <param name="permission">Filtro por permissão</param>
+    /// <param name="vetorId">Filtro por vetor</param>
+    /// <param name="active">Filtro por status ativo/inativo</param>
+    /// <param name="page">Página (padrão: 1)</param>
+    /// <param name="pageSize">Itens por página (padrão: 10, máximo: 100)</param>
+    /// <param name="cancellationToken">Token de cancelamento</param>
+    /// <returns>Lista paginada de usuários</returns>
+    [HttpGet]
+    [AuthorizePermission("AdminGlobal", "AdminVetor")]
+    [ProducesResponseType(typeof(ListUsersResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ListUsersResult), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> ListUsers(
+        [FromQuery] string? name = null,
+        [FromQuery] string? email = null,
+        [FromQuery] int? permission = null,
+        [FromQuery] Guid? vetorId = null,
+        [FromQuery] bool? active = null,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10,
+        CancellationToken cancellationToken = default)
+    {
+        // Obter ID do usuário atual do token JWT
+        var currentUserIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(currentUserIdClaim) || !Guid.TryParse(currentUserIdClaim, out var currentUserId))
+        {
+            return BadRequest(ListUsersResult.Failure("Usuário atual não identificado."));
+        }
+
+        // Converter permission de int para enum se fornecido
+        Domain.ValueTypes.PermissionEnum? permissionEnum = null;
+        if (permission.HasValue && Enum.IsDefined(typeof(Domain.ValueTypes.PermissionEnum), permission.Value))
+        {
+            permissionEnum = (Domain.ValueTypes.PermissionEnum)permission.Value;
+        }
+
+        var request = new ListUsersRequest(
+            name,
+            email,
+            permissionEnum,
+            vetorId,
+            active,
+            page,
+            pageSize);
+
+        var result = await _listUsersUseCase.ListAsync(request, currentUserId, cancellationToken);
+
+        if (!result.IsSuccess)
+        {
+            return BadRequest(result);
+        }
+
+        return Ok(result);
     }
 
     /// <summary>

@@ -546,7 +546,7 @@ Informações:
 
 - Respeita restrição: vetor deve ter ao menos 1 admin
 
-### **UC-14 – Listar Usuários**
+### **UC-14 – Listar Usuários - OK**
 
 ### **UC-15 – Obter Dados do Usuário por ID**
 
