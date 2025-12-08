@@ -8,8 +8,9 @@ namespace Domain.ValueTypes
 {
     public enum PermissionEnum
     {
-        Admin_Global = 1,
-        Admin_Vetor = 2,
-        Operator = 3
+        AdminGlobal = 1,
+        AdminVetor = 2,
+        Operador = 3,
+        Parceiro = 4
     }
 }

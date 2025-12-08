@@ -1,0 +1,34 @@
+﻿namespace Domain.Entities;
+
+public class Partner
+{
+    public Guid Id { get; private set; }
+    public string Name { get; private set; }
+    public string PhoneNumber { get; private set; }
+    public string Email { get; private set; }
+    public bool Activve { get; private set; }
+    public DateTime CreatedAt { get; private set; }
+
+    public Guid VetorId { get; private set; }
+    public Vetor Vetor { get; private set; }
+
+    public Guid? RecommenderId { get; private set; }
+    public Partner? Recommender { get; private set; }
+
+    public IReadOnlyCollection<Partner> Recommended => _recommended.AsReadOnly();
+    private readonly List<Partner> _recommended = new();
+
+    protected Partner() { }
+
+    public Partner(string name, string phoneNumber, string email, Guid vetorId, Guid? recommenderId)
+    {
+        Id = Guid.NewGuid();
+        Name = name;
+        PhoneNumber = phoneNumber;
+        Email = email;
+        VetorId = vetorId;
+        RecommenderId = recommenderId;
+        Activve = true;
+        CreatedAt = DateTime.UtcNow;
+    }
+}
