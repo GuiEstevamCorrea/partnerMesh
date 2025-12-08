@@ -1,6 +1,7 @@
 using Api.Authorization;
 using Application.Interfaces.IUseCases;
 using Application.UseCases.CreateUser.DTO;
+using Application.UseCases.UpdateUser.DTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -13,10 +14,14 @@ namespace Api.Controllers;
 public class UsersController : ControllerBase
 {
     private readonly ICreateUserUseCase _createUserUseCase;
+    private readonly IUpdateUserUseCase _updateUserUseCase;
 
-    public UsersController(ICreateUserUseCase createUserUseCase)
+    public UsersController(
+        ICreateUserUseCase createUserUseCase,
+        IUpdateUserUseCase updateUserUseCase)
     {
         _createUserUseCase = createUserUseCase;
+        _updateUserUseCase = updateUserUseCase;
     }
 
     /// <summary>
@@ -66,5 +71,38 @@ public class UsersController : ControllerBase
     {
         // Será implementado no UC-15
         return Ok(new { message = "Endpoint será implementado no UC-15", userId = id });
+    }
+
+    /// <summary>
+    /// Atualiza um usuário existente no sistema
+    /// </summary>
+    /// <param name="id">ID do usuário a ser atualizado</param>
+    /// <param name="request">Dados a serem atualizados</param>
+    /// <param name="cancellationToken">Token de cancelamento</param>
+    /// <returns>Informações do usuário atualizado</returns>
+    [HttpPut("{id}")]
+    [AuthorizePermission("AdminGlobal", "AdminVetor")]
+    [ProducesResponseType(typeof(UpdateUserResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(UpdateUserResult), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UpdateUserRequest request, CancellationToken cancellationToken = default)
+    {
+        // Obter ID do usuário atual do token JWT
+        var currentUserIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(currentUserIdClaim) || !Guid.TryParse(currentUserIdClaim, out var currentUserId))
+        {
+            return BadRequest(UpdateUserResult.Failure("Usuário atual não identificado."));
+        }
+
+        var result = await _updateUserUseCase.UpdateAsync(id, request, currentUserId, cancellationToken);
+
+        if (!result.IsSuccess)
+        {
+            return BadRequest(result);
+        }
+
+        return Ok(result);
     }
 }

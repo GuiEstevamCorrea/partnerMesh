@@ -520,7 +520,7 @@ Informações:
 - Output: novo JWT
 - Regras: validade, revogação
 
-### **UC-03 – Logout**
+### **UC-03 – Logout - OK**
 
 - Invalida refresh token
 
@@ -528,12 +528,12 @@ Informações:
 
 # **2. Gestão de Usuários**
 
-### **UC-10 – Criar Usuário**
+### **UC-10 – Criar Usuário - OK**
 
 - Perfis permitidos: Admin Global, Admin de Vetor
 - Regras: email único, admin global não tem vetor, outros perfis devem ter.
 
-### **UC-11 – Atualizar Usuário**
+### **UC-11 – Atualizar Usuário - OK**
 
 - Permite alterar nome, email, permission, vetor.
 

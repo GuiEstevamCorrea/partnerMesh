@@ -65,6 +65,12 @@ public sealed class UserRepository : IUserRepository
         return Task.FromResult(exists);
     }
 
+    public Task<bool> EmailExistsExcludingUserAsync(string email, Guid excludeUserId, CancellationToken cancellationToken = default)
+    {
+        var exists = _users.Any(u => u.Email.Equals(email, StringComparison.OrdinalIgnoreCase) && u.Id != excludeUserId);
+        return Task.FromResult(exists);
+    }
+
     public Task SaveAsync(User user, CancellationToken cancellationToken = default)
     {
         var existingUser = _users.FirstOrDefault(u => u.Id == user.Id);

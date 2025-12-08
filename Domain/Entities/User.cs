@@ -45,6 +45,26 @@ public class User
         }
     }
 
+    public void ClearVetores()
+    {
+        foreach (var userVetor in _userVetores)
+        {
+            userVetor.Deactivate();
+        }
+    }
+
+    public void UpdateVetor(Guid? vetorId)
+    {
+        // Remove todos os vetores ativos
+        ClearVetores();
+        
+        // Adiciona o novo vetor se fornecido
+        if (vetorId.HasValue)
+        {
+            AddVetor(vetorId.Value);
+        }
+    }
+
     public void UpdateEmail(string newEmail)
     {
         Email = newEmail;
@@ -53,6 +73,11 @@ public class User
     public void UpdateName(string newName)
     {
         Name = newName;
+    }
+
+    public void UpdatePermission(PermissionEnum newPermission)
+    {
+        Permission = newPermission;
     }
 
     public void UpdatePassword(string newPasswordHash)
