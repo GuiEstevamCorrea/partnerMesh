@@ -4,6 +4,7 @@ using Application.Interfaces.Services;
 using Application.UseCases.AuthenticateUser;
 using Application.UseCases.RefreshToken;
 using Application.UseCases.Logout;
+using Application.UseCases.CreateUser;
 using Infrastructure.Repositories;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -77,7 +78,9 @@ builder.Services.AddAuthorization();
 builder.Services.AddScoped<IAuthenticateUserUseCase, AuthenticateUserUseCase>();
 builder.Services.AddScoped<IRefreshTokenUseCase, RefreshTokenUseCase>();
 builder.Services.AddScoped<ILogoutUseCase, LogoutUseCase>();
+builder.Services.AddScoped<ICreateUserUseCase, CreateUserUseCase>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IVetorRepository, VetorRepository>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 

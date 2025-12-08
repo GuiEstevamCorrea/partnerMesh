@@ -36,6 +36,40 @@ public class User
         _userVetores.Add(new UserVetor(Id, vetorId));
     }
 
+    public void RemoveVetor(Guid vetorId)
+    {
+        var userVetor = _userVetores.FirstOrDefault(uv => uv.VetorId == vetorId);
+        if (userVetor != null)
+        {
+            userVetor.Deactivate();
+        }
+    }
+
+    public void UpdateEmail(string newEmail)
+    {
+        Email = newEmail;
+    }
+
+    public void UpdateName(string newName)
+    {
+        Name = newName;
+    }
+
+    public void UpdatePassword(string newPasswordHash)
+    {
+        PasswordHash = newPasswordHash;
+    }
+
+    public void Activate()
+    {
+        Active = true;
+    }
+
+    public void Deactivate()
+    {
+        Active = false;
+    }
+
     public bool PasswordMatches(string plain)
        => BCrypt.Net.BCrypt.Verify(plain, PasswordHash);
 
