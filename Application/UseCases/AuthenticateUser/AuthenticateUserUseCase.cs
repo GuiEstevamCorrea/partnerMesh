@@ -10,11 +10,16 @@ public sealed class AuthenticateUserUseCase : IAuthenticateUserUseCase
 {
     private readonly IUserRepository _userRepository;
     private readonly ITokenService _tokenService;
+    private readonly IRefreshTokenRepository _refreshTokenRepository;
 
-    public AuthenticateUserUseCase(IUserRepository userRepository, ITokenService tokenService)
+    public AuthenticateUserUseCase(
+        IUserRepository userRepository, 
+        ITokenService tokenService,
+        IRefreshTokenRepository refreshTokenRepository)
     {
         _userRepository = userRepository;
         _tokenService = tokenService;
+        _refreshTokenRepository = refreshTokenRepository;
     }
 
     public async Task<AuthenticationResult> AuthenticateAsync(AuthenticationRequest request, CancellationToken cancellationToken = default)
@@ -62,6 +67,14 @@ public sealed class AuthenticateUserUseCase : IAuthenticateUserUseCase
             vetorIds);
 
         var refreshToken = _tokenService.GenerateRefreshToken();
+
+        // Salvar refresh token
+        var refreshTokenEntity = new Domain.Entities.RefreshToken(
+            refreshToken,
+            user.Id,
+            DateTime.UtcNow.AddDays(30)); // 30 dias de validade
+
+        await _refreshTokenRepository.SaveAsync(refreshTokenEntity, cancellationToken);
 
         // Criar informações do usuário
         var userInfo = new UserInfo(

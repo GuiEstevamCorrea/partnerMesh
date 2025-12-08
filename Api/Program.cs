@@ -2,6 +2,7 @@ using Application.Interfaces.IUseCases;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Application.UseCases.AuthenticateUser;
+using Application.UseCases.RefreshToken;
 using Infrastructure.Repositories;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -73,7 +74,9 @@ builder.Services.AddAuthorization();
 
 // Registro das dependências
 builder.Services.AddScoped<IAuthenticateUserUseCase, AuthenticateUserUseCase>();
+builder.Services.AddScoped<IRefreshTokenUseCase, RefreshTokenUseCase>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 
 var app = builder.Build();
