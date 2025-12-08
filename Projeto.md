@@ -1,3 +1,5 @@
+<!-- Baseado no Projeto ponto MD vamos fazer por partes. Seguinto a arquitetura hexagonal, com a estrutura de projeto que já existe. -->
+
 # Projeto **Sistema de Rede de Credenciamento / Vetores**
 
 [Rede de credenciados Vetor.xlsx](attachment:14dcdb0e-a73f-4053-b622-c3d66e5fdc95:Rede_de_credenciados_Vetor.xlsx)
@@ -506,13 +508,13 @@ Informações:
 
 ## **1. Autenticação e Sessão**
 
-### **UC-01 – Autenticar Usuário**
+### **UC-01 – Autenticar Usuário - OK**
 
 - Input: email, senha
 - Output: JWT + Refresh Token
 - Regras: validar credenciais, usuário ativo, vetor ativo (se existir)
 
-### **UC-02 – Renovar Token**
+### **UC-02 – Renovar Token - OK**
 
 - Input: refresh token
 - Output: novo JWT

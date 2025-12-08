@@ -1,10 +1,10 @@
-# UC-02 - Renovar Token - Implementado
+# UC-02 e UC-03 - Autenticação Completa - Implementados
 
 ## 🎉 Implementação Concluída
 
-O Use Case UC-02 (Renovar Token) foi implementado com sucesso seguindo a **Arquitetura Hexagonal** e integrado à estrutura existente do projeto.
+Os Use Cases **UC-02 (Renovar Token)** e **UC-03 (Logout)** foram implementados com sucesso, completando o módulo de autenticação do sistema.
 
-### 📋 O que foi implementado:
+### 📋 **UC-02 - Renovar Token** ✅
 
 #### **1. Domain Layer**
 - ✅ Entidade `RefreshToken` com validações e métodos de controle
@@ -16,29 +16,37 @@ O Use Case UC-02 (Renovar Token) foi implementado com sucesso seguindo a **Arqui
 - ✅ DTOs: `RefreshTokenRequest`, `RefreshTokenResult`
 - ✅ Use Case `RefreshTokenUseCase` com todas as validações
 - ✅ Interface `IRefreshTokenRepository`
-- ✅ Atualização do `IUserRepository` com método `GetByIdAsync()`
 
 #### **3. Infrastructure Layer**
 - ✅ Implementação `RefreshTokenRepository` (em memória para testes)
 - ✅ Métodos: `GetByTokenAsync()`, `SaveAsync()`, `RevokeAllByUserIdAsync()`
-- ✅ Atualização do `UserRepository` com busca por ID
 
 #### **4. API Layer**
 - ✅ Endpoint `POST /api/auth/refresh` no `AuthController`
-- ✅ Documentação Swagger atualizada
-- ✅ Integração com o login existente (UC-01)
-
-#### **5. Integração com UC-01**
-- ✅ `AuthenticateUserUseCase` agora salva refresh tokens
-- ✅ Dependências registradas no `Program.cs`
 
 ---
 
-## 🧪 **Testando o Refresh Token**
+### 📋 **UC-03 - Logout** ✅
 
-### **Fluxo Completo de Teste:**
+#### **1. Application Layer**
+- ✅ Interface `ILogoutUseCase`
+- ✅ DTOs: `LogoutRequest`, `LogoutResult`
+- ✅ Use Case `LogoutUseCase` com revogação de tokens
 
-#### **1. Fazer Login (UC-01)**
+#### **2. API Layer**
+- ✅ Endpoint `POST /api/auth/logout` no `AuthController`
+- ✅ Revoga refresh token específico e todos os tokens do usuário
+
+#### **3. Segurança**
+- ✅ Revogação de token específico
+- ✅ Opção de revogar todos os tokens do usuário
+- ✅ Tratamento gracioso para tokens inexistentes
+
+---
+
+## 🧪 **Fluxo Completo de Autenticação**
+
+### **1. Login (UC-01)**
 **POST** `http://localhost:5251/api/auth/login`
 
 ```json
@@ -48,25 +56,17 @@ O Use Case UC-02 (Renovar Token) foi implementado com sucesso seguindo a **Arqui
 }
 ```
 
-**Response:**
+### **2. Refresh Token (UC-02)**
+**POST** `http://localhost:5251/api/auth/refresh`
+
 ```json
 {
-  "isSuccess": true,
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "refreshToken": "8F2E4A1B5D6C7E9F...",
-  "message": null,
-  "user": {
-    "id": "12345678-1234-1234-1234-123456789abc",
-    "name": "Admin Global",
-    "email": "admin@partnermesh.com",
-    "permission": "AdminGlobal",
-    "vetorIds": []
-  }
+  "refreshToken": "8F2E4A1B5D6C7E9F..."
 }
 ```
 
-#### **2. Renovar Token (UC-02)**
-**POST** `http://localhost:5251/api/auth/refresh`
+### **3. Logout (UC-03)**
+**POST** `http://localhost:5251/api/auth/logout`
 
 ```json
 {
@@ -78,90 +78,99 @@ O Use Case UC-02 (Renovar Token) foi implementado com sucesso seguindo a **Arqui
 ```json
 {
   "isSuccess": true,
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...", // NOVO TOKEN
-  "refreshToken": "9G3F5B2C6E8D0A1E...", // NOVO REFRESH TOKEN
-  "message": null,
-  "user": {
-    "id": "12345678-1234-1234-1234-123456789abc",
-    "name": "Admin Global",
-    "email": "admin@partnermesh.com",
-    "permission": "AdminGlobal",
-    "vetorIds": []
-  }
-}
-```
-
-**Response de Erro:**
-```json
-{
-  "isSuccess": false,
-  "token": null,
-  "refreshToken": null,
-  "message": "Refresh token inválido.",
-  "user": null
+  "message": "Logout realizado com sucesso."
 }
 ```
 
 ---
 
-## 🔒 **Regras de Validação Implementadas**
+## 🔒 **Recursos de Segurança Implementados**
 
-✅ **Refresh token obrigatório**
-✅ **Verificação de existência do refresh token**
-✅ **Validação de expiração** (30 dias)
-✅ **Verificação se não foi revogado**
-✅ **Verificação se não foi usado** (one-time use)
-✅ **Validação de usuário ativo**
-✅ **Verificação de vetor ativo** (exceto Admin Global)
-✅ **Invalidação do refresh token usado**
-✅ **Geração de novos tokens** (JWT + Refresh)
+### **UC-02 - Refresh Token:**
+✅ **One-time use** para refresh tokens
+✅ **Expiração automática** (30 dias)
+✅ **Validação completa** de usuário e vetor
+✅ **Regeneração automática** de tokens
 
----
-
-## 🔄 **Ciclo de Vida do Refresh Token**
-
-1. **Criação**: Gerado durante login (UC-01)
-2. **Armazenamento**: Salvo com validade de 30 dias
-3. **Uso**: Utilizado uma única vez para renovar tokens
-4. **Invalidação**: Marcado como usado após renovação
-5. **Expiração**: Automática após 30 dias
+### **UC-03 - Logout:**
+✅ **Revogação de refresh token específico**
+✅ **Revogação de todos os tokens do usuário** (segurança extra)
+✅ **Tratamento idempotente** (sucesso mesmo se token não existe)
+✅ **Invalidação imediata** da sessão
 
 ---
 
-## ⚡ **Recursos Implementados**
+## 📊 **Endpoints Disponíveis**
 
-### **Segurança:**
-- ✅ One-time use para refresh tokens
-- ✅ Expiração automática (30 dias)
-- ✅ Revogação manual possível
-- ✅ Validação de usuário ativo
-
-### **Flexibilidade:**
-- ✅ Suporte a múltiplos vetores
-- ✅ Diferentes perfis de usuário
-- ✅ Regeneração automática de tokens
-
-### **Integração:**
-- ✅ Funciona com UC-01 existente
-- ✅ Pronto para UC-03 (Logout)
-- ✅ Estrutura preparada para Entity Framework
+| Endpoint | Método | Descrição | Use Case |
+|----------|---------|-----------|----------|
+| `/api/auth/login` | POST | Autenticar usuário | UC-01 |
+| `/api/auth/refresh` | POST | Renovar token JWT | UC-02 |
+| `/api/auth/logout` | POST | Fazer logout | UC-03 |
 
 ---
 
-## 📊 **Swagger/OpenAPI**
+## ⚡ **Testes Completos**
+
+### **Cenário 1: Fluxo Normal**
+1. **Login** → recebe JWT + Refresh Token
+2. **Uso do JWT** → acesso a recursos protegidos
+3. **Refresh** → recebe novos tokens
+4. **Logout** → revoga refresh token
+
+### **Cenário 2: Segurança**
+1. **Login** → recebe tokens
+2. **Refresh** → usa refresh token (invalida o anterior)
+3. **Tentar usar refresh antigo** → erro (já usado)
+4. **Logout** → revoga tokens restantes
+
+### **Cenário 3: Multiple Sessions**
+1. **Login** → recebe tokens (sessão 1)
+2. **Login novamente** → recebe novos tokens (sessão 2)
+3. **Logout** → revoga TODAS as sessões do usuário
+
+---
+
+## 🔄 **Ciclo de Vida Completo**
+
+```
+Login (UC-01) 
+    ↓
+Recebe JWT + Refresh Token
+    ↓
+Usa JWT para acessar recursos
+    ↓
+JWT expira (8h) → Usa Refresh Token (UC-02)
+    ↓
+Recebe novos JWT + Refresh Token
+    ↓
+Quando terminar → Logout (UC-03)
+    ↓
+Todos os tokens revogados
+```
+
+---
+
+## 📊 **Swagger/OpenAPI Atualizado**
 
 - **URL:** `http://localhost:5251`
-- **Novo endpoint documentado**: `POST /api/auth/refresh`
-- **Suporte a teste interativo**
+- **3 endpoints de autenticação** documentados
+- **Testes interativos** disponíveis
+- **Esquemas de autorização** configurados
 
 ---
 
 ## ⚡ **Próximos Passos Sugeridos**
 
-1. **UC-03** - Logout (Revogar Refresh Token)
-2. **UC-10 a UC-15** - Gestão de Usuários
-3. **UC-20 a UC-24** - Gestão de Vetores
-4. **Integração com Entity Framework + PostgreSQL**
+Módulo de **Autenticação Completo** ✅
+
+**Próximo módulo:** Gestão de Usuários
+1. **UC-10** - Criar Usuário
+2. **UC-11** - Atualizar Usuário
+3. **UC-12** - Alterar Senha
+4. **UC-13** - Ativar/Inativar Usuário
+5. **UC-14** - Listar Usuários
+6. **UC-15** - Obter Usuário por ID
 
 ---
 
@@ -174,12 +183,13 @@ dotnet run
 
 A API ficará disponível em: `http://localhost:5251`
 
-### 🧪 **Teste Rápido:**
-
-1. Fazer login → pegar refresh token
-2. Usar refresh token → receber novos tokens
-3. Usar refresh token novamente → erro (já foi usado)
-
 ---
 
-**✅ UC-02 implementado com sucesso!** O sistema agora suporta renovação segura de tokens JWT.
+**✅ Módulo de Autenticação (UC-01, UC-02, UC-03) completamente implementado!**
+
+O sistema agora possui um **sistema de autenticação robusto e seguro** com:
+- ✅ Login com JWT
+- ✅ Renovação automática de tokens
+- ✅ Logout seguro com revogação
+- ✅ Controle de múltiplas sessões
+- ✅ Segurança robusta

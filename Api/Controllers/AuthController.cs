@@ -1,7 +1,9 @@
 ﻿using Application.Interfaces.IUseCases;
 using Application.UseCases.AuthenticateUser.DTO;
 using Application.UseCases.RefreshToken.DTO;
+using Application.UseCases.Logout.DTO;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Api.Controllers;
 
@@ -11,13 +13,16 @@ public class AuthController : ControllerBase
 {
     private readonly IAuthenticateUserUseCase _authenticateUserUseCase;
     private readonly IRefreshTokenUseCase _refreshTokenUseCase;
+    private readonly ILogoutUseCase _logoutUseCase;
 
     public AuthController(
         IAuthenticateUserUseCase authenticateUserUseCase,
-        IRefreshTokenUseCase refreshTokenUseCase)
+        IRefreshTokenUseCase refreshTokenUseCase,
+        ILogoutUseCase logoutUseCase)
     {
         _authenticateUserUseCase = authenticateUserUseCase;
         _refreshTokenUseCase = refreshTokenUseCase;
+        _logoutUseCase = logoutUseCase;
     }
 
     /// <summary>
@@ -55,6 +60,27 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Refresh([FromBody] RefreshTokenRequest request, CancellationToken cancellationToken = default)
     {
         var result = await _refreshTokenUseCase.RefreshAsync(request, cancellationToken);
+
+        if (!result.IsSuccess)
+        {
+            return BadRequest(result);
+        }
+
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Faz logout do usuário revogando o refresh token
+    /// </summary>
+    /// <param name="request">Refresh token a ser revogado</param>
+    /// <param name="cancellationToken">Token de cancelamento</param>
+    /// <returns>Resultado do logout</returns>
+    [HttpPost("logout")]
+    [ProducesResponseType(typeof(LogoutResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(LogoutResult), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> Logout([FromBody] LogoutRequest request, CancellationToken cancellationToken = default)
+    {
+        var result = await _logoutUseCase.LogoutAsync(request, cancellationToken);
 
         if (!result.IsSuccess)
         {
