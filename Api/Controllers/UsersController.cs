@@ -5,6 +5,7 @@ using Application.UseCases.UpdateUser.DTO;
 using Application.UseCases.ChangePassword.DTO;
 using Application.UseCases.ActivateDeactivateUser.DTO;
 using Application.UseCases.ListUsers.DTO;
+using Application.UseCases.GetUserById.DTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -21,19 +22,22 @@ public class UsersController : ControllerBase
     private readonly IChangePasswordUseCase _changePasswordUseCase;
     private readonly IActivateDeactivateUserUseCase _activateDeactivateUserUseCase;
     private readonly IListUsersUseCase _listUsersUseCase;
+    private readonly IGetUserByIdUseCase _getUserByIdUseCase;
 
     public UsersController(
         ICreateUserUseCase createUserUseCase,
         IUpdateUserUseCase updateUserUseCase,
         IChangePasswordUseCase changePasswordUseCase,
         IActivateDeactivateUserUseCase activateDeactivateUserUseCase,
-        IListUsersUseCase listUsersUseCase)
+        IListUsersUseCase listUsersUseCase,
+        IGetUserByIdUseCase getUserByIdUseCase)
     {
         _createUserUseCase = createUserUseCase;
         _updateUserUseCase = updateUserUseCase;
         _changePasswordUseCase = changePasswordUseCase;
         _activateDeactivateUserUseCase = activateDeactivateUserUseCase;
         _listUsersUseCase = listUsersUseCase;
+        _getUserByIdUseCase = getUserByIdUseCase;
     }
 
     /// <summary>
@@ -132,18 +136,39 @@ public class UsersController : ControllerBase
     }
 
     /// <summary>
-    /// Placeholder para obter usuário por ID (será implementado em UC-15)
+    /// Obtém dados detalhados de um usuário por ID
     /// </summary>
     /// <param name="id">ID do usuário</param>
-    /// <returns>Informações do usuário</returns>
+    /// <param name="cancellationToken">Token de cancelamento</param>
+    /// <returns>Informações detalhadas do usuário</returns>
     [HttpGet("{id}")]
     [AuthorizePermission("AdminGlobal", "AdminVetor", "Operador")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public IActionResult GetUser(Guid id)
+    [ProducesResponseType(typeof(GetUserByIdResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(GetUserByIdResult), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(GetUserByIdResult), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> GetUser(Guid id, CancellationToken cancellationToken = default)
     {
-        // Será implementado no UC-15
-        return Ok(new { message = "Endpoint será implementado no UC-15", userId = id });
+        // Obter ID do usuário atual do token JWT
+        var currentUserIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(currentUserIdClaim) || !Guid.TryParse(currentUserIdClaim, out var currentUserId))
+        {
+            return BadRequest(GetUserByIdResult.Failure("Usuário atual não identificado."));
+        }
+
+        var result = await _getUserByIdUseCase.GetAsync(id, currentUserId, cancellationToken);
+
+        if (!result.IsSuccess)
+        {
+            if (result.Message == "Usuário não encontrado.")
+            {
+                return NotFound(result);
+            }
+            return BadRequest(result);
+        }
+
+        return Ok(result);
     }
 
     /// <summary>
