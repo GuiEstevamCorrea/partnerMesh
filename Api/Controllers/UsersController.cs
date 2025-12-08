@@ -3,6 +3,7 @@ using Application.Interfaces.IUseCases;
 using Application.UseCases.CreateUser.DTO;
 using Application.UseCases.UpdateUser.DTO;
 using Application.UseCases.ChangePassword.DTO;
+using Application.UseCases.ActivateDeactivateUser.DTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -17,15 +18,18 @@ public class UsersController : ControllerBase
     private readonly ICreateUserUseCase _createUserUseCase;
     private readonly IUpdateUserUseCase _updateUserUseCase;
     private readonly IChangePasswordUseCase _changePasswordUseCase;
+    private readonly IActivateDeactivateUserUseCase _activateDeactivateUserUseCase;
 
     public UsersController(
         ICreateUserUseCase createUserUseCase,
         IUpdateUserUseCase updateUserUseCase,
-        IChangePasswordUseCase changePasswordUseCase)
+        IChangePasswordUseCase changePasswordUseCase,
+        IActivateDeactivateUserUseCase activateDeactivateUserUseCase)
     {
         _createUserUseCase = createUserUseCase;
         _updateUserUseCase = updateUserUseCase;
         _changePasswordUseCase = changePasswordUseCase;
+        _activateDeactivateUserUseCase = activateDeactivateUserUseCase;
     }
 
     /// <summary>
@@ -163,6 +167,70 @@ public class UsersController : ControllerBase
         }
 
         var result = await _changePasswordUseCase.ResetPasswordAsync(id, request, adminUserId, cancellationToken);
+
+        if (!result.IsSuccess)
+        {
+            return BadRequest(result);
+        }
+
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Ativa um usuário inativo
+    /// </summary>
+    /// <param name="id">ID do usuário a ser ativado</param>
+    /// <param name="cancellationToken">Token de cancelamento</param>
+    /// <returns>Resultado da operação</returns>
+    [HttpPatch("{id}/activate")]
+    [AuthorizePermission("AdminGlobal", "AdminVetor")]
+    [ProducesResponseType(typeof(ActivateDeactivateUserResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ActivateDeactivateUserResult), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> ActivateUser(Guid id, CancellationToken cancellationToken = default)
+    {
+        // Obter ID do usuário atual do token JWT
+        var currentUserIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(currentUserIdClaim) || !Guid.TryParse(currentUserIdClaim, out var currentUserId))
+        {
+            return BadRequest(ActivateDeactivateUserResult.Failure("Usuário atual não identificado."));
+        }
+
+        var result = await _activateDeactivateUserUseCase.ActivateUserAsync(id, currentUserId, cancellationToken);
+
+        if (!result.IsSuccess)
+        {
+            return BadRequest(result);
+        }
+
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Desativa um usuário ativo (respeitando a regra: vetor deve ter ao menos 1 admin)
+    /// </summary>
+    /// <param name="id">ID do usuário a ser desativado</param>
+    /// <param name="cancellationToken">Token de cancelamento</param>
+    /// <returns>Resultado da operação</returns>
+    [HttpPatch("{id}/deactivate")]
+    [AuthorizePermission("AdminGlobal", "AdminVetor")]
+    [ProducesResponseType(typeof(ActivateDeactivateUserResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ActivateDeactivateUserResult), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> DeactivateUser(Guid id, CancellationToken cancellationToken = default)
+    {
+        // Obter ID do usuário atual do token JWT
+        var currentUserIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(currentUserIdClaim) || !Guid.TryParse(currentUserIdClaim, out var currentUserId))
+        {
+            return BadRequest(ActivateDeactivateUserResult.Failure("Usuário atual não identificado."));
+        }
+
+        var result = await _activateDeactivateUserUseCase.DeactivateUserAsync(id, currentUserId, cancellationToken);
 
         if (!result.IsSuccess)
         {
