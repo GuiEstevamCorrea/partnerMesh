@@ -554,7 +554,7 @@ Informações:
 
 # **3. Gestão de Vetores (Tenants)**
 
-### **UC-20 – Criar Vetor**
+### **UC-20 – Criar Vetor - OK**
 
 - Apenas Admin Global
 - Regras: nome único, email único, criar admin por vetor.
