@@ -6,7 +6,7 @@ public class Partner
     public string Name { get; private set; }
     public string PhoneNumber { get; private set; }
     public string Email { get; private set; }
-    public bool Activve { get; private set; }
+    public bool Active { get; private set; }
     public DateTime CreatedAt { get; private set; }
 
     public Guid VetorId { get; private set; }
@@ -28,7 +28,29 @@ public class Partner
         Email = email;
         VetorId = vetorId;
         RecommenderId = recommenderId;
-        Activve = true;
+        Active = true;
         CreatedAt = DateTime.UtcNow;
+    }
+
+    public void UpdateInfo(string name, string phoneNumber, string email)
+    {
+        Name = name;
+        PhoneNumber = phoneNumber;
+        Email = email;
+    }
+
+    public void Activate()
+    {
+        Active = true;
+    }
+
+    public void Deactivate()
+    {
+        Active = false;
+    }
+
+    public bool CanRecommend()
+    {
+        return Active;
     }
 }

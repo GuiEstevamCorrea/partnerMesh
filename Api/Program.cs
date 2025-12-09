@@ -15,6 +15,7 @@ using Application.UseCases.UpdateVetor;
 using Application.UseCases.DeactivateVetor;
 using Application.UseCases.ListVetores;
 using Application.UseCases.GetVetorById;
+using Application.UseCases.CreatePartner;
 using Infrastructure.Repositories;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -99,8 +100,10 @@ builder.Services.AddScoped<IUpdateVetorUseCase, UpdateVetorUseCase>();
 builder.Services.AddScoped<IDeactivateVetorUseCase, DeactivateVetorUseCase>();
 builder.Services.AddScoped<IListVetoresUseCase, ListVetoresUseCase>();
 builder.Services.AddScoped<IGetVetorByIdUseCase, GetVetorByIdUseCase>();
+builder.Services.AddScoped<ICreatePartnerUseCase, CreatePartnerUseCase>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IVetorRepository, VetorRepository>();
+builder.Services.AddScoped<IPartnerRepository, PartnerRepository>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 

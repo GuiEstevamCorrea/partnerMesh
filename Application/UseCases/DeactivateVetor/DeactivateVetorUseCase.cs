@@ -111,7 +111,7 @@ public sealed class DeactivateVetorUseCase : IDeactivateVetorUseCase
         // Verificar se há parceiros associados (regra adicional de proteção)
         if (vetor.Partners.Any())
         {
-            var activeParceiros = vetor.Partners.Count(p => p.Activve); // Nota: há um typo "Activve" na entidade Partner
+            var activeParceiros = vetor.Partners.Count(p => p.Active);
             if (activeParceiros > 0)
             {
                 return ValidationResult.Invalid($"Não é possível inativar este vetor pois existem {activeParceiros} parceiro(s) ativo(s) associado(s). Desative ou mova os parceiros primeiro.");

@@ -575,7 +575,7 @@ Informações:
 
 # **4. Gestão de Parceiros**
 
-### **UC-30 – Criar Parceiro**
+### **UC-30 – Criar Parceiro - OK**
 
 - Campos: nome, contato, recomendador
 - Regras:

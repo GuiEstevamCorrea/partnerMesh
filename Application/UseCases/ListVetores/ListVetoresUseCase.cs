@@ -136,7 +136,7 @@ public sealed class ListVetoresUseCase : IListVetoresUseCase
 
         // Calcular estatísticas de parceiros
         var totalParceiros = vetor.Partners.Count;
-        var parceirosAtivos = vetor.Partners.Count(p => p.Activve); // Nota: há um typo "Activve" na entidade Partner
+        var parceirosAtivos = vetor.Partners.Count(p => p.Active);
 
         return new VetorListItem(
             vetor.Id,
