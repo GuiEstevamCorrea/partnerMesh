@@ -3,6 +3,7 @@ using Application.Interfaces.IUseCases;
 using Application.Interfaces.Repositories;
 using Application.UseCases.CreateVetor.DTO;
 using Application.UseCases.UpdateVetor.DTO;
+using Application.UseCases.DeactivateVetor.DTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -17,15 +18,18 @@ public class VectorsController : ControllerBase
     private readonly IVetorRepository _vetorRepository;
     private readonly ICreateVetorUseCase _createVetorUseCase;
     private readonly IUpdateVetorUseCase _updateVetorUseCase;
+    private readonly IDeactivateVetorUseCase _deactivateVetorUseCase;
 
     public VectorsController(
         IVetorRepository vetorRepository,
         ICreateVetorUseCase createVetorUseCase,
-        IUpdateVetorUseCase updateVetorUseCase)
+        IUpdateVetorUseCase updateVetorUseCase,
+        IDeactivateVetorUseCase deactivateVetorUseCase)
     {
         _vetorRepository = vetorRepository;
         _createVetorUseCase = createVetorUseCase;
         _updateVetorUseCase = updateVetorUseCase;
+        _deactivateVetorUseCase = deactivateVetorUseCase;
     }
 
     /// <summary>
