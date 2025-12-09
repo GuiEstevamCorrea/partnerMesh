@@ -559,7 +559,7 @@ Informações:
 - Apenas Admin Global
 - Regras: nome único, email único, criar admin por vetor.
 
-### **UC-21 – Atualizar Vetor**
+### **UC-21 – Atualizar Vetor - OK**
 
 - Nome, email, status
 
