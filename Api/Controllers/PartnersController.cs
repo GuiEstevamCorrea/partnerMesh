@@ -1,6 +1,7 @@
 using Api.Authorization;
 using Application.Interfaces.IUseCases;
 using Application.UseCases.CreatePartner.DTO;
+using Application.UseCases.UpdatePartner.DTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -13,10 +14,14 @@ namespace Api.Controllers;
 public class PartnersController : ControllerBase
 {
     private readonly ICreatePartnerUseCase _createPartnerUseCase;
+    private readonly IUpdatePartnerUseCase _updatePartnerUseCase;
 
-    public PartnersController(ICreatePartnerUseCase createPartnerUseCase)
+    public PartnersController(
+        ICreatePartnerUseCase createPartnerUseCase,
+        IUpdatePartnerUseCase updatePartnerUseCase)
     {
         _createPartnerUseCase = createPartnerUseCase;
+        _updatePartnerUseCase = updatePartnerUseCase;
     }
 
     /// <summary>
@@ -51,6 +56,43 @@ public class PartnersController : ControllerBase
             nameof(GetPartner), 
             new { id = result.Partner!.Id }, 
             result);
+    }
+
+    /// <summary>
+    /// Atualiza um parceiro existente no sistema
+    /// </summary>
+    /// <param name="id">ID do parceiro a ser atualizado</param>
+    /// <param name="request">Dados a serem atualizados</param>
+    /// <param name="cancellationToken">Token de cancelamento</param>
+    /// <returns>Informações do parceiro atualizado</returns>
+    [HttpPut("{id}")]
+    [AuthorizePermission("AdminGlobal", "AdminVetor", "Operador")]
+    [ProducesResponseType(typeof(Application.UseCases.UpdatePartner.DTO.UpdatePartnerResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Application.UseCases.UpdatePartner.DTO.UpdatePartnerResult), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> UpdatePartner(Guid id, [FromBody] Application.UseCases.UpdatePartner.DTO.UpdatePartnerRequest request, CancellationToken cancellationToken = default)
+    {
+        // Obter ID do usuário atual do token JWT
+        var currentUserIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(currentUserIdClaim) || !Guid.TryParse(currentUserIdClaim, out var currentUserId))
+        {
+            return BadRequest(Application.UseCases.UpdatePartner.DTO.UpdatePartnerResult.Failure("Usuário atual não identificado."));
+        }
+
+        var result = await _updatePartnerUseCase.UpdateAsync(id, request, currentUserId, cancellationToken);
+
+        if (!result.IsSuccess)
+        {
+            if (result.Message == "Parceiro não encontrado.")
+            {
+                return NotFound(result);
+            }
+            return BadRequest(result);
+        }
+
+        return Ok(result);
     }
 
     /// <summary>

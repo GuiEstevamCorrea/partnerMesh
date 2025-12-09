@@ -583,7 +583,7 @@ Informações:
     - parceiro ativo
     - sem ciclo
 
-### **UC-31 – Atualizar Parceiro**
+### **UC-31 – Atualizar Parceiro - OK**
 
 ### **UC-32 – Ativar/Inativar Parceiro**
 

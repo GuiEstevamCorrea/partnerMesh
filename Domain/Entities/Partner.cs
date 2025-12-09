@@ -39,6 +39,11 @@ public class Partner
         Email = email;
     }
 
+    public void UpdateRecommender(Guid? recommenderId)
+    {
+        RecommenderId = recommenderId;
+    }
+
     public void Activate()
     {
         Active = true;
