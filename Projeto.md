@@ -569,7 +569,7 @@ Informações:
 
 ### **UC-23 – Listar Vetores - OK**
 
-### **UC-24 – Obter Vetor por ID**
+### **UC-24 – Obter Vetor por ID - OK**
 
 ---
 
