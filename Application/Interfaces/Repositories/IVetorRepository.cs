@@ -9,4 +9,6 @@ public interface IVetorRepository
     Task SaveAsync(Vetor vetor, CancellationToken cancellationToken = default);
     Task<bool> NameExistsAsync(string name, CancellationToken cancellationToken = default);
     Task<bool> EmailExistsAsync(string email, CancellationToken cancellationToken = default);
+    Task<bool> NameExistsExcludingVetorAsync(string name, Guid excludeVetorId, CancellationToken cancellationToken = default);
+    Task<bool> EmailExistsExcludingVetorAsync(string email, Guid excludeVetorId, CancellationToken cancellationToken = default);
 }

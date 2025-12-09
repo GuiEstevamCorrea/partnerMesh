@@ -26,4 +26,24 @@ public class Vetor
         Active = true;
         CreatedAt = DateTime.UtcNow;
     }
+
+    public void UpdateName(string newName)
+    {
+        Name = newName;
+    }
+
+    public void UpdateEmail(string newEmail)
+    {
+        Email = newEmail;
+    }
+
+    public void Activate()
+    {
+        Active = true;
+    }
+
+    public void Deactivate()
+    {
+        Active = false;
+    }
 }

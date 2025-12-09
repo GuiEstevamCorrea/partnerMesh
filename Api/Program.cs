@@ -11,6 +11,7 @@ using Application.UseCases.ActivateDeactivateUser;
 using Application.UseCases.ListUsers;
 using Application.UseCases.GetUserById;
 using Application.UseCases.CreateVetor;
+using Application.UseCases.UpdateVetor;
 using Infrastructure.Repositories;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -91,6 +92,7 @@ builder.Services.AddScoped<IActivateDeactivateUserUseCase, ActivateDeactivateUse
 builder.Services.AddScoped<IListUsersUseCase, ListUsersUseCase>();
 builder.Services.AddScoped<IGetUserByIdUseCase, GetUserByIdUseCase>();
 builder.Services.AddScoped<ICreateVetorUseCase, CreateVetorUseCase>();
+builder.Services.AddScoped<IUpdateVetorUseCase, UpdateVetorUseCase>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IVetorRepository, VetorRepository>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();

@@ -2,6 +2,7 @@ using Api.Authorization;
 using Application.Interfaces.IUseCases;
 using Application.Interfaces.Repositories;
 using Application.UseCases.CreateVetor.DTO;
+using Application.UseCases.UpdateVetor.DTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -15,13 +16,16 @@ public class VectorsController : ControllerBase
 {
     private readonly IVetorRepository _vetorRepository;
     private readonly ICreateVetorUseCase _createVetorUseCase;
+    private readonly IUpdateVetorUseCase _updateVetorUseCase;
 
     public VectorsController(
         IVetorRepository vetorRepository,
-        ICreateVetorUseCase createVetorUseCase)
+        ICreateVetorUseCase createVetorUseCase,
+        IUpdateVetorUseCase updateVetorUseCase)
     {
         _vetorRepository = vetorRepository;
         _createVetorUseCase = createVetorUseCase;
+        _updateVetorUseCase = updateVetorUseCase;
     }
 
     /// <summary>
@@ -56,6 +60,43 @@ public class VectorsController : ControllerBase
             nameof(GetVector), 
             new { id = result.Vetor!.Id }, 
             result);
+    }
+
+    /// <summary>
+    /// Atualiza um vetor existente no sistema
+    /// </summary>
+    /// <param name="id">ID do vetor a ser atualizado</param>
+    /// <param name="request">Dados a serem atualizados</param>
+    /// <param name="cancellationToken">Token de cancelamento</param>
+    /// <returns>Informações do vetor atualizado</returns>
+    [HttpPut("{id}")]
+    [AuthorizePermission("AdminGlobal")]
+    [ProducesResponseType(typeof(Application.UseCases.UpdateVetor.DTO.UpdateVetorResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Application.UseCases.UpdateVetor.DTO.UpdateVetorResult), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> UpdateVector(Guid id, [FromBody] Application.UseCases.UpdateVetor.DTO.UpdateVetorRequest request, CancellationToken cancellationToken = default)
+    {
+        // Obter ID do usuário atual do token JWT
+        var currentUserIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(currentUserIdClaim) || !Guid.TryParse(currentUserIdClaim, out var currentUserId))
+        {
+            return BadRequest(Application.UseCases.UpdateVetor.DTO.UpdateVetorResult.Failure("Usuário atual não identificado."));
+        }
+
+        var result = await _updateVetorUseCase.UpdateAsync(id, request, currentUserId, cancellationToken);
+
+        if (!result.IsSuccess)
+        {
+            if (result.Message == "Vetor não encontrado.")
+            {
+                return NotFound(result);
+            }
+            return BadRequest(result);
+        }
+
+        return Ok(result);
     }
 
     /// <summary>
