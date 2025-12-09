@@ -5,6 +5,7 @@ using Application.UseCases.CreateVetor.DTO;
 using Application.UseCases.UpdateVetor.DTO;
 using Application.UseCases.DeactivateVetor.DTO;
 using Application.UseCases.ListVetores.DTO;
+using Application.UseCases.GetVetorById.DTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -21,19 +22,22 @@ public class VectorsController : ControllerBase
     private readonly IUpdateVetorUseCase _updateVetorUseCase;
     private readonly IDeactivateVetorUseCase _deactivateVetorUseCase;
     private readonly IListVetoresUseCase _listVetoresUseCase;
+    private readonly IGetVetorByIdUseCase _getVetorByIdUseCase;
 
     public VectorsController(
         IVetorRepository vetorRepository,
         ICreateVetorUseCase createVetorUseCase,
         IUpdateVetorUseCase updateVetorUseCase,
         IDeactivateVetorUseCase deactivateVetorUseCase,
-        IListVetoresUseCase listVetoresUseCase)
+        IListVetoresUseCase listVetoresUseCase,
+        IGetVetorByIdUseCase getVetorByIdUseCase)
     {
         _vetorRepository = vetorRepository;
         _createVetorUseCase = createVetorUseCase;
         _updateVetorUseCase = updateVetorUseCase;
         _deactivateVetorUseCase = deactivateVetorUseCase;
         _listVetoresUseCase = listVetoresUseCase;
+        _getVetorByIdUseCase = getVetorByIdUseCase;
     }
 
     /// <summary>
@@ -144,34 +148,38 @@ public class VectorsController : ControllerBase
     }
 
     /// <summary>
-    /// Obtém um vetor por ID
+    /// Obtém um vetor por ID com detalhes e estatísticas
     /// </summary>
     /// <param name="id">ID do vetor</param>
     /// <param name="cancellationToken">Token de cancelamento</param>
-    /// <returns>Informações do vetor</returns>
+    /// <returns>Informações detalhadas do vetor</returns>
     [HttpGet("{id}")]
     [AuthorizePermission("AdminGlobal", "AdminVetor")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(GetVetorByIdResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(GetVetorByIdResult), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> GetVector(Guid id, CancellationToken cancellationToken = default)
     {
-        var vetor = await _vetorRepository.GetByIdAsync(id, cancellationToken);
-        
-        if (vetor == null)
+        // Obter ID do usuário atual do token JWT
+        var currentUserIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(currentUserIdClaim) || !Guid.TryParse(currentUserIdClaim, out var currentUserId))
         {
-            return NotFound(new { message = "Vetor não encontrado." });
+            return BadRequest(GetVetorByIdResult.Failure("Usuário atual não identificado."));
         }
 
-        var result = new 
-        { 
-            id = vetor.Id, 
-            name = vetor.Name, 
-            email = vetor.Email, 
-            active = vetor.Active,
-            createdAt = vetor.CreatedAt
-        };
+        var request = GetVetorByIdRequest.Create(id);
+        var result = await _getVetorByIdUseCase.GetByIdAsync(request, currentUserId, cancellationToken);
+
+        if (!result.IsSuccess)
+        {
+            if (result.Message == "Vetor não encontrado.")
+            {
+                return NotFound(result);
+            }
+            return BadRequest(result);
+        }
 
         return Ok(result);
     }
