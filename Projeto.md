@@ -567,7 +567,7 @@ Informações:
 
 - Valida se existe administrador ativo
 
-### **UC-23 – Listar Vetores**
+### **UC-23 – Listar Vetores - OK**
 
 ### **UC-24 – Obter Vetor por ID**
 
