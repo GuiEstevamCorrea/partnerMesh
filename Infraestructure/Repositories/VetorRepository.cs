@@ -45,6 +45,18 @@ public sealed class VetorRepository : IVetorRepository
         return Task.CompletedTask;
     }
 
+    public Task<bool> NameExistsAsync(string name, CancellationToken cancellationToken = default)
+    {
+        var exists = _vetores.Any(v => v.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+        return Task.FromResult(exists);
+    }
+
+    public Task<bool> EmailExistsAsync(string email, CancellationToken cancellationToken = default)
+    {
+        var exists = _vetores.Any(v => v.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
+        return Task.FromResult(exists);
+    }
+
     // Método auxiliar para obter o primeiro vetor (para testes)
     public static Guid GetDefaultVetorId()
     {
