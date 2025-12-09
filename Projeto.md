@@ -585,7 +585,7 @@ Informações:
 
 ### **UC-31 – Atualizar Parceiro - OK**
 
-### **UC-32 – Ativar/Inativar Parceiro**
+### **UC-32 – Ativar/Inativar Parceiro - OK**
 
 - Parceiro inativo não pode recomendar
 

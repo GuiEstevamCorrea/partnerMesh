@@ -59,6 +59,12 @@ public class PartnerRepository : IPartnerRepository
         return chain;
     }
 
+    public Task<IEnumerable<Partner>> GetRecommendedByPartnerAsync(Guid recommenderId, CancellationToken cancellationToken = default)
+    {
+        var recommended = _partners.Where(p => p.RecommenderId == recommenderId).ToList();
+        return Task.FromResult<IEnumerable<Partner>>(recommended);
+    }
+
     public async Task<bool> WouldCreateCycleAsync(Guid partnerId, Guid recommenderId, CancellationToken cancellationToken = default)
     {
         // Se o parceiro vai ser recomendado por alguém que está na sua cadeia de recomendados, seria um ciclo

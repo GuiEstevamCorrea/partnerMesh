@@ -11,6 +11,7 @@ public interface IPartnerRepository
     Task<bool> EmailExistsAsync(string email, CancellationToken cancellationToken = default);
     Task<bool> EmailExistsAsync(string email, Guid excludeId, CancellationToken cancellationToken = default);
     Task<IEnumerable<Partner>> GetRecommendationChainAsync(Guid partnerId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<Partner>> GetRecommendedByPartnerAsync(Guid recommenderId, CancellationToken cancellationToken = default);
     Task<bool> WouldCreateCycleAsync(Guid partnerId, Guid recommenderId, CancellationToken cancellationToken = default);
     Task AddAsync(Partner partner, CancellationToken cancellationToken = default);
     Task UpdateAsync(Partner partner, CancellationToken cancellationToken = default);
