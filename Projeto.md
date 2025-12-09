@@ -563,7 +563,7 @@ Informações:
 
 - Nome, email, status
 
-### **UC-22 – Inativar Vetor**
+### **UC-22 – Inativar Vetor - OK**
 
 - Valida se existe administrador ativo
 
