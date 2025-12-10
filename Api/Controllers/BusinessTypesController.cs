@@ -1,6 +1,7 @@
 using Api.Authorization;
 using Application.Interfaces.IUseCases;
 using Application.UseCases.CreateBusinessType.DTO;
+using Application.UseCases.UpdateBusinessType.DTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -13,10 +14,14 @@ namespace Api.Controllers;
 public class BusinessTypesController : ControllerBase
 {
     private readonly ICreateBusinessTypeUseCase _createBusinessTypeUseCase;
+    private readonly IUpdateBusinessTypeUseCase _updateBusinessTypeUseCase;
 
-    public BusinessTypesController(ICreateBusinessTypeUseCase createBusinessTypeUseCase)
+    public BusinessTypesController(
+        ICreateBusinessTypeUseCase createBusinessTypeUseCase,
+        IUpdateBusinessTypeUseCase updateBusinessTypeUseCase)
     {
         _createBusinessTypeUseCase = createBusinessTypeUseCase;
+        _updateBusinessTypeUseCase = updateBusinessTypeUseCase;
     }
 
     /// <summary>
@@ -54,6 +59,50 @@ public class BusinessTypesController : ControllerBase
             nameof(GetBusinessTypeById),
             new { id = result.BusinessType!.Id },
             result);
+    }
+
+    /// <summary>
+    /// UC-41: Atualizar Tipo de Negócio
+    /// </summary>
+    /// <param name="id">ID do tipo de negócio</param>
+    /// <param name="request">Dados para atualização do tipo de negócio</param>
+    /// <returns>Informações do tipo de negócio atualizado</returns>
+    [HttpPut("{id:guid}")]
+    [AuthorizePermission("AdminGlobal", "AdminVetor")]
+    [ProducesResponseType(typeof(UpdateBusinessTypeResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> UpdateBusinessType(Guid id, [FromBody] UpdateBusinessTypeRequest request)
+    {
+        if (request == null)
+            return BadRequest(new { message = "Request body is required" });
+
+        // Obter ID do usuário atual do token JWT
+        var currentUserIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(currentUserIdClaim) || !Guid.TryParse(currentUserIdClaim, out var currentUserId))
+        {
+            return BadRequest(new { message = "Usuário atual não identificado." });
+        }
+
+        try
+        {
+            var result = await _updateBusinessTypeUseCase.ExecuteAsync(id, request, currentUserId);
+            return Ok(result);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Forbid(ex.Message);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "Erro interno do servidor", details = ex.Message });
+        }
     }
 
     /// <summary>

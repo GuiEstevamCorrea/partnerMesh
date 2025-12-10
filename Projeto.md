@@ -606,7 +606,7 @@ Informações:
 
 ### **UC-40 – Criar Tipo de Negócio - OK**
 
-### **UC-41 – Atualizar Tipo de Negócio**
+### **UC-41 – Atualizar Tipo de Negócio - OK**
 
 ### **UC-42 – Remover/Inativar Tipo de Negócio**
 
