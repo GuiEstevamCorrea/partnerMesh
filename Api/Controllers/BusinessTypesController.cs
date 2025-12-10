@@ -2,6 +2,7 @@ using Api.Authorization;
 using Application.Interfaces.IUseCases;
 using Application.UseCases.CreateBusinessType.DTO;
 using Application.UseCases.UpdateBusinessType.DTO;
+using Application.UseCases.DeactivateBusinessType.DTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -15,13 +16,16 @@ public class BusinessTypesController : ControllerBase
 {
     private readonly ICreateBusinessTypeUseCase _createBusinessTypeUseCase;
     private readonly IUpdateBusinessTypeUseCase _updateBusinessTypeUseCase;
+    private readonly IDeactivateBusinessTypeUseCase _deactivateBusinessTypeUseCase;
 
     public BusinessTypesController(
         ICreateBusinessTypeUseCase createBusinessTypeUseCase,
-        IUpdateBusinessTypeUseCase updateBusinessTypeUseCase)
+        IUpdateBusinessTypeUseCase updateBusinessTypeUseCase,
+        IDeactivateBusinessTypeUseCase deactivateBusinessTypeUseCase)
     {
         _createBusinessTypeUseCase = createBusinessTypeUseCase;
         _updateBusinessTypeUseCase = updateBusinessTypeUseCase;
+        _deactivateBusinessTypeUseCase = deactivateBusinessTypeUseCase;
     }
 
     /// <summary>
@@ -89,6 +93,46 @@ public class BusinessTypesController : ControllerBase
         try
         {
             var result = await _updateBusinessTypeUseCase.ExecuteAsync(id, request, currentUserId);
+            return Ok(result);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Forbid(ex.Message);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "Erro interno do servidor", details = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// UC-42: Remover/Inativar Tipo de Negócio
+    /// </summary>
+    /// <param name="id">ID do tipo de negócio</param>
+    /// <returns>Informações do tipo de negócio inativado</returns>
+    [HttpDelete("{id:guid}")]
+    [AuthorizePermission("AdminGlobal", "AdminVetor")]
+    [ProducesResponseType(typeof(DeactivateBusinessTypeResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> DeactivateBusinessType(Guid id)
+    {
+        // Obter ID do usuário atual do token JWT
+        var currentUserIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(currentUserIdClaim) || !Guid.TryParse(currentUserIdClaim, out var currentUserId))
+        {
+            return BadRequest(new { message = "Usuário atual não identificado." });
+        }
+
+        try
+        {
+            var result = await _deactivateBusinessTypeUseCase.ExecuteAsync(id, currentUserId);
             return Ok(result);
         }
         catch (UnauthorizedAccessException ex)

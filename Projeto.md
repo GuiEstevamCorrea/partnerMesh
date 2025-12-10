@@ -608,7 +608,7 @@ Informações:
 
 ### **UC-41 – Atualizar Tipo de Negócio - OK**
 
-### **UC-42 – Remover/Inativar Tipo de Negócio**
+### **UC-42 – Remover/Inativar Tipo de Negócio - OK**
 
 ### **UC-43 – Listar Tipos de Negócio**
 

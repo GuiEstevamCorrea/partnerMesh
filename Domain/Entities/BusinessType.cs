@@ -31,15 +31,17 @@ public class BusinessType
         ModifiedBy = modifiedBy;
     }
 
-    public void Activate()
+    public void Activate(Guid modifiedBy)
     {
         Active = true;
         LastModified = DateTime.UtcNow;
+        ModifiedBy = modifiedBy;
     }
 
-    public void Deactivate()
+    public void Deactivate(Guid modifiedBy)
     {
         Active = false;
         LastModified = DateTime.UtcNow;
+        ModifiedBy = modifiedBy;
     }
 }
