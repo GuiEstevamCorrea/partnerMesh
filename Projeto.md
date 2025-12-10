@@ -593,7 +593,7 @@ Informações:
 
 - Com filtros
 
-### **UC-34 – Obter Parceiro por ID**
+### **UC-34 – Obter Parceiro por ID - OK**
 
 ### **UC-35 – Obter Árvore de Parceiros**
 

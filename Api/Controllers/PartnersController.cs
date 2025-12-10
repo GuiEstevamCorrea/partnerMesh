@@ -4,6 +4,7 @@ using Application.UseCases.CreatePartner.DTO;
 using Application.UseCases.UpdatePartner.DTO;
 using Application.UseCases.ActivateDeactivatePartner.DTO;
 using Application.UseCases.ListPartners.DTO;
+using Application.UseCases.GetPartnerById.DTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -19,17 +20,20 @@ public class PartnersController : ControllerBase
     private readonly IUpdatePartnerUseCase _updatePartnerUseCase;
     private readonly IActivateDeactivatePartnerUseCase _activateDeactivatePartnerUseCase;
     private readonly IListPartnersUseCase _listPartnersUseCase;
+    private readonly IGetPartnerByIdUseCase _getPartnerByIdUseCase;
 
     public PartnersController(
         ICreatePartnerUseCase createPartnerUseCase,
         IUpdatePartnerUseCase updatePartnerUseCase,
         IActivateDeactivatePartnerUseCase activateDeactivatePartnerUseCase,
-        IListPartnersUseCase listPartnersUseCase)
+        IListPartnersUseCase listPartnersUseCase,
+        IGetPartnerByIdUseCase getPartnerByIdUseCase)
     {
         _createPartnerUseCase = createPartnerUseCase;
         _updatePartnerUseCase = updatePartnerUseCase;
         _activateDeactivatePartnerUseCase = activateDeactivatePartnerUseCase;
         _listPartnersUseCase = listPartnersUseCase;
+        _getPartnerByIdUseCase = getPartnerByIdUseCase;
     }
 
     /// <summary>
@@ -126,7 +130,7 @@ public class PartnersController : ControllerBase
         }
 
         return CreatedAtAction(
-            nameof(GetPartner), 
+            nameof(GetPartnerById), 
             new { id = result.Partner!.Id }, 
             result);
     }
@@ -212,20 +216,38 @@ public class PartnersController : ControllerBase
     }
 
     /// <summary>
-    /// Obtém um parceiro por ID (endpoint placeholder)
+    /// UC-34: Obter Parceiro por ID
     /// </summary>
     /// <param name="id">ID do parceiro</param>
     /// <param name="cancellationToken">Token de cancelamento</param>
-    /// <returns>Informações do parceiro</returns>
-    [HttpGet("{id}")]
+    /// <returns>Informações detalhadas do parceiro</returns>
+    [HttpGet("{id:guid}")]
     [AuthorizePermission("AdminGlobal", "AdminVetor", "Operador")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(GetPartnerByIdResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(GetPartnerByIdResult), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public IActionResult GetPartner(Guid id, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> GetPartnerById(Guid id, CancellationToken cancellationToken = default)
     {
-        // TODO: Implementar UC-34 (Obter Parceiro por ID)
-        return Ok(new { message = "UC-34 não implementado ainda.", partnerId = id });
+        // Obter ID do usuário atual do token JWT
+        var currentUserIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(currentUserIdClaim) || !Guid.TryParse(currentUserIdClaim, out var currentUserId))
+        {
+            return BadRequest(GetPartnerByIdResult.Failure("Usuário atual não identificado."));
+        }
+
+        var result = await _getPartnerByIdUseCase.GetByIdAsync(id, currentUserId, cancellationToken);
+
+        if (!result.IsSuccess)
+        {
+            if (result.Message == "Parceiro não encontrado.")
+            {
+                return NotFound(result);
+            }
+            return BadRequest(result);
+        }
+
+        return Ok(result);
     }
 }
