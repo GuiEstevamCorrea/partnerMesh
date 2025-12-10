@@ -1,4 +1,5 @@
 using Domain.Entities;
+using Application.UseCases.ListPartners.DTO;
 
 namespace Application.Interfaces.Repositories;
 
@@ -13,6 +14,7 @@ public interface IPartnerRepository
     Task<IEnumerable<Partner>> GetRecommendationChainAsync(Guid partnerId, CancellationToken cancellationToken = default);
     Task<IEnumerable<Partner>> GetRecommendedByPartnerAsync(Guid recommenderId, CancellationToken cancellationToken = default);
     Task<bool> WouldCreateCycleAsync(Guid partnerId, Guid recommenderId, CancellationToken cancellationToken = default);
+    Task<(IEnumerable<Partner> Partners, int TotalCount)> GetFilteredAsync(ListPartnersRequest request, CancellationToken cancellationToken = default);
     Task AddAsync(Partner partner, CancellationToken cancellationToken = default);
     Task UpdateAsync(Partner partner, CancellationToken cancellationToken = default);
     Task DeleteAsync(Partner partner, CancellationToken cancellationToken = default);

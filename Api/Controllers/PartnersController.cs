@@ -3,6 +3,7 @@ using Application.Interfaces.IUseCases;
 using Application.UseCases.CreatePartner.DTO;
 using Application.UseCases.UpdatePartner.DTO;
 using Application.UseCases.ActivateDeactivatePartner.DTO;
+using Application.UseCases.ListPartners.DTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -17,15 +18,83 @@ public class PartnersController : ControllerBase
     private readonly ICreatePartnerUseCase _createPartnerUseCase;
     private readonly IUpdatePartnerUseCase _updatePartnerUseCase;
     private readonly IActivateDeactivatePartnerUseCase _activateDeactivatePartnerUseCase;
+    private readonly IListPartnersUseCase _listPartnersUseCase;
 
     public PartnersController(
         ICreatePartnerUseCase createPartnerUseCase,
         IUpdatePartnerUseCase updatePartnerUseCase,
-        IActivateDeactivatePartnerUseCase activateDeactivatePartnerUseCase)
+        IActivateDeactivatePartnerUseCase activateDeactivatePartnerUseCase,
+        IListPartnersUseCase listPartnersUseCase)
     {
         _createPartnerUseCase = createPartnerUseCase;
         _updatePartnerUseCase = updatePartnerUseCase;
         _activateDeactivatePartnerUseCase = activateDeactivatePartnerUseCase;
+        _listPartnersUseCase = listPartnersUseCase;
+    }
+
+    /// <summary>
+    /// UC-33: Listar Parceiros
+    /// </summary>
+    /// <param name="name">Filtro por nome</param>
+    /// <param name="email">Filtro por email</param>
+    /// <param name="phoneNumber">Filtro por telefone</param>
+    /// <param name="isActive">Filtro por status ativo/inativo</param>
+    /// <param name="vetorId">Filtro por ID do vetor</param>
+    /// <param name="recommenderId">Filtro por ID do recomendador</param>
+    /// <param name="page">Número da página</param>
+    /// <param name="pageSize">Itens por página</param>
+    /// <param name="orderBy">Campo para ordenação</param>
+    /// <param name="orderDirection">Direção da ordenação (asc/desc)</param>
+    /// <param name="cancellationToken">Token de cancelamento</param>
+    /// <returns>Lista paginada de parceiros</returns>
+    [HttpGet]
+    [AuthorizePermission("AdminGlobal", "AdminVetor", "Operador")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> ListPartners(
+        [FromQuery] string? name,
+        [FromQuery] string? email,
+        [FromQuery] string? phoneNumber,
+        [FromQuery] bool? isActive,
+        [FromQuery] Guid? vetorId,
+        [FromQuery] Guid? recommenderId,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20,
+        [FromQuery] string? orderBy = "name",
+        [FromQuery] string? orderDirection = "asc",
+        CancellationToken cancellationToken = default)
+    {
+        // Obter ID do usuário atual do token JWT
+        var currentUserIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(currentUserIdClaim) || !Guid.TryParse(currentUserIdClaim, out var currentUserId))
+        {
+            return BadRequest(ListPartnersResult.Failure("Usuário atual não identificado."));
+        }
+
+        var request = new ListPartnersRequest
+        {
+            Name = name,
+            Email = email,
+            PhoneNumber = phoneNumber,
+            IsActive = isActive,
+            VetorId = vetorId,
+            RecommenderId = recommenderId,
+            Page = page,
+            PageSize = pageSize,
+            OrderBy = orderBy,
+            OrderDirection = orderDirection
+        };
+
+        var result = await _listPartnersUseCase.ListAsync(request, currentUserId, cancellationToken);
+
+        if (!result.IsSuccess)
+        {
+            return BadRequest(result);
+        }
+
+        return Ok(result);
     }
 
     /// <summary>

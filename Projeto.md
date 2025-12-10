@@ -589,7 +589,7 @@ Informações:
 
 - Parceiro inativo não pode recomendar
 
-### **UC-33 – Listar Parceiros**
+### **UC-33 – Listar Parceiros - OK**
 
 - Com filtros
 
