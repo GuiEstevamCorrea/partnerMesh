@@ -5,6 +5,7 @@ using Application.UseCases.UpdatePartner.DTO;
 using Application.UseCases.ActivateDeactivatePartner.DTO;
 using Application.UseCases.ListPartners.DTO;
 using Application.UseCases.GetPartnerById.DTO;
+using Application.UseCases.GetPartnerTree.DTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -21,19 +22,22 @@ public class PartnersController : ControllerBase
     private readonly IActivateDeactivatePartnerUseCase _activateDeactivatePartnerUseCase;
     private readonly IListPartnersUseCase _listPartnersUseCase;
     private readonly IGetPartnerByIdUseCase _getPartnerByIdUseCase;
+    private readonly IGetPartnerTreeUseCase _getPartnerTreeUseCase;
 
     public PartnersController(
         ICreatePartnerUseCase createPartnerUseCase,
         IUpdatePartnerUseCase updatePartnerUseCase,
         IActivateDeactivatePartnerUseCase activateDeactivatePartnerUseCase,
         IListPartnersUseCase listPartnersUseCase,
-        IGetPartnerByIdUseCase getPartnerByIdUseCase)
+        IGetPartnerByIdUseCase getPartnerByIdUseCase,
+        IGetPartnerTreeUseCase getPartnerTreeUseCase)
     {
         _createPartnerUseCase = createPartnerUseCase;
         _updatePartnerUseCase = updatePartnerUseCase;
         _activateDeactivatePartnerUseCase = activateDeactivatePartnerUseCase;
         _listPartnersUseCase = listPartnersUseCase;
         _getPartnerByIdUseCase = getPartnerByIdUseCase;
+        _getPartnerTreeUseCase = getPartnerTreeUseCase;
     }
 
     /// <summary>
@@ -245,6 +249,53 @@ public class PartnersController : ControllerBase
             {
                 return NotFound(result);
             }
+            return BadRequest(result);
+        }
+
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// UC-35: Obter Árvore de Parceiros
+    /// </summary>
+    /// <param name="vetorId">ID do vetor (opcional)</param>
+    /// <param name="rootPartnerId">ID do parceiro raiz (opcional)</param>
+    /// <param name="maxDepth">Profundidade máxima (opcional)</param>
+    /// <param name="onlyActive">Incluir apenas ativos</param>
+    /// <param name="cancellationToken">Token de cancelamento</param>
+    /// <returns>Estrutura hierárquica dos parceiros</returns>
+    [HttpGet("tree")]
+    [AuthorizePermission("AdminGlobal", "AdminVetor", "Operador")]
+    [ProducesResponseType(typeof(GetPartnerTreeResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> GetPartnerTree(
+        [FromQuery] Guid? vetorId,
+        [FromQuery] Guid? rootPartnerId,
+        [FromQuery] int? maxDepth,
+        [FromQuery] bool onlyActive = false,
+        CancellationToken cancellationToken = default)
+    {
+        // Obter ID do usuário atual do token JWT
+        var currentUserIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(currentUserIdClaim) || !Guid.TryParse(currentUserIdClaim, out var currentUserId))
+        {
+            return BadRequest(GetPartnerTreeResult.Failure("Usuário atual não identificado."));
+        }
+
+        var request = new GetPartnerTreeRequest
+        {
+            VetorId = vetorId,
+            RootPartnerId = rootPartnerId,
+            MaxDepth = maxDepth,
+            OnlyActive = onlyActive
+        };
+
+        var result = await _getPartnerTreeUseCase.GetTreeAsync(request, currentUserId, cancellationToken);
+
+        if (!result.IsSuccess)
+        {
             return BadRequest(result);
         }
 
