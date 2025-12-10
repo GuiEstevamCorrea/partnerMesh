@@ -604,7 +604,7 @@ Informações:
 
 # **5. Gestão de Tipos de Negócio**
 
-### **UC-40 – Criar Tipo de Negócio**
+### **UC-40 – Criar Tipo de Negócio - OK**
 
 ### **UC-41 – Atualizar Tipo de Negócio**
 
