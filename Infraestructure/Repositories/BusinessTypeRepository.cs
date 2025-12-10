@@ -1,4 +1,5 @@
 using Application.Interfaces.Repositories;
+using Application.UseCases.ListBusinessTypes.DTO;
 using Domain.Entities;
 
 namespace Infrastructure.Repositories;
@@ -40,6 +41,55 @@ public class BusinessTypeRepository : IBusinessTypeRepository
     {
         var exists = _businessTypes.Any(bt => bt.Name.Equals(name, StringComparison.OrdinalIgnoreCase) && bt.Id != excludeId);
         return Task.FromResult(exists);
+    }
+
+    public Task<(IEnumerable<BusinessType> BusinessTypes, int TotalCount)> GetFilteredAsync(ListBusinessTypesRequest request, CancellationToken cancellationToken = default)
+    {
+        var query = _businessTypes.AsEnumerable();
+
+        // Aplicar filtros
+        if (!string.IsNullOrWhiteSpace(request.Name))
+        {
+            query = query.Where(bt => bt.Name.Contains(request.Name, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.Description))
+        {
+            query = query.Where(bt => bt.Description.Contains(request.Description, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (request.IsActive.HasValue)
+        {
+            query = query.Where(bt => bt.Active == request.IsActive.Value);
+        }
+
+        // Aplicar ordenação
+        query = ApplyOrdering(query, request.OrderBy, request.OrderDirection);
+
+        var totalCount = query.Count();
+
+        // Aplicar paginação
+        var pagedResults = query
+            .Skip((request.Page - 1) * request.PageSize)
+            .Take(request.PageSize)
+            .ToList();
+
+        return Task.FromResult<(IEnumerable<BusinessType>, int)>((pagedResults, totalCount));
+    }
+
+    private static IEnumerable<BusinessType> ApplyOrdering(IEnumerable<BusinessType> query, string? orderBy, string? orderDirection)
+    {
+        var isDescending = string.Equals(orderDirection, "desc", StringComparison.OrdinalIgnoreCase);
+
+        return orderBy?.ToLowerInvariant() switch
+        {
+            "name" => isDescending ? query.OrderByDescending(bt => bt.Name) : query.OrderBy(bt => bt.Name),
+            "description" => isDescending ? query.OrderByDescending(bt => bt.Description) : query.OrderBy(bt => bt.Description),
+            "createdat" => isDescending ? query.OrderByDescending(bt => bt.CreatedAt) : query.OrderBy(bt => bt.CreatedAt),
+            "lastmodified" => isDescending ? query.OrderByDescending(bt => bt.LastModified) : query.OrderBy(bt => bt.LastModified),
+            "active" => isDescending ? query.OrderByDescending(bt => bt.Active) : query.OrderBy(bt => bt.Active),
+            _ => query.OrderBy(bt => bt.Name) // Default ordering
+        };
     }
 
     public Task AddAsync(BusinessType businessType, CancellationToken cancellationToken = default)

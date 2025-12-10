@@ -3,6 +3,7 @@ using Application.Interfaces.IUseCases;
 using Application.UseCases.CreateBusinessType.DTO;
 using Application.UseCases.UpdateBusinessType.DTO;
 using Application.UseCases.DeactivateBusinessType.DTO;
+using Application.UseCases.ListBusinessTypes.DTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -17,15 +18,18 @@ public class BusinessTypesController : ControllerBase
     private readonly ICreateBusinessTypeUseCase _createBusinessTypeUseCase;
     private readonly IUpdateBusinessTypeUseCase _updateBusinessTypeUseCase;
     private readonly IDeactivateBusinessTypeUseCase _deactivateBusinessTypeUseCase;
+    private readonly IListBusinessTypesUseCase _listBusinessTypesUseCase;
 
     public BusinessTypesController(
         ICreateBusinessTypeUseCase createBusinessTypeUseCase,
         IUpdateBusinessTypeUseCase updateBusinessTypeUseCase,
-        IDeactivateBusinessTypeUseCase deactivateBusinessTypeUseCase)
+        IDeactivateBusinessTypeUseCase deactivateBusinessTypeUseCase,
+        IListBusinessTypesUseCase listBusinessTypesUseCase)
     {
         _createBusinessTypeUseCase = createBusinessTypeUseCase;
         _updateBusinessTypeUseCase = updateBusinessTypeUseCase;
         _deactivateBusinessTypeUseCase = deactivateBusinessTypeUseCase;
+        _listBusinessTypesUseCase = listBusinessTypesUseCase;
     }
 
     /// <summary>
@@ -63,6 +67,36 @@ public class BusinessTypesController : ControllerBase
             nameof(GetBusinessTypeById),
             new { id = result.BusinessType!.Id },
             result);
+    }
+
+    /// <summary>
+    /// UC-43: Listar Tipos de Negócio
+    /// </summary>
+    /// <param name="request">Filtros e parâmetros de paginação</param>
+    /// <returns>Lista de tipos de negócio com paginação</returns>
+    [HttpGet]
+    [AuthorizePermission("AdminGlobal", "AdminVetor", "Operador")]
+    [ProducesResponseType(typeof(ListBusinessTypesResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> ListBusinessTypes([FromQuery] ListBusinessTypesRequest request)
+    {
+        // Obter ID do usuário atual do token JWT
+        var currentUserIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(currentUserIdClaim) || !Guid.TryParse(currentUserIdClaim, out var currentUserId))
+        {
+            return BadRequest(new { message = "Usuário atual não identificado." });
+        }
+
+        var result = await _listBusinessTypesUseCase.ExecuteAsync(request, currentUserId);
+
+        if (!result.IsSuccess)
+        {
+            return BadRequest(result);
+        }
+
+        return Ok(result);
     }
 
     /// <summary>
