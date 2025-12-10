@@ -595,7 +595,7 @@ Informações:
 
 ### **UC-34 – Obter Parceiro por ID - OK**
 
-### **UC-35 – Obter Árvore de Parceiros**
+### **UC-35 – Obter Árvore de Parceiros - OK**
 
 - Retorna estrutura hierárquica
 - Filtrada por vetor
