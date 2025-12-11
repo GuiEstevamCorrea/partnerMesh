@@ -4,6 +4,7 @@ using Application.UseCases.CreateBusinessType.DTO;
 using Application.UseCases.UpdateBusinessType.DTO;
 using Application.UseCases.DeactivateBusinessType.DTO;
 using Application.UseCases.ListBusinessTypes.DTO;
+using Application.UseCases.GetBusinessTypeById.DTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -19,17 +20,20 @@ public class BusinessTypesController : ControllerBase
     private readonly IUpdateBusinessTypeUseCase _updateBusinessTypeUseCase;
     private readonly IDeactivateBusinessTypeUseCase _deactivateBusinessTypeUseCase;
     private readonly IListBusinessTypesUseCase _listBusinessTypesUseCase;
+    private readonly IGetBusinessTypeByIdUseCase _getBusinessTypeByIdUseCase;
 
     public BusinessTypesController(
         ICreateBusinessTypeUseCase createBusinessTypeUseCase,
         IUpdateBusinessTypeUseCase updateBusinessTypeUseCase,
         IDeactivateBusinessTypeUseCase deactivateBusinessTypeUseCase,
-        IListBusinessTypesUseCase listBusinessTypesUseCase)
+        IListBusinessTypesUseCase listBusinessTypesUseCase,
+        IGetBusinessTypeByIdUseCase getBusinessTypeByIdUseCase)
     {
         _createBusinessTypeUseCase = createBusinessTypeUseCase;
         _updateBusinessTypeUseCase = updateBusinessTypeUseCase;
         _deactivateBusinessTypeUseCase = deactivateBusinessTypeUseCase;
         _listBusinessTypesUseCase = listBusinessTypesUseCase;
+        _getBusinessTypeByIdUseCase = getBusinessTypeByIdUseCase;
     }
 
     /// <summary>
@@ -184,20 +188,47 @@ public class BusinessTypesController : ControllerBase
     }
 
     /// <summary>
-    /// Placeholder para obter tipo de negócio por ID
+    /// UC-44: Obter Tipo de Negócio por ID
     /// </summary>
     /// <param name="id">ID do tipo de negócio</param>
-    /// <param name="cancellationToken">Token de cancelamento</param>
     /// <returns>Informações do tipo de negócio</returns>
     [HttpGet("{id:guid}")]
     [AuthorizePermission("AdminGlobal", "AdminVetor", "Operador")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(GetBusinessTypeByIdResult), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public IActionResult GetBusinessTypeById(Guid id, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> GetBusinessTypeById(Guid id)
     {
-        // TODO: Implementar UC-44 (Obter Tipo por ID)
-        return Ok(new { message = "UC-44 não implementado ainda.", businessTypeId = id });
+        // Obter ID do usuário atual do token JWT
+        var currentUserIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(currentUserIdClaim) || !Guid.TryParse(currentUserIdClaim, out var currentUserId))
+        {
+            return BadRequest(new { message = "Usuário atual não identificado." });
+        }
+
+        try
+        {
+            var result = await _getBusinessTypeByIdUseCase.ExecuteAsync(id, currentUserId);
+
+            if (!result.IsSuccess)
+            {
+                if (result.Message.Contains("não encontrado"))
+                {
+                    return NotFound(result);
+                }
+                return BadRequest(result);
+            }
+
+            return Ok(result);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Forbid(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "Erro interno do servidor", details = ex.Message });
+        }
     }
 }

@@ -612,7 +612,7 @@ Informações:
 
 ### **UC-43 – Listar Tipos de Negócio - OK**
 
-### **UC-44 – Obter Tipo por ID**
+### **UC-44 – Obter Tipo por ID - OK**
 
 ---
 
