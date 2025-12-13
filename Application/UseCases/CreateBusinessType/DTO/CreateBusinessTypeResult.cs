@@ -6,16 +6,16 @@ public sealed record CreateBusinessTypeResult
 {
     public bool IsSuccess { get; init; }
     public string Message { get; init; } = string.Empty;
-    public BusinessTypeDto? BusinessType { get; init; }
+    public BusinessTypeCreateDto? BusinessType { get; init; }
 
-    public static CreateBusinessTypeResult Success(BusinessTypeDto businessType)
+    public static CreateBusinessTypeResult Success(BusinessTypeCreateDto businessType)
         => new() { IsSuccess = true, Message = "Tipo de negócio criado com sucesso.", BusinessType = businessType };
 
     public static CreateBusinessTypeResult Failure(string message)
         => new() { IsSuccess = false, Message = message };
 }
 
-public sealed record BusinessTypeDto
+public sealed record BusinessTypeCreateDto
 {
     public Guid Id { get; init; }
     public string Name { get; init; } = string.Empty;
@@ -26,9 +26,9 @@ public sealed record BusinessTypeDto
     public Guid CreatedBy { get; init; }
     public Guid? ModifiedBy { get; init; }
 
-    public static BusinessTypeDto FromEntity(BusinessType businessType)
+    public static BusinessTypeCreateDto FromEntity(BusinessType businessType)
     {
-        return new BusinessTypeDto
+        return new BusinessTypeCreateDto
         {
             Id = businessType.Id,
             Name = businessType.Name,

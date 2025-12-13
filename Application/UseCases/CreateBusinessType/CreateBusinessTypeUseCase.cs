@@ -57,7 +57,7 @@ public class CreateBusinessTypeUseCase : ICreateBusinessTypeUseCase
             await _businessTypeRepository.AddAsync(businessType, cancellationToken);
 
             // Retornar resultado de sucesso
-            var businessTypeDto = BusinessTypeDto.FromEntity(businessType);
+            var businessTypeDto = BusinessTypeCreateDto.FromEntity(businessType);
             return CreateBusinessTypeResult.Success(businessTypeDto);
         }
         catch (Exception ex)

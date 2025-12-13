@@ -54,7 +54,7 @@ public class ListBusinessTypesUseCase : IListBusinessTypesUseCase
             var (businessTypes, totalCount) = await _businessTypeRepository.GetFilteredAsync(request);
 
             // Converter para DTO
-            var businessTypeDtos = businessTypes.Select(BusinessTypeDto.FromEntity);
+            var businessTypeDtos = businessTypes.Select(BusinessTypeListDto.FromEntity);
 
             // Calcular informações de paginação
             var totalPages = (int)Math.Ceiling((double)totalCount / request.PageSize);

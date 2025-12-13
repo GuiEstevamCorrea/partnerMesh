@@ -3,6 +3,7 @@ using Application.UseCases.CreateBusiness.DTO;
 using Application.UseCases.UpdateBusiness.DTO;
 using Application.UseCases.CancelBusiness.DTO;
 using Application.UseCases.ListBusinesses.DTO;
+using Application.UseCases.GetBusinessById.DTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -18,17 +19,62 @@ public class BusinessController : ControllerBase
     private readonly IUpdateBusinessUseCase _updateBusinessUseCase;
     private readonly ICancelBusinessUseCase _cancelBusinessUseCase;
     private readonly IListBusinessesUseCase _listBusinessesUseCase;
+    private readonly IGetBusinessByIdUseCase _getBusinessByIdUseCase;
 
     public BusinessController(
         ICreateBusinessUseCase createBusinessUseCase,
         IUpdateBusinessUseCase updateBusinessUseCase,
         ICancelBusinessUseCase cancelBusinessUseCase,
-        IListBusinessesUseCase listBusinessesUseCase)
+        IListBusinessesUseCase listBusinessesUseCase,
+        IGetBusinessByIdUseCase getBusinessByIdUseCase)
     {
         _createBusinessUseCase = createBusinessUseCase;
         _updateBusinessUseCase = updateBusinessUseCase;
         _cancelBusinessUseCase = cancelBusinessUseCase;
         _listBusinessesUseCase = listBusinessesUseCase;
+        _getBusinessByIdUseCase = getBusinessByIdUseCase;
+    }
+
+    /// <summary>
+    /// Obter um negócio específico por ID com detalhes completos
+    /// </summary>
+    /// <param name="businessId">ID do negócio a ser consultado</param>
+    /// <param name="cancellationToken">Token de cancelamento</param>
+    /// <returns>Detalhes completos do negócio incluindo informações de comissão</returns>
+    [HttpGet("{businessId}")]
+    public async Task<ActionResult<GetBusinessByIdResult>> GetBusinessById(
+        [FromRoute] Guid businessId,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+            {
+                return BadRequest(new { message = "Token de autenticação inválido" });
+            }
+
+            var result = await _getBusinessByIdUseCase.ExecuteAsync(businessId, userId);
+            
+            if (!result.IsSuccess)
+            {
+                if (result.Message.Contains("não encontrado"))
+                {
+                    return NotFound(new { message = result.Message });
+                }
+                return BadRequest(new { message = result.Message });
+            }
+
+            return Ok(result);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "Erro interno do servidor", details = ex.Message });
+        }
     }
 
     /// <summary>

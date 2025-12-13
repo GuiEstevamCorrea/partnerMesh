@@ -1,0 +1,172 @@
+using Application.Interfaces.IUseCases;
+using Application.Interfaces.Repositories;
+using Application.UseCases.GetBusinessById.DTO;
+using Domain.ValueObjects;
+
+namespace Application.UseCases.GetBusinessById;
+
+public class GetBusinessByIdUseCase : IGetBusinessByIdUseCase
+{
+    private readonly IBusinessRepository _businessRepository;
+    private readonly ICommissionRepository _commissionRepository;
+    private readonly IPartnerRepository _partnerRepository;
+    private readonly IBusinessTypeRepository _businessTypeRepository;
+
+    public GetBusinessByIdUseCase(
+        IBusinessRepository businessRepository,
+        ICommissionRepository commissionRepository,
+        IPartnerRepository partnerRepository,
+        IBusinessTypeRepository businessTypeRepository)
+    {
+        _businessRepository = businessRepository;
+        _commissionRepository = commissionRepository;
+        _partnerRepository = partnerRepository;
+        _businessTypeRepository = businessTypeRepository;
+    }
+
+    public async Task<GetBusinessByIdResult> ExecuteAsync(Guid businessId, Guid userId)
+    {
+        try
+        {
+            // Buscar o negócio
+            var business = await _businessRepository.GetByIdAsync(businessId);
+            if (business == null)
+            {
+                return GetBusinessByIdResult.NotFound();
+            }
+
+            // Buscar informações do parceiro
+            var partner = await _partnerRepository.GetByIdAsync(business.PartnerId);
+            if (partner == null)
+            {
+                return GetBusinessByIdResult.Failure("Parceiro associado ao negócio não encontrado");
+            }
+
+            // Buscar informações do tipo de negócio
+            var businessType = await _businessTypeRepository.GetByIdAsync(business.BussinessTypeId);
+            if (businessType == null)
+            {
+                return GetBusinessByIdResult.Failure("Tipo de negócio associado não encontrado");
+            }
+
+            // Buscar informações da comissão
+            var commission = await _commissionRepository.GetByBusinessIdAsync(businessId);
+            var detailedCommission = await BuildDetailedCommissionInfo(commission);
+
+            // Construir DTO completo
+            var businessDetail = new BusinessDetailDto
+            {
+                Id = business.Id,
+                PartnerId = business.PartnerId,
+                PartnerName = partner.Name,
+                PartnerEmail = partner.Email,
+                PartnerPhone = partner.PhoneNumber,
+                BusinessTypeId = business.BussinessTypeId,
+                BusinessTypeName = businessType.Name,
+                BusinessTypeDescription = businessType.Description,
+                Value = business.Value,
+                Status = business.Status,
+                Date = business.Date,
+                Observations = business.Observations,
+                CreatedAt = business.CreatedAt,
+                UpdatedAt = business.Status == "cancelado" ? DateTime.UtcNow : null, // Simular UpdatedAt
+                CancellationReason = business.Status == "cancelado" ? "Negócio cancelado" : null,
+                CancelledAt = business.Status == "cancelado" ? DateTime.UtcNow : null,
+                Commission = detailedCommission
+            };
+
+            return GetBusinessByIdResult.Success(businessDetail);
+        }
+        catch (Exception ex)
+        {
+            return GetBusinessByIdResult.Failure($"Erro ao buscar negócio: {ex.Message}");
+        }
+    }
+
+    private async Task<DetailedCommissionInfo> BuildDetailedCommissionInfo(Domain.Entities.Comission? commission)
+    {
+        if (commission == null)
+        {
+            return new DetailedCommissionInfo
+            {
+                CommissionStatus = "Comissão não encontrada"
+            };
+        }
+
+        var totalPayments = commission.Pagamentos.Count;
+        var paidPayments = commission.Pagamentos.Count(p => p.Status == ComissionPayment.Pago);
+        var pendingPayments = commission.Pagamentos.Count(p => p.Status == ComissionPayment.APagar);
+        var cancelledPayments = commission.Pagamentos.Count(p => p.Status == ComissionPayment.Cancelado);
+
+        var totalPaidValue = commission.Pagamentos
+            .Where(p => p.Status == ComissionPayment.Pago)
+            .Sum(p => p.Value);
+
+        var totalPendingValue = commission.Pagamentos
+            .Where(p => p.Status == ComissionPayment.APagar)
+            .Sum(p => p.Value);
+
+        var totalCancelledValue = commission.Pagamentos
+            .Where(p => p.Status == ComissionPayment.Cancelado)
+            .Sum(p => p.Value);
+
+        // Determinar status da comissão
+        string commissionStatus;
+        if (cancelledPayments == totalPayments && totalPayments > 0)
+            commissionStatus = "Totalmente Cancelado";
+        else if (paidPayments == totalPayments && totalPayments > 0)
+            commissionStatus = "Totalmente Pago";
+        else if (paidPayments > 0)
+            commissionStatus = "Parcialmente Pago";
+        else if (pendingPayments > 0)
+            commissionStatus = "Pendente";
+        else
+            commissionStatus = "Sem Pagamentos";
+
+        // Construir detalhes dos pagamentos
+        var paymentDetails = new List<CommissionPaymentDetailDto>();
+        foreach (var payment in commission.Pagamentos.OrderBy(p => p.PartnerId))
+        {
+            var paymentPartner = await _partnerRepository.GetByIdAsync(payment.PartnerId);
+            
+            // Determinar o nível baseado no tipo de pagamento
+            string level = payment.TipoPagamento switch
+            {
+                var t when t == ComissionPayment.VetorPagamento => "Vetor",
+                var t when t == ComissionPayment.RecomendadorPagamento => "Nível 1",
+                var t when t == ComissionPayment.ParticipantePagamento => "Você",
+                var t when t == ComissionPayment.IntermediarioPagamento => "Intermediário",
+                _ => "Não identificado"
+            };
+
+            paymentDetails.Add(new CommissionPaymentDetailDto
+            {
+                PaymentId = payment.Id,
+                PartnerId = payment.PartnerId,
+                PartnerName = paymentPartner?.Name ?? "Partner não encontrado",
+                PaymentType = payment.TipoPagamento,
+                Value = payment.Value,
+                Status = payment.Status,
+                CreatedAt = commission.CreatedAt, // Usar a data da comissão como referência
+                PaidOn = payment.PaidOn,
+                Level = level
+            });
+        }
+
+        return new DetailedCommissionInfo
+        {
+            CommissionId = commission.Id,
+            TotalValue = commission.TotalValue,
+            CreatedAt = commission.CreatedAt,
+            TotalPayments = totalPayments,
+            PaidPayments = paidPayments,
+            PendingPayments = pendingPayments,
+            CancelledPayments = cancelledPayments,
+            TotalPaidValue = totalPaidValue,
+            TotalPendingValue = totalPendingValue,
+            TotalCancelledValue = totalCancelledValue,
+            CommissionStatus = commissionStatus,
+            Payments = paymentDetails
+        };
+    }
+}

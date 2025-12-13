@@ -6,17 +6,17 @@ public sealed record ListBusinessTypesResult
 {
     public bool IsSuccess { get; init; }
     public string Message { get; init; } = string.Empty;
-    public IEnumerable<BusinessTypeDto> BusinessTypes { get; init; } = Enumerable.Empty<BusinessTypeDto>();
+    public IEnumerable<BusinessTypeListDto> BusinessTypes { get; init; } = Enumerable.Empty<BusinessTypeListDto>();
     public PaginationInfo Pagination { get; init; } = new();
 
-    public static ListBusinessTypesResult Success(IEnumerable<BusinessTypeDto> businessTypes, PaginationInfo pagination)
+    public static ListBusinessTypesResult Success(IEnumerable<BusinessTypeListDto> businessTypes, PaginationInfo pagination)
         => new() { IsSuccess = true, Message = "Tipos de negócio listados com sucesso.", BusinessTypes = businessTypes, Pagination = pagination };
 
     public static ListBusinessTypesResult Failure(string message)
         => new() { IsSuccess = false, Message = message };
 }
 
-public sealed record BusinessTypeDto
+public sealed record BusinessTypeListDto
 {
     public Guid Id { get; init; }
     public string Name { get; init; } = string.Empty;
@@ -27,9 +27,9 @@ public sealed record BusinessTypeDto
     public Guid CreatedBy { get; init; }
     public Guid? ModifiedBy { get; init; }
 
-    public static BusinessTypeDto FromEntity(BusinessType businessType)
+    public static BusinessTypeListDto FromEntity(BusinessType businessType)
     {
-        return new BusinessTypeDto
+        return new BusinessTypeListDto
         {
             Id = businessType.Id,
             Name = businessType.Name,
