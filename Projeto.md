@@ -629,7 +629,7 @@ Fluxo completo:
 5. Resolver os 3 níveis de recomendadores
 6. Criar os Pagamentos de Comissão “a pagar”
 
-### **UC-51 – Atualizar Negócio**
+### **UC-51 – Atualizar Negócio - OK**
 
 - Somente campos não críticos
 - Não recalcula comissão após criado (regra opcional)
