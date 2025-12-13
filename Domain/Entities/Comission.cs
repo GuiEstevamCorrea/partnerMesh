@@ -11,7 +11,7 @@ public class Comission
     public decimal TotalValue { get; private set; }
     public DateTime CreatedAt { get; private set; }
 
-    public IReadOnlyCollection<ComissionPayment> Payments => _payments.AsReadOnly();
+    public IReadOnlyCollection<ComissionPayment> Pagamentos => _payments.AsReadOnly();
     private readonly List<ComissionPayment> _payments = new();
 
     protected Comission() { }
@@ -22,6 +22,12 @@ public class Comission
         BussinessId = bussinessId;
         TotalValue = totalValue;
         CreatedAt = DateTime.UtcNow;
+    }
+
+    public void AddPagamento(Guid partnerId, decimal value, string tipoPagamento, string status)
+    {
+        var pagamento = new ComissionPayment(Id, partnerId, value, tipoPagamento, status);
+        _payments.Add(pagamento);
     }
 
     public void AddPagamento(ComissionPayment pagamento)

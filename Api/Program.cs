@@ -26,6 +26,7 @@ using Application.UseCases.UpdateBusinessType;
 using Application.UseCases.DeactivateBusinessType;
 using Application.UseCases.ListBusinessTypes;
 using Application.UseCases.GetBusinessTypeById;
+using Application.UseCases.CreateBusiness;
 using Infrastructure.Repositories;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -121,10 +122,13 @@ builder.Services.AddScoped<IUpdateBusinessTypeUseCase, UpdateBusinessTypeUseCase
 builder.Services.AddScoped<IDeactivateBusinessTypeUseCase, DeactivateBusinessTypeUseCase>();
 builder.Services.AddScoped<IListBusinessTypesUseCase, ListBusinessTypesUseCase>();
 builder.Services.AddScoped<IGetBusinessTypeByIdUseCase, GetBusinessTypeByIdUseCase>();
+builder.Services.AddScoped<ICreateBusinessUseCase, CreateBusinessUseCase>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IVetorRepository, VetorRepository>();
 builder.Services.AddScoped<IPartnerRepository, PartnerRepository>();
 builder.Services.AddScoped<IBusinessTypeRepository, BusinessTypeRepository>();
+builder.Services.AddScoped<IBusinessRepository, BusinessRepository>();
+builder.Services.AddScoped<ICommissionRepository, CommissionRepository>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 

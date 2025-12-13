@@ -4,35 +4,41 @@ namespace Domain.ValueObjects;
 
 public class ComissionPayment
 {
+    // Constantes para Tipos de Pagamento
+    public static readonly string VetorPagamento = "vetor";
+    public static readonly string RecomendadorPagamento = "recomendador";
+    public static readonly string ParticipantePagamento = "participante";
+    public static readonly string IntermediarioPagamento = "intermediario";
+
+    // Constantes para Status
+    public static readonly string APagar = "a_pagar";
+    public static readonly string Pago = "pago";
+
     public Guid Id { get; private set; }
     public Guid ComissionId { get; private set; }
     public Comission Comission { get; private set; }
 
-    public Guid ReceiverId { get; private set; }
-    public string ReceiverType { get; private set; } // "vetor" ou "parceiro"  // TO-DO: Implementar tipo tipado
-
-    public int Level { get; private set; }
+    public Guid PartnerId { get; private set; } // Mudei de ReceiverId para PartnerId
+    public string TipoPagamento { get; private set; } // Mudei de ReceiverType para TipoPagamento
     public decimal Value { get; private set; }
-
-    public string Status { get; private set; } // "a_pagar" / "pago"    // TO-DO: Implementar status tipado
+    public string Status { get; private set; }
     public DateTime? PaidOn { get; private set; }
 
     protected ComissionPayment() { }
 
-    public ComissionPayment(Guid comissionId, Guid receiverId, string receiverType, int level, decimal value)
+    public ComissionPayment(Guid comissionId, Guid partnerId, decimal value, string tipoPagamento, string status)
     {
         Id = Guid.NewGuid();
         ComissionId = comissionId;
-        ReceiverId = receiverId;
-        ReceiverType = receiverType;
-        Level = level;
+        PartnerId = partnerId;
         Value = value;
-        Status = "a_pagar";
+        TipoPagamento = tipoPagamento;
+        Status = status;
     }
 
     public void UpdateStatusToPaid()
     {
-        Status = "pago";
+        Status = Pago;
         PaidOn = DateTime.UtcNow;
     }
 }
