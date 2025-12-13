@@ -618,7 +618,7 @@ Informações:
 
 # **6. Gestão de Negócios**
 
-### **UC-50 – Criar Negócio**
+### **UC-50 – Criar Negócio - OK**
 
 Fluxo completo:
 
