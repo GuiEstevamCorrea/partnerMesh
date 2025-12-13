@@ -1,6 +1,7 @@
 using Application.Interfaces.IUseCases;
 using Application.UseCases.CreateBusiness.DTO;
 using Application.UseCases.UpdateBusiness.DTO;
+using Application.UseCases.CancelBusiness.DTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -14,13 +15,16 @@ public class BusinessController : ControllerBase
 {
     private readonly ICreateBusinessUseCase _createBusinessUseCase;
     private readonly IUpdateBusinessUseCase _updateBusinessUseCase;
+    private readonly ICancelBusinessUseCase _cancelBusinessUseCase;
 
     public BusinessController(
         ICreateBusinessUseCase createBusinessUseCase,
-        IUpdateBusinessUseCase updateBusinessUseCase)
+        IUpdateBusinessUseCase updateBusinessUseCase,
+        ICancelBusinessUseCase cancelBusinessUseCase)
     {
         _createBusinessUseCase = createBusinessUseCase;
         _updateBusinessUseCase = updateBusinessUseCase;
+        _cancelBusinessUseCase = cancelBusinessUseCase;
     }
 
     /// <summary>
@@ -77,6 +81,46 @@ public class BusinessController : ControllerBase
             }
 
             var result = await _updateBusinessUseCase.ExecuteAsync(businessId, request, userId);
+            
+            if (!result.IsSuccess)
+            {
+                return BadRequest(new { message = result.Message });
+            }
+
+            return Ok(result);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "Erro interno do servidor", details = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Cancelar um negócio existente
+    /// </summary>
+    /// <param name="businessId">ID do negócio a ser cancelado</param>
+    /// <param name="request">Dados do cancelamento</param>
+    /// <param name="cancellationToken">Token de cancelamento</param>
+    /// <returns>Dados do negócio cancelado e resumo das comissões afetadas</returns>
+    [HttpDelete("{businessId}")]
+    public async Task<ActionResult<CancelBusinessResult>> CancelBusiness(
+        [FromRoute] Guid businessId,
+        [FromBody] CancelBusinessRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+            {
+                return BadRequest(new { message = "Token de autenticação inválido" });
+            }
+
+            var result = await _cancelBusinessUseCase.ExecuteAsync(businessId, request, userId);
             
             if (!result.IsSuccess)
             {

@@ -34,4 +34,32 @@ public class Comission
     {
         _payments.Add(pagamento);
     }
+
+    public void CancelPendingPayments()
+    {
+        foreach (var payment in _payments.Where(p => p.Status == ComissionPayment.APagar))
+        {
+            payment.CancelPayment();
+        }
+    }
+
+    public int GetPendingPaymentsCount()
+    {
+        return _payments.Count(p => p.Status == ComissionPayment.APagar);
+    }
+
+    public int GetPaidPaymentsCount()
+    {
+        return _payments.Count(p => p.Status == ComissionPayment.Pago);
+    }
+
+    public decimal GetPendingPaymentsValue()
+    {
+        return _payments.Where(p => p.Status == ComissionPayment.APagar).Sum(p => p.Value);
+    }
+
+    public decimal GetPaidPaymentsValue()
+    {
+        return _payments.Where(p => p.Status == ComissionPayment.Pago).Sum(p => p.Value);
+    }
 }

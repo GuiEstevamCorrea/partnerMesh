@@ -13,6 +13,7 @@ public class ComissionPayment
     // Constantes para Status
     public static readonly string APagar = "a_pagar";
     public static readonly string Pago = "pago";
+    public static readonly string Cancelado = "cancelado";
 
     public Guid Id { get; private set; }
     public Guid ComissionId { get; private set; }
@@ -40,5 +41,13 @@ public class ComissionPayment
     {
         Status = Pago;
         PaidOn = DateTime.UtcNow;
+    }
+
+    public void CancelPayment()
+    {
+        if (Status == APagar)
+        {
+            Status = Cancelado;
+        }
     }
 }
