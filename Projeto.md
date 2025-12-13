@@ -643,7 +643,7 @@ Fluxo completo:
 
 ### **UC-53 – Listar Negócios - OK**
 
-### **UC-54 – Obter Negócio por ID**
+### **UC-54 – Obter Negócio por ID - OK**
 
 ---
 
