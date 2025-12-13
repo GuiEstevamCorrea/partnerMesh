@@ -641,7 +641,7 @@ Fluxo completo:
     - cancelar todos os pagamentos pendentes
     - não cancela os já pagos
 
-### **UC-53 – Listar Negócios**
+### **UC-53 – Listar Negócios - OK**
 
 ### **UC-54 – Obter Negócio por ID**
 
