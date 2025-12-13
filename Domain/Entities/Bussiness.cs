@@ -32,4 +32,22 @@ public class Bussiness
         Status = "ativo";
         CreatedAt = DateTime.UtcNow;
     }
+
+    public void UpdateValue(decimal newValue)
+    {
+        if (newValue <= 0)
+            throw new ArgumentException("Valor deve ser positivo", nameof(newValue));
+        
+        Value = newValue;
+    }
+
+    public void UpdateObservations(string newObservations)
+    {
+        Observations = newObservations ?? string.Empty;
+    }
+
+    public void CancelBusiness()
+    {
+        Status = "cancelado";
+    }
 }
