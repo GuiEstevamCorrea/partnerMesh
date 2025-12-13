@@ -1,4 +1,5 @@
 using Domain.Entities;
+using Domain.ValueObjects;
 
 namespace Application.Interfaces.Repositories;
 
@@ -10,4 +11,17 @@ public interface ICommissionRepository
     Task AddAsync(Comission commission, CancellationToken cancellationToken = default);
     Task UpdateAsync(Comission commission, CancellationToken cancellationToken = default);
     Task DeleteAsync(Comission commission, CancellationToken cancellationToken = default);
+
+    Task<(IEnumerable<ComissionPayment> payments, int totalCount)> GetPaymentsWithFiltersAsync(
+        Guid? vetorId = null,
+        Guid? partnerId = null,
+        DateTime? startDate = null,
+        DateTime? endDate = null,
+        string? status = null,
+        string? tipoPagamento = null,
+        string sortBy = "createdAt",
+        string sortDirection = "desc",
+        int page = 1,
+        int pageSize = 10,
+        CancellationToken cancellationToken = default);
 }

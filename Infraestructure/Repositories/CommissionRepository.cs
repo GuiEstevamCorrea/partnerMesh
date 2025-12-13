@@ -1,5 +1,6 @@
 using Application.Interfaces.Repositories;
 using Domain.Entities;
+using Domain.ValueObjects;
 
 namespace Infrastructure.Repositories;
 
@@ -45,5 +46,78 @@ public class CommissionRepository : ICommissionRepository
     {
         _commissions.Remove(commission);
         return Task.CompletedTask;
+    }
+
+    public Task<(IEnumerable<ComissionPayment> payments, int totalCount)> GetPaymentsWithFiltersAsync(
+        Guid? vetorId = null,
+        Guid? partnerId = null,
+        DateTime? startDate = null,
+        DateTime? endDate = null,
+        string? status = null,
+        string? tipoPagamento = null,
+        string sortBy = "createdAt",
+        string sortDirection = "desc",
+        int page = 1,
+        int pageSize = 10,
+        CancellationToken cancellationToken = default)
+    {
+        // Obter todos os pagamentos de todas as comissões
+        var allPayments = _commissions.SelectMany(c => c.Pagamentos).AsQueryable();
+
+        // Aplicar filtros
+        if (partnerId.HasValue)
+        {
+            allPayments = allPayments.Where(p => p.PartnerId == partnerId);
+        }
+
+        if (!string.IsNullOrEmpty(status))
+        {
+            allPayments = allPayments.Where(p => p.Status == status);
+        }
+
+        if (!string.IsNullOrEmpty(tipoPagamento))
+        {
+            allPayments = allPayments.Where(p => p.TipoPagamento == tipoPagamento);
+        }
+
+        if (startDate.HasValue)
+        {
+            allPayments = allPayments.Where(p => p.Comission.CreatedAt >= startDate.Value);
+        }
+
+        if (endDate.HasValue)
+        {
+            allPayments = allPayments.Where(p => p.Comission.CreatedAt <= endDate.Value);
+        }
+
+        // TODO: Implementar filtro por vetorId quando houver relação direta
+
+        // Contar total antes da paginação
+        var totalCount = allPayments.Count();
+
+        // Aplicar ordenação
+        allPayments = sortBy.ToLower() switch
+        {
+            "value" => sortDirection.ToLower() == "asc" 
+                ? allPayments.OrderBy(p => p.Value)
+                : allPayments.OrderByDescending(p => p.Value),
+            "status" => sortDirection.ToLower() == "asc"
+                ? allPayments.OrderBy(p => p.Status)
+                : allPayments.OrderByDescending(p => p.Status),
+            "paidon" => sortDirection.ToLower() == "asc"
+                ? allPayments.OrderBy(p => p.PaidOn ?? DateTime.MinValue)
+                : allPayments.OrderByDescending(p => p.PaidOn ?? DateTime.MinValue),
+            _ => sortDirection.ToLower() == "asc"
+                ? allPayments.OrderBy(p => p.Comission.CreatedAt)
+                : allPayments.OrderByDescending(p => p.Comission.CreatedAt)
+        };
+
+        // Aplicar paginação
+        var pagedPayments = allPayments
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+
+        return Task.FromResult((pagedPayments.AsEnumerable(), totalCount));
     }
 }
