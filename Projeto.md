@@ -634,7 +634,7 @@ Fluxo completo:
 - Somente campos não críticos
 - Não recalcula comissão após criado (regra opcional)
 
-### **UC-52 – Cancelar Negócio**
+### **UC-52 – Cancelar Negócio - OK**
 
 - Marca como cancelado
 - Regras:
