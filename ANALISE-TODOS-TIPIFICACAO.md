@@ -14,7 +14,7 @@
 | `Api/Controllers/PaymentsController.cs` | 58, 102 | Extrair userId do token JWT | **ALTA** |
 | `Api/Controllers/ReportsController.cs` | 44 | Extrair userId do token JWT | **ALTA** |
 
-### **2. Implementações Futuras**
+### **2. Implementações Futuras - OK**
 | Arquivo | Linha | TODO | Prioridade |
 |---------|-------|------|------------|
 | `Application/UseCases/PartnersReport/PartnersReportUseCase.cs` | 34 | Implementar validação de acesso por vetor | **MÉDIA** |
