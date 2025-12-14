@@ -653,7 +653,7 @@ Fluxo completo:
 
 - Filtros: vetor, parceiro, período, status, nível
 
-### **UC-61 – Efetuar Pagamento**
+### **UC-61 – Efetuar Pagamento - OK**
 
 - Troca status de “a pagar” → “pago”
 - Registra data, usuário
