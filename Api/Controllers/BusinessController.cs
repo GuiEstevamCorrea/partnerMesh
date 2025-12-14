@@ -5,6 +5,7 @@ using Application.UseCases.CancelBusiness.DTO;
 using Application.UseCases.ListBusinesses.DTO;
 using Application.UseCases.GetBusinessById.DTO;
 using Application.UseCases.GetBusinessPayments.DTO;
+using Application.UseCases.BusinessReport.DTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -22,6 +23,7 @@ public class BusinessController : ControllerBase
     private readonly IListBusinessesUseCase _listBusinessesUseCase;
     private readonly IGetBusinessByIdUseCase _getBusinessByIdUseCase;
     private readonly IGetBusinessPaymentsUseCase _getBusinessPaymentsUseCase;
+    private readonly IBusinessReportUseCase _businessReportUseCase;
 
     public BusinessController(
         ICreateBusinessUseCase createBusinessUseCase,
@@ -29,7 +31,8 @@ public class BusinessController : ControllerBase
         ICancelBusinessUseCase cancelBusinessUseCase,
         IListBusinessesUseCase listBusinessesUseCase,
         IGetBusinessByIdUseCase getBusinessByIdUseCase,
-        IGetBusinessPaymentsUseCase getBusinessPaymentsUseCase)
+        IGetBusinessPaymentsUseCase getBusinessPaymentsUseCase,
+        IBusinessReportUseCase businessReportUseCase)
     {
         _createBusinessUseCase = createBusinessUseCase;
         _updateBusinessUseCase = updateBusinessUseCase;
@@ -37,6 +40,7 @@ public class BusinessController : ControllerBase
         _listBusinessesUseCase = listBusinessesUseCase;
         _getBusinessByIdUseCase = getBusinessByIdUseCase;
         _getBusinessPaymentsUseCase = getBusinessPaymentsUseCase;
+        _businessReportUseCase = businessReportUseCase;
     }
 
     /// <summary>
@@ -303,6 +307,68 @@ public class BusinessController : ControllerBase
         catch (Exception ex)
         {
             return StatusCode(500, new { message = "Erro interno do servidor", details = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// UC-72 - Relatório de Negócios
+    /// Gera relatório completo dos negócios com filtros avançados e análise de comissões
+    /// </summary>
+    [HttpGet("report")]
+    public async Task<ActionResult<BusinessReportResult>> GetBusinessReport(
+        [FromQuery] Guid? vetorId = null,
+        [FromQuery] Guid? partnerId = null,
+        [FromQuery] Guid? businessTypeId = null,
+        [FromQuery] decimal? minValue = null,
+        [FromQuery] decimal? maxValue = null,
+        [FromQuery] DateTime? startDate = null,
+        [FromQuery] DateTime? endDate = null,
+        [FromQuery] string? status = null,
+        [FromQuery] bool? commissionPaid = null,
+        [FromQuery] string sortBy = "date",
+        [FromQuery] string sortDirection = "desc",
+        [FromQuery] int? page = null,
+        [FromQuery] int pageSize = 50,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var request = new BusinessReportRequest
+            {
+                VetorId = vetorId,
+                PartnerId = partnerId,
+                BusinessTypeId = businessTypeId,
+                MinValue = minValue,
+                MaxValue = maxValue,
+                StartDate = startDate,
+                EndDate = endDate,
+                Status = status,
+                CommissionPaid = commissionPaid,
+                SortBy = sortBy,
+                SortDirection = sortDirection,
+                Page = page,
+                PageSize = pageSize
+            };
+
+            // TODO: Extrair userId do token JWT
+            var userId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+
+            var result = await _businessReportUseCase.ExecuteAsync(request, userId, cancellationToken);
+
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { 
+                IsSuccess = false, 
+                Message = "Erro interno do servidor.", 
+                Details = ex.Message 
+            });
         }
     }
 }

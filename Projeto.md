@@ -677,7 +677,7 @@ Fluxo completo:
 - Totais por nível
 - Totais por vetor
 
-### **UC-72 – Relatório de Negócios**
+### **UC-72 – Relatório de Negócios - OK**
 
 - Filtros: tipo, parceiro, período
 - Com comissão total e status
