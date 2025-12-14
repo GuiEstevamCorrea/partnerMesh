@@ -71,7 +71,7 @@ public enum PaymentStatus
 - `Pago = "pago"`
 - `Cancelado = "cancelado"`
 
-### **2. TIPOS DE PAGAMENTO - CRIAÇÃO DE ENUMS**
+### **2. TIPOS DE PAGAMENTO - CRIAÇÃO DE ENUMS - OK**
 
 #### **PaymentType (Para Tipos de Pagamento)**
 ```csharp

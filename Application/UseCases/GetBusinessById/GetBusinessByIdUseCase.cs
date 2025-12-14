@@ -132,10 +132,10 @@ public class GetBusinessByIdUseCase : IGetBusinessByIdUseCase
             // Determinar o nível baseado no tipo de pagamento
             string level = payment.TipoPagamento switch
             {
-                var t when t == ComissionPayment.VetorPagamento => "Vetor",
-                var t when t == ComissionPayment.RecomendadorPagamento => "Nível 1",
-                var t when t == ComissionPayment.ParticipantePagamento => "Você",
-                var t when t == ComissionPayment.IntermediarioPagamento => "Intermediário",
+                Domain.ValueTypes.PaymentType.Vetor => "Vetor",
+                Domain.ValueTypes.PaymentType.Recomendador => "Nível 1",
+                Domain.ValueTypes.PaymentType.Participante => "Você",
+                Domain.ValueTypes.PaymentType.Intermediario => "Intermediário",
                 _ => "Não identificado"
             };
 
@@ -144,7 +144,7 @@ public class GetBusinessByIdUseCase : IGetBusinessByIdUseCase
                 PaymentId = payment.Id,
                 PartnerId = payment.PartnerId,
                 PartnerName = paymentPartner?.Name ?? "Partner não encontrado",
-                PaymentType = payment.TipoPagamento,
+                PaymentType = payment.TipoPagamento.ToLegacyString(),
                 Value = payment.Value,
                 Status = payment.Status.ToLegacyString(),
                 CreatedAt = commission.CreatedAt, // Usar a data da comissão como referência

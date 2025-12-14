@@ -169,17 +169,17 @@ public class FinancialReportUseCase : IFinancialReportUseCase
         // Filtro por nível (usando TipoPagamento como proxy para nível)
         if (request.Level.HasValue)
         {
-            string targetType = request.Level.Value switch
+            Domain.ValueTypes.PaymentType? targetType = request.Level.Value switch
             {
-                1 => Domain.ValueObjects.ComissionPayment.RecomendadorPagamento,
-                2 => Domain.ValueObjects.ComissionPayment.IntermediarioPagamento,
-                3 => Domain.ValueObjects.ComissionPayment.ParticipantePagamento,
-                _ => ""
+                1 => Domain.ValueTypes.PaymentType.Recomendador,
+                2 => Domain.ValueTypes.PaymentType.Intermediario,
+                3 => Domain.ValueTypes.PaymentType.Participante,
+                _ => null
             };
             
-            if (!string.IsNullOrEmpty(targetType))
+            if (targetType.HasValue)
             {
-                filtered = filtered.Where(p => p.TipoPagamento == targetType);
+                filtered = filtered.Where(p => p.TipoPagamento == targetType.Value);
             }
         }
 
@@ -283,12 +283,12 @@ public class FinancialReportUseCase : IFinancialReportUseCase
         var summary = new Dictionary<int, LevelFinancialSummaryDto>();
 
         // Mapear tipos de pagamento para níveis
-        var typeToLevelMap = new Dictionary<string, int>
+        var typeToLevelMap = new Dictionary<Domain.ValueTypes.PaymentType, int>
         {
-            { Domain.ValueObjects.ComissionPayment.RecomendadorPagamento, 1 },
-            { Domain.ValueObjects.ComissionPayment.IntermediarioPagamento, 2 },
-            { Domain.ValueObjects.ComissionPayment.ParticipantePagamento, 3 },
-            { Domain.ValueObjects.ComissionPayment.VetorPagamento, 0 }
+            { Domain.ValueTypes.PaymentType.Recomendador, 1 },
+            { Domain.ValueTypes.PaymentType.Intermediario, 2 },
+            { Domain.ValueTypes.PaymentType.Participante, 3 },
+            { Domain.ValueTypes.PaymentType.Vetor, 0 }
         };
 
         // Agrupar por tipo de pagamento (nível)
@@ -378,12 +378,12 @@ public class FinancialReportUseCase : IFinancialReportUseCase
             var pendingPayments = partnerPayments.Where(p => p.Status == Domain.ValueObjects.ComissionPayment.APagar).ToList();
 
             // Mapear tipo de pagamento mais comum para nível
-            var typeToLevelMap = new Dictionary<string, int>
+            var typeToLevelMap = new Dictionary<Domain.ValueTypes.PaymentType, int>
             {
-                { Domain.ValueObjects.ComissionPayment.RecomendadorPagamento, 1 },
-                { Domain.ValueObjects.ComissionPayment.IntermediarioPagamento, 2 },
-                { Domain.ValueObjects.ComissionPayment.ParticipantePagamento, 3 },
-                { Domain.ValueObjects.ComissionPayment.VetorPagamento, 0 }
+                { Domain.ValueTypes.PaymentType.Recomendador, 1 },
+                { Domain.ValueTypes.PaymentType.Intermediario, 2 },
+                { Domain.ValueTypes.PaymentType.Participante, 3 },
+                { Domain.ValueTypes.PaymentType.Vetor, 0 }
             };
 
             var mostCommonLevel = partnerPayments.GroupBy(p => typeToLevelMap.GetValueOrDefault(p.TipoPagamento, 1))

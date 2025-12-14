@@ -73,7 +73,7 @@ public class CancelBusinessUseCase : ICancelBusinessUseCase
                 PaymentId = payment.Id,
                 PartnerId = payment.PartnerId,
                 PartnerName = paymentPartner?.Name ?? "Partner não encontrado",
-                PaymentType = payment.TipoPagamento,
+                PaymentType = payment.TipoPagamento.ToLegacyString(),
                 Value = payment.Value,
                 OriginalStatus = payment.Status.ToLegacyString(),
                 FinalStatus = wasCancelled ? ComissionPayment.Cancelado : payment.Status,

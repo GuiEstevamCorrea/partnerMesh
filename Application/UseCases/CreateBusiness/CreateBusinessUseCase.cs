@@ -133,13 +133,13 @@ public class CreateBusinessUseCase : ICreateBusinessUseCase
             var vetorValue = totalValue * 0.50m;
             var recommenderValue = totalValue * 0.50m;
 
-            commission.AddPagamento(partner.Id, vetorValue, ComissionPayment.VetorPagamento, ComissionPayment.APagar);
-            commission.AddPagamento(recommender.Id, recommenderValue, ComissionPayment.RecomendadorPagamento, ComissionPayment.APagar);
+            commission.AddPagamento(partner.Id, vetorValue, Domain.ValueTypes.PaymentType.Vetor);
+            commission.AddPagamento(recommender.Id, recommenderValue, Domain.ValueTypes.PaymentType.Recomendador);
         }
         else
         {
             // Apenas o vetor recebe 100%
-            commission.AddPagamento(partner.Id, totalValue, ComissionPayment.VetorPagamento, ComissionPayment.APagar);
+            commission.AddPagamento(partner.Id, totalValue, Domain.ValueTypes.PaymentType.Vetor);
         }
     }
 
@@ -154,9 +154,9 @@ public class CreateBusinessUseCase : ICreateBusinessUseCase
         var youValue = totalValue * 0.35m;
         var intermediaryValue = totalValue * 0.50m;
 
-        commission.AddPagamento(level2.Id, vetorValue, ComissionPayment.VetorPagamento, ComissionPayment.APagar);
-        commission.AddPagamento(you.Id, youValue, ComissionPayment.ParticipantePagamento, ComissionPayment.APagar);
-        commission.AddPagamento(level1.Id, intermediaryValue, ComissionPayment.IntermediarioPagamento, ComissionPayment.APagar);
+        commission.AddPagamento(level2.Id, vetorValue, Domain.ValueTypes.PaymentType.Vetor);
+        commission.AddPagamento(you.Id, youValue, Domain.ValueTypes.PaymentType.Participante);
+        commission.AddPagamento(level1.Id, intermediaryValue, Domain.ValueTypes.PaymentType.Intermediario);
     }
 
     private async Task DistributeLevel3CommissionAsync(Comission commission, List<Partner> chain, decimal totalValue)
@@ -172,9 +172,9 @@ public class CreateBusinessUseCase : ICreateBusinessUseCase
         var level1Value = totalValue * 0.25m;
         var level2Value = totalValue * 0.50m;
 
-        commission.AddPagamento(level3.Id, vetorValue, ComissionPayment.VetorPagamento, ComissionPayment.APagar);
-        commission.AddPagamento(you.Id, youValue, ComissionPayment.ParticipantePagamento, ComissionPayment.APagar);
-        commission.AddPagamento(level1.Id, level1Value, ComissionPayment.IntermediarioPagamento, ComissionPayment.APagar);
-        commission.AddPagamento(level2.Id, level2Value, ComissionPayment.IntermediarioPagamento, ComissionPayment.APagar);
+        commission.AddPagamento(level3.Id, vetorValue, Domain.ValueTypes.PaymentType.Vetor);
+        commission.AddPagamento(you.Id, youValue, Domain.ValueTypes.PaymentType.Participante);
+        commission.AddPagamento(level1.Id, level1Value, Domain.ValueTypes.PaymentType.Intermediario);
+        commission.AddPagamento(level2.Id, level2Value, Domain.ValueTypes.PaymentType.Intermediario);
     }
 }

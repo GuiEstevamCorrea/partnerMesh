@@ -89,7 +89,7 @@ public class ProcessPaymentUseCase : IProcessPaymentUseCase
                 ComissionId = payment.ComissionId,
                 PartnerId = payment.PartnerId,
                 PartnerName = partner?.Name ?? "Parceiro não encontrado",
-                TipoPagamento = payment.TipoPagamento,
+                TipoPagamento = payment.TipoPagamento.ToLegacyString(),
                 Value = payment.Value,
                 Status = payment.Status.ToLegacyString(),
                 PaidOn = payment.PaidOn,

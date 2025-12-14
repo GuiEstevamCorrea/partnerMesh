@@ -1,4 +1,5 @@
 ﻿using Domain.ValueObjects;
+using Domain.ValueTypes;
 
 namespace Domain.Entities;
 
@@ -24,7 +25,7 @@ public class Comission
         CreatedAt = DateTime.UtcNow;
     }
 
-    public void AddPagamento(Guid partnerId, decimal value, string tipoPagamento, string status)
+    public void AddPagamento(Guid partnerId, decimal value, PaymentType tipoPagamento, PaymentStatus status = PaymentStatus.APagar)
     {
         var pagamento = new ComissionPayment(Id, partnerId, value, tipoPagamento, status);
         _payments.Add(pagamento);

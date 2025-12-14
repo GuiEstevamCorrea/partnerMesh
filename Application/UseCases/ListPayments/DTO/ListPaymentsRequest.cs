@@ -28,9 +28,6 @@ public sealed record ListPaymentsRequest
     {
         if (string.IsNullOrEmpty(TipoPagamento)) return true;
         
-        return TipoPagamento == ComissionPayment.VetorPagamento ||
-               TipoPagamento == ComissionPayment.RecomendadorPagamento ||
-               TipoPagamento == ComissionPayment.ParticipantePagamento ||
-               TipoPagamento == ComissionPayment.IntermediarioPagamento;
+        return Domain.Extensions.PaymentTypeExtensions.TryParse(TipoPagamento, out _);
     }
 }

@@ -96,7 +96,7 @@ public class GetBusinessPaymentsUseCase : IGetBusinessPaymentsUseCase
                     Id = payment.Id,
                     PartnerId = payment.PartnerId,
                     PartnerName = paymentPartner?.Name ?? "Parceiro não encontrado",
-                    TipoPagamento = payment.TipoPagamento,
+                    TipoPagamento = payment.TipoPagamento.ToLegacyString(),
                     Value = payment.Value,
                     Status = payment.Status.ToLegacyString(),
                     PaidOn = payment.PaidOn,
