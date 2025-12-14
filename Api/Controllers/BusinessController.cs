@@ -4,6 +4,7 @@ using Application.UseCases.UpdateBusiness.DTO;
 using Application.UseCases.CancelBusiness.DTO;
 using Application.UseCases.ListBusinesses.DTO;
 using Application.UseCases.GetBusinessById.DTO;
+using Application.UseCases.GetBusinessPayments.DTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -20,19 +21,22 @@ public class BusinessController : ControllerBase
     private readonly ICancelBusinessUseCase _cancelBusinessUseCase;
     private readonly IListBusinessesUseCase _listBusinessesUseCase;
     private readonly IGetBusinessByIdUseCase _getBusinessByIdUseCase;
+    private readonly IGetBusinessPaymentsUseCase _getBusinessPaymentsUseCase;
 
     public BusinessController(
         ICreateBusinessUseCase createBusinessUseCase,
         IUpdateBusinessUseCase updateBusinessUseCase,
         ICancelBusinessUseCase cancelBusinessUseCase,
         IListBusinessesUseCase listBusinessesUseCase,
-        IGetBusinessByIdUseCase getBusinessByIdUseCase)
+        IGetBusinessByIdUseCase getBusinessByIdUseCase,
+        IGetBusinessPaymentsUseCase getBusinessPaymentsUseCase)
     {
         _createBusinessUseCase = createBusinessUseCase;
         _updateBusinessUseCase = updateBusinessUseCase;
         _cancelBusinessUseCase = cancelBusinessUseCase;
         _listBusinessesUseCase = listBusinessesUseCase;
         _getBusinessByIdUseCase = getBusinessByIdUseCase;
+        _getBusinessPaymentsUseCase = getBusinessPaymentsUseCase;
     }
 
     /// <summary>
@@ -251,6 +255,43 @@ public class BusinessController : ControllerBase
             if (!result.IsSuccess)
             {
                 return BadRequest(new { message = result.Message });
+            }
+
+            return Ok(result);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "Erro interno do servidor", details = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// UC-62 - Buscar pagamentos de um negócio específico
+    /// </summary>
+    [HttpGet("{businessId}/payments")]
+    public async Task<ActionResult<GetBusinessPaymentsResult>> GetBusinessPayments(
+        Guid businessId,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            if (businessId == Guid.Empty)
+            {
+                return BadRequest(new { message = "ID do negócio é obrigatório e deve ser válido." });
+            }
+
+            // TODO: Extrair userId do token JWT
+            var userId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+
+            var result = await _getBusinessPaymentsUseCase.ExecuteAsync(businessId, userId, cancellationToken);
+
+            if (!result.IsSuccess)
+            {
+                return NotFound(result);
             }
 
             return Ok(result);

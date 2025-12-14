@@ -658,7 +658,7 @@ Fluxo completo:
 - Troca status de “a pagar” → “pago”
 - Registra data, usuário
 
-### **UC-62 – Buscar Pagamentos de um Negócio**
+### **UC-62 – Buscar Pagamentos de um Negócio - OK**
 
 ---
 
