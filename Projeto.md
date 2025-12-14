@@ -1,4 +1,4 @@
-<!-- Baseado no Projeto ponto MD vamos fazer por partes. Seguinto a arquitetura hexagonal, com a estrutura de projeto que já existe. -->
+<!-- Baseado no Projeto ponto MD vamos fazer por partes. Seguinto a arquitetura hexagonal, com a estrutura de projeto que já existe. Implemente o -->
 
 # Projeto **Sistema de Rede de Credenciamento / Vetores**
 
@@ -649,7 +649,7 @@ Fluxo completo:
 
 # **7. Gestão de Pagamentos (Comissões)**
 
-### **UC-60 – Listar Pagamentos**
+### **UC-60 – Listar Pagamentos - OK**
 
 - Filtros: vetor, parceiro, período, status, nível
 

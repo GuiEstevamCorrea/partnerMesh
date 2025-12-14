@@ -1,0 +1,11 @@
+### Teste rápido do UC-60
+GET http://localhost:5251/api/payments
+Authorization: Bearer fake-token
+
+### Teste com filtros básicos
+GET http://localhost:5251/api/payments?page=1&pageSize=5&sortBy=createdAt&sortDirection=desc
+Authorization: Bearer fake-token
+
+### Teste de validação - Status inválido (deve retornar 400)
+GET http://localhost:5251/api/payments?status=invalid_status
+Authorization: Bearer fake-token
