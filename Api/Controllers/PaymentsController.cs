@@ -1,5 +1,6 @@
 using Application.Interfaces.IUseCases;
 using Application.UseCases.ListPayments.DTO;
+using Application.UseCases.ProcessPayment.DTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,10 +12,14 @@ namespace Api.Controllers;
 public class PaymentsController : ControllerBase
 {
     private readonly IListPaymentsUseCase _listPaymentsUseCase;
+    private readonly IProcessPaymentUseCase _processPaymentUseCase;
 
-    public PaymentsController(IListPaymentsUseCase listPaymentsUseCase)
+    public PaymentsController(
+        IListPaymentsUseCase listPaymentsUseCase,
+        IProcessPaymentUseCase processPaymentUseCase)
     {
         _listPaymentsUseCase = listPaymentsUseCase;
+        _processPaymentUseCase = processPaymentUseCase;
     }
 
     /// <summary>
@@ -54,6 +59,50 @@ public class PaymentsController : ControllerBase
             var userId = Guid.Parse("00000000-0000-0000-0000-000000000001");
 
             var result = await _listPaymentsUseCase.ExecuteAsync(request, userId, cancellationToken);
+
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { 
+                IsSuccess = false, 
+                Message = "Erro interno do servidor.", 
+                Details = ex.Message 
+            });
+        }
+    }
+
+    /// <summary>
+    /// UC-61 - Efetua pagamento (marca como pago)
+    /// </summary>
+    [HttpPut("{paymentId}/process")]
+    public async Task<ActionResult<ProcessPaymentResult>> ProcessPayment(
+        Guid paymentId,
+        [FromBody] ProcessPaymentRequest? request = null,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            if (paymentId == Guid.Empty)
+            {
+                return BadRequest(new { IsSuccess = false, Message = "ID do pagamento é obrigatório." });
+            }
+
+            var processRequest = new ProcessPaymentRequest
+            {
+                PaymentId = paymentId,
+                Observations = request?.Observations
+            };
+
+            // TODO: Extrair userId do token JWT
+            var userId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+
+            var result = await _processPaymentUseCase.ExecuteAsync(processRequest, userId, cancellationToken);
 
             if (!result.IsSuccess)
             {
