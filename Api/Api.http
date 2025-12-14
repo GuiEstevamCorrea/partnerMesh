@@ -41,3 +41,45 @@ POST {{Api_HostAddress}}/api/audit/example/550e8400-e29b-41d4-a716-446655440002
 Authorization: Bearer {{token}}
 
 ###
+
+# UC-81: Consultar logs de auditoria (GET com query params)
+GET {{Api_HostAddress}}/api/audit/logs?pageNumber=1&pageSize=10&orderBy=CreatedAt&orderDirection=DESC
+Authorization: Bearer {{token}}
+
+###
+
+# UC-81: Consultar logs de auditoria com filtros específicos
+GET {{Api_HostAddress}}/api/audit/logs?action=CREATE&entity=Partner&pageNumber=1&pageSize=5
+Authorization: Bearer {{token}}
+
+###
+
+# UC-81: Consultar logs de auditoria por período
+GET {{Api_HostAddress}}/api/audit/logs?startDate=2025-12-01&endDate=2025-12-31&pageNumber=1&pageSize=20
+Authorization: Bearer {{token}}
+
+###
+
+# UC-81: Consulta avançada via POST
+POST {{Api_HostAddress}}/api/audit/logs/search
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "userId": "550e8400-e29b-41d4-a716-446655440000",
+  "action": "CREATE",
+  "startDate": "2025-12-01T00:00:00Z",
+  "endDate": "2025-12-31T23:59:59Z",
+  "pageNumber": 1,
+  "pageSize": 10,
+  "orderBy": "CreatedAt",
+  "orderDirection": "DESC"
+}
+
+###
+
+# UC-81: Estatísticas de logs de auditoria
+GET {{Api_HostAddress}}/api/audit/logs/stats?startDate=2025-12-01&endDate=2025-12-31
+Authorization: Bearer {{token}}
+
+###

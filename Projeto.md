@@ -686,11 +686,11 @@ Fluxo completo:
 
 # **9. Auditoria / Logs**
 
-### **UC-80 – Registrar Log de Ação**
+### **UC-80 – Registrar Log de Ação - OK**
 
 - Cada ação crítica grava: usuário, data, operação, payload
 
-### **UC-81 – Consultar Logs**
+### **UC-81 – Consultar Logs - OK**
 
 *(Restrito ao Admin Global)*
 

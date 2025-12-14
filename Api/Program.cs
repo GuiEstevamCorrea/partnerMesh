@@ -38,6 +38,7 @@ using Application.UseCases.PartnersReport;
 using Application.UseCases.FinancialReport;
 using Application.UseCases.BusinessReport;
 using Application.UseCases.LogAudit;
+using Application.UseCases.AuditLogQuery;
 using Infraestructure.Repositories;
 using Infraestructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -108,6 +109,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization();
 
 // Registro das dependências
+
+#region UseCases
+
 builder.Services.AddScoped<IAuthenticateUserUseCase, AuthenticateUserUseCase>();
 builder.Services.AddScoped<IRefreshTokenUseCase, RefreshTokenUseCase>();
 builder.Services.AddScoped<ILogoutUseCase, LogoutUseCase>();
@@ -145,6 +149,12 @@ builder.Services.AddScoped<IPartnersReportUseCase, PartnersReportUseCase>();
 builder.Services.AddScoped<IFinancialReportUseCase, FinancialReportUseCase>();
 builder.Services.AddScoped<IBusinessReportUseCase, BusinessReportUseCase>();
 builder.Services.AddScoped<ILogAuditUseCase, LogAuditUseCase>();
+builder.Services.AddScoped<IAuditLogQueryUseCase, AuditLogQueryUseCase>();
+
+#endregion
+
+#region Repositories
+
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IVetorRepository, VetorRepository>();
 builder.Services.AddScoped<IPartnerRepository, PartnerRepository>();
@@ -153,7 +163,14 @@ builder.Services.AddScoped<IBusinessRepository, BusinessRepository>();
 builder.Services.AddScoped<ICommissionRepository, CommissionRepository>();
 builder.Services.AddScoped<IAuditLogRepository, AuditLogRepository>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+
+#endregion
+
+#region Services
+
 builder.Services.AddScoped<ITokenService, TokenService>();
+
+#endregion
 
 var app = builder.Build();
 
