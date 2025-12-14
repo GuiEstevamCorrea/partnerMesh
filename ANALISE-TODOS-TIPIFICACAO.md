@@ -32,7 +32,7 @@
 
 ## 🏷️ **OPORTUNIDADES DE TIPIFICAÇÃO**
 
-### **1. STATUS - CRIAÇÃO DE ENUMS**
+### **1. STATUS - CRIAÇÃO DE ENUMS - OK**
 
 #### **StatusEntity (Para Entidades Gerais)**
 ```csharp

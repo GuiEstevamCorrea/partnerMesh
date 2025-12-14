@@ -100,7 +100,7 @@ public class ListPaymentsUseCase : IListPaymentsUseCase
                     PartnerName = partner?.Name ?? "Parceiro não encontrado",
                     TipoPagamento = payment.TipoPagamento,
                     Value = payment.Value,
-                    Status = payment.Status,
+                    Status = payment.Status.ToLegacyString(),
                     PaidOn = payment.PaidOn,
                     CreatedAt = payment.Comission.CreatedAt,
                     BusinessId = business?.Id ?? Guid.Empty,

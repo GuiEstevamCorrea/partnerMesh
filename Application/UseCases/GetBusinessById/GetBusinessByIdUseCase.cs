@@ -65,13 +65,13 @@ public class GetBusinessByIdUseCase : IGetBusinessByIdUseCase
                 BusinessTypeName = businessType.Name,
                 BusinessTypeDescription = businessType.Description,
                 Value = business.Value,
-                Status = business.Status,
+                Status = business.Status.ToLegacyString(),
                 Date = business.Date,
                 Observations = business.Observations,
                 CreatedAt = business.CreatedAt,
-                UpdatedAt = business.Status == "cancelado" ? DateTime.UtcNow : null, // Simular UpdatedAt
-                CancellationReason = business.Status == "cancelado" ? "Negócio cancelado" : null,
-                CancelledAt = business.Status == "cancelado" ? DateTime.UtcNow : null,
+                UpdatedAt = business.Status == Domain.ValueTypes.BusinessStatus.Cancelado ? DateTime.UtcNow : null, // Simular UpdatedAt
+                CancellationReason = business.Status == Domain.ValueTypes.BusinessStatus.Cancelado ? "Negócio cancelado" : null,
+                CancelledAt = business.Status == Domain.ValueTypes.BusinessStatus.Cancelado ? DateTime.UtcNow : null,
                 Commission = detailedCommission
             };
 
@@ -146,7 +146,7 @@ public class GetBusinessByIdUseCase : IGetBusinessByIdUseCase
                 PartnerName = paymentPartner?.Name ?? "Partner não encontrado",
                 PaymentType = payment.TipoPagamento,
                 Value = payment.Value,
-                Status = payment.Status,
+                Status = payment.Status.ToLegacyString(),
                 CreatedAt = commission.CreatedAt, // Usar a data da comissão como referência
                 PaidOn = payment.PaidOn,
                 Level = level

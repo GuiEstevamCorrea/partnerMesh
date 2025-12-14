@@ -37,7 +37,7 @@ public class UpdateBusinessUseCase : IUpdateBusinessUseCase
         }
 
         // Validar se o negócio não está cancelado
-        if (business.Status == "cancelado")
+        if (business.Status == Domain.ValueTypes.BusinessStatus.Cancelado)
         {
             return UpdateBusinessResult.Failure("Não é possível atualizar negócios cancelados");
         }
@@ -86,7 +86,7 @@ public class UpdateBusinessUseCase : IUpdateBusinessUseCase
             BusinessTypeId = business.BussinessTypeId,
             BusinessTypeName = businessType?.Name ?? "Tipo não encontrado",
             Value = business.Value,
-            Status = business.Status,
+            Status = business.Status.ToLegacyString(),
             Date = business.Date,
             Observations = business.Observations,
             CreatedAt = business.CreatedAt,

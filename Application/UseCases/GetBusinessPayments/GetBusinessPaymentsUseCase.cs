@@ -98,7 +98,7 @@ public class GetBusinessPaymentsUseCase : IGetBusinessPaymentsUseCase
                     PartnerName = paymentPartner?.Name ?? "Parceiro não encontrado",
                     TipoPagamento = payment.TipoPagamento,
                     Value = payment.Value,
-                    Status = payment.Status,
+                    Status = payment.Status.ToLegacyString(),
                     PaidOn = payment.PaidOn,
                     CreatedAt = commission.CreatedAt
                 };
@@ -109,12 +109,12 @@ public class GetBusinessPaymentsUseCase : IGetBusinessPaymentsUseCase
             // Calcular resumo
             var summary = new PaymentSummaryDto
             {
-                TotalPago = paymentDtos.Where(p => p.Status == ComissionPayment.Pago).Sum(p => p.Value),
-                TotalPendente = paymentDtos.Where(p => p.Status == ComissionPayment.APagar).Sum(p => p.Value),
-                TotalCancelado = paymentDtos.Where(p => p.Status == ComissionPayment.Cancelado).Sum(p => p.Value),
-                QuantidadePagos = paymentDtos.Count(p => p.Status == ComissionPayment.Pago),
-                QuantidadePendentes = paymentDtos.Count(p => p.Status == ComissionPayment.APagar),
-                QuantidadeCancelados = paymentDtos.Count(p => p.Status == ComissionPayment.Cancelado)
+                TotalPago = paymentDtos.Where(p => p.Status == Domain.ValueTypes.PaymentStatus.Pago).Sum(p => p.Value),
+                TotalPendente = paymentDtos.Where(p => p.Status == Domain.ValueTypes.PaymentStatus.APagar).Sum(p => p.Value),
+                TotalCancelado = paymentDtos.Where(p => p.Status == Domain.ValueTypes.PaymentStatus.Cancelado).Sum(p => p.Value),
+                QuantidadePagos = paymentDtos.Count(p => p.Status == Domain.ValueTypes.PaymentStatus.Pago),
+                QuantidadePendentes = paymentDtos.Count(p => p.Status == Domain.ValueTypes.PaymentStatus.APagar),
+                QuantidadeCancelados = paymentDtos.Count(p => p.Status == Domain.ValueTypes.PaymentStatus.Cancelado)
             };
 
             // Criar DTO principal
@@ -124,7 +124,7 @@ public class GetBusinessPaymentsUseCase : IGetBusinessPaymentsUseCase
                 BusinessDescription = business.Observations,
                 BusinessValue = business.Value,
                 BusinessDate = business.CreatedAt,
-                BusinessStatus = business.Status,
+                BusinessStatus = business.Status.ToLegacyString(),
                 PartnerName = partner?.Name ?? "Parceiro não encontrado",
                 BusinessTypeName = businessType?.Name ?? "Tipo não encontrado",
                 TotalCommission = commission.TotalValue,

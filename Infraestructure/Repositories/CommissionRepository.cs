@@ -1,6 +1,7 @@
 using Application.Interfaces.Repositories;
 using Domain.Entities;
 using Domain.ValueObjects;
+using Domain.Extensions;
 
 namespace Infraestructure.Repositories;
 
@@ -72,7 +73,10 @@ public class CommissionRepository : ICommissionRepository
 
         if (!string.IsNullOrEmpty(status))
         {
-            allPayments = allPayments.Where(p => p.Status == status);
+            if (PaymentStatusExtensions.TryParse(status, out var statusEnum))
+            {
+                allPayments = allPayments.Where(p => p.Status == statusEnum);
+            }
         }
 
         if (!string.IsNullOrEmpty(tipoPagamento))

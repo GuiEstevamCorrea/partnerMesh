@@ -1,4 +1,5 @@
 ﻿using Domain.ValueObjects;
+using Domain.ValueTypes;
 
 namespace Domain.Entities;
 
@@ -12,7 +13,7 @@ public class Bussiness
     public BussinessType BussinessType { get; private set; }
 
     public decimal Value { get; private set; }
-    public string Status { get; private set; } // TO-DO: Implementar status tipado
+    public BusinessStatus Status { get; private set; }
     public DateTime Date { get; private set; }
     public string Observations { get; private set; }
     public DateTime CreatedAt { get; private set; }
@@ -29,7 +30,7 @@ public class Bussiness
         Value = value;
         Date = DateTime.UtcNow;
         Observations = observations;
-        Status = "ativo";
+        Status = BusinessStatus.Ativo;
         CreatedAt = DateTime.UtcNow;
     }
 
@@ -48,6 +49,9 @@ public class Bussiness
 
     public void CancelBusiness()
     {
-        Status = "cancelado";
+        Status = BusinessStatus.Cancelado;
     }
+    
+    public bool IsActive() => Status == BusinessStatus.Ativo;
+    public bool IsCanceled() => Status == BusinessStatus.Cancelado;
 }

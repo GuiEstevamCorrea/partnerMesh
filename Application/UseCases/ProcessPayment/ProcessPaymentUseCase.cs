@@ -62,13 +62,13 @@ public class ProcessPaymentUseCase : IProcessPaymentUseCase
             }
 
             // Verificar se o pagamento já foi pago
-            if (payment.Status == ComissionPayment.Pago)
+            if (payment.Status == Domain.ValueTypes.PaymentStatus.Pago)
             {
                 return ProcessPaymentResult.Failure("Este pagamento já foi efetuado.");
             }
 
             // Verificar se o pagamento não está cancelado
-            if (payment.Status == ComissionPayment.Cancelado)
+            if (payment.Status == Domain.ValueTypes.PaymentStatus.Cancelado)
             {
                 return ProcessPaymentResult.Failure("Não é possível efetuar um pagamento cancelado.");
             }
@@ -91,7 +91,7 @@ public class ProcessPaymentUseCase : IProcessPaymentUseCase
                 PartnerName = partner?.Name ?? "Parceiro não encontrado",
                 TipoPagamento = payment.TipoPagamento,
                 Value = payment.Value,
-                Status = payment.Status,
+                Status = payment.Status.ToLegacyString(),
                 PaidOn = payment.PaidOn,
                 ProcessedBy = userId,
                 ProcessedByName = user.Name

@@ -56,7 +56,12 @@ public class BusinessRepository : IBusinessRepository
             query = query.Where(b => b.BussinessTypeId == businessTypeId.Value);
 
         if (!string.IsNullOrEmpty(status))
-            query = query.Where(b => b.Status.ToLower() == status.ToLower());
+        {
+            if (BusinessStatusExtensions.TryParse(status, out var statusEnum))
+            {
+                query = query.Where(b => b.Status == statusEnum);
+            }
+        }
 
         if (minValue.HasValue)
             query = query.Where(b => b.Value >= minValue.Value);

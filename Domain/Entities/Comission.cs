@@ -37,7 +37,7 @@ public class Comission
 
     public void CancelPendingPayments()
     {
-        foreach (var payment in _payments.Where(p => p.Status == ComissionPayment.APagar))
+        foreach (var payment in _payments.Where(p => p.Status == ValueTypes.PaymentStatus.APagar))
         {
             payment.CancelPayment();
         }
@@ -45,21 +45,21 @@ public class Comission
 
     public int GetPendingPaymentsCount()
     {
-        return _payments.Count(p => p.Status == ComissionPayment.APagar);
+        return _payments.Count(p => p.Status == ValueTypes.PaymentStatus.APagar);
     }
 
     public int GetPaidPaymentsCount()
     {
-        return _payments.Count(p => p.Status == ComissionPayment.Pago);
+        return _payments.Count(p => p.Status == ValueTypes.PaymentStatus.Pago);
     }
 
     public decimal GetPendingPaymentsValue()
     {
-        return _payments.Where(p => p.Status == ComissionPayment.APagar).Sum(p => p.Value);
+        return _payments.Where(p => p.Status == ValueTypes.PaymentStatus.APagar).Sum(p => p.Value);
     }
 
     public decimal GetPaidPaymentsValue()
     {
-        return _payments.Where(p => p.Status == ComissionPayment.Pago).Sum(p => p.Value);
+        return _payments.Where(p => p.Status == ValueTypes.PaymentStatus.Pago).Sum(p => p.Value);
     }
 }

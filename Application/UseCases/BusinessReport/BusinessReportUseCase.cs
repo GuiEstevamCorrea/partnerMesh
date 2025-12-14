@@ -326,7 +326,7 @@ public class BusinessReportUseCase : IBusinessReportUseCase
             Value = business.Value,
             Date = business.Date,
             CreatedAt = business.CreatedAt,
-            Status = business.Status,
+            Status = business.Status.ToLegacyString(),
             Observations = business.Observations,
             PartnerId = business.PartnerId,
             PartnerName = partner?.Name ?? "N/A",
@@ -352,8 +352,8 @@ public class BusinessReportUseCase : IBusinessReportUseCase
         List<Domain.Entities.Partner> partners,
         List<Domain.Entities.BusinessType> businessTypes)
     {
-        var activeBusinesses = businesses.Where(b => b.Status == "ativo").ToList();
-        var cancelledBusinesses = businesses.Where(b => b.Status == "cancelado").ToList();
+        var activeBusinesses = businesses.Where(b => b.Status == Domain.ValueTypes.BusinessStatus.Ativo).ToList();
+        var cancelledBusinesses = businesses.Where(b => b.Status == Domain.ValueTypes.BusinessStatus.Cancelado).ToList();
 
         var totalValue = businesses.Sum(b => b.Value);
         var averageValue = businesses.Count > 0 ? totalValue / businesses.Count : 0;

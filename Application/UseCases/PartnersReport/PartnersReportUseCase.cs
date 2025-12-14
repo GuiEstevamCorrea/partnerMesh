@@ -111,11 +111,11 @@ public class PartnersReportUseCase : IPartnersReportUseCase
                     {
                         foreach (var payment in commission.Pagamentos.Where(p => p.PartnerId == partner.Id))
                         {
-                            if (payment.Status == ComissionPayment.Pago)
+                            if (payment.Status == Domain.ValueTypes.PaymentStatus.Pago)
                             {
                                 totalReceived += payment.Value;
                             }
-                            else if (payment.Status == ComissionPayment.APagar)
+                            else if (payment.Status == Domain.ValueTypes.PaymentStatus.APagar)
                             {
                                 totalPending += payment.Value;
                             }

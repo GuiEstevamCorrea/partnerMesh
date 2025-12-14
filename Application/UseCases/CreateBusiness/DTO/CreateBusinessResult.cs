@@ -45,7 +45,7 @@ public sealed record BusinessDto
             BusinessTypeId = business.BussinessTypeId,
             BusinessTypeName = businessTypeName,
             Value = business.Value,
-            Status = business.Status,
+            Status = business.Status.ToLegacyString(),
             Date = business.Date,
             Observations = business.Observations,
             CreatedAt = business.CreatedAt

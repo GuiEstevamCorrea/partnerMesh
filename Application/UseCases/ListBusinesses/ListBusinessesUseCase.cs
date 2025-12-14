@@ -75,7 +75,7 @@ public class ListBusinessesUseCase : IListBusinessesUseCase
                     BusinessTypeId = business.BussinessTypeId,
                     BusinessTypeName = businessType?.Name ?? "Tipo não encontrado",
                     Value = business.Value,
-                    Status = business.Status,
+                    Status = business.Status.ToLegacyString(),
                     Date = business.Date,
                     Observations = business.Observations,
                     CreatedAt = business.CreatedAt,
@@ -159,8 +159,8 @@ public class ListBusinessesUseCase : IListBusinessesUseCase
         var businessList = businesses.ToList();
         
         var totalValue = businessList.Sum(b => b.Value);
-        var activeCount = businessList.Count(b => b.Status == "ativo");
-        var cancelledCount = businessList.Count(b => b.Status == "cancelado");
+        var activeCount = businessList.Count(b => b.Status == Domain.ValueTypes.BusinessStatus.Ativo);
+        var cancelledCount = businessList.Count(b => b.Status == Domain.ValueTypes.BusinessStatus.Cancelado);
 
         decimal totalCommissions = 0;
         decimal paidCommissions = 0;

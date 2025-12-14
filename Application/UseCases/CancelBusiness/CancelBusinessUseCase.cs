@@ -34,7 +34,7 @@ public class CancelBusinessUseCase : ICancelBusinessUseCase
         }
 
         // Verificar se já está cancelado
-        if (business.Status == "cancelado")
+        if (business.Status == Domain.ValueTypes.BusinessStatus.Cancelado)
         {
             return CancelBusinessResult.Failure("Negócio já está cancelado");
         }
@@ -75,7 +75,7 @@ public class CancelBusinessUseCase : ICancelBusinessUseCase
                 PartnerName = paymentPartner?.Name ?? "Partner não encontrado",
                 PaymentType = payment.TipoPagamento,
                 Value = payment.Value,
-                OriginalStatus = payment.Status,
+                OriginalStatus = payment.Status.ToLegacyString(),
                 FinalStatus = wasCancelled ? ComissionPayment.Cancelado : payment.Status,
                 WasCancelled = wasCancelled,
                 CancellationNote = wasCancelled ? "Cancelado devido ao cancelamento do negócio" : 
@@ -106,7 +106,7 @@ public class CancelBusinessUseCase : ICancelBusinessUseCase
             BusinessTypeId = business.BussinessTypeId,
             BusinessTypeName = businessType?.Name ?? "Tipo não encontrado",
             Value = business.Value,
-            Status = business.Status,
+            Status = business.Status.ToLegacyString(),
             Date = business.Date,
             Observations = business.Observations,
             CancellationReason = request.CancellationReason,

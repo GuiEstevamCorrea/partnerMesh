@@ -56,7 +56,7 @@ public class DeactivateBusinessTypeUseCase : IDeactivateBusinessTypeUseCase
         var allBusinesses = await _businessRepository.GetAllAsync();
         var activeBusinessesForType = allBusinesses.Where(b => 
             b.BussinessTypeId == businessTypeId && 
-            b.Status != "cancelado").ToList();
+            b.Status != Domain.ValueTypes.BusinessStatus.Cancelado).ToList();
         
         if (activeBusinessesForType.Any())
         {

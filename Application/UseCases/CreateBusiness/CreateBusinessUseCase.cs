@@ -58,7 +58,7 @@ public class CreateBusinessUseCase : ICreateBusinessUseCase
                 Value = business.Value,
                 Observations = business.Observations,
                 CreatedAt = business.CreatedAt,
-                Status = business.Status,
+                Status = business.Status.ToLegacyString(),
                 Date = business.Date
             },
             new CommissionSummaryDto
