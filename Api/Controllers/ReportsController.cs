@@ -1,8 +1,7 @@
 using Application.Interfaces.IUseCases;
 using Application.UseCases.PartnersReport.DTO;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-
+using Microsoft.AspNetCore.Mvc;using Api.Extensions;
 namespace Api.Controllers;
 
 [ApiController]
@@ -41,8 +40,9 @@ public class ReportsController : ControllerBase
                 SortDirection = sortDirection
             };
 
-            // TODO: Extrair userId do token JWT
-            var userId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+            var errorResult = this.GetCurrentUserIdOrError(out var userId);
+            if (errorResult != null)
+                return errorResult;
 
             var result = await _partnersReportUseCase.ExecuteAsync(request, userId, cancellationToken);
 

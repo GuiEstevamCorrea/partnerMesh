@@ -9,6 +9,7 @@ using Application.UseCases.BusinessReport.DTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using Api.Extensions;
 
 namespace Api.Controllers;
 
@@ -288,8 +289,9 @@ public class BusinessController : ControllerBase
                 return BadRequest(new { message = "ID do negócio é obrigatório e deve ser válido." });
             }
 
-            // TODO: Extrair userId do token JWT
-            var userId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+            var errorResult = this.GetCurrentUserIdOrError(out var userId);
+            if (errorResult != null)
+                return errorResult;
 
             var result = await _getBusinessPaymentsUseCase.ExecuteAsync(businessId, userId, cancellationToken);
 
@@ -350,8 +352,9 @@ public class BusinessController : ControllerBase
                 PageSize = pageSize
             };
 
-            // TODO: Extrair userId do token JWT
-            var userId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+            var errorResult = this.GetCurrentUserIdOrError(out var userId);
+            if (errorResult != null)
+                return errorResult;
 
             var result = await _businessReportUseCase.ExecuteAsync(request, userId, cancellationToken);
 

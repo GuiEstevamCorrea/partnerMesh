@@ -4,7 +4,7 @@
 
 ## 📋 **TODOs Identificados**
 
-### **1. Autorização e Segurança**
+### **1. Autorização e Segurança - OK**
 | Arquivo | Linha | TODO | Prioridade |
 |---------|-------|------|------------|
 | `Api/Controllers/AuditQueryController.cs` | 14 | Implementar verificação específica de Admin Global | **ALTA** |

@@ -2,8 +2,7 @@ using Application.Interfaces.IUseCases;
 using Application.UseCases.ListPayments.DTO;
 using Application.UseCases.ProcessPayment.DTO;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-
+using Microsoft.AspNetCore.Mvc;using Api.Extensions;
 namespace Api.Controllers;
 
 [ApiController]
@@ -55,8 +54,9 @@ public class PaymentsController : ControllerBase
                 PageSize = pageSize
             };
 
-            // TODO: Extrair userId do token JWT
-            var userId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+            var errorResult = this.GetCurrentUserIdOrError(out var userId);
+            if (errorResult != null)
+                return errorResult;
 
             var result = await _listPaymentsUseCase.ExecuteAsync(request, userId, cancellationToken);
 
@@ -99,8 +99,9 @@ public class PaymentsController : ControllerBase
                 Observations = request?.Observations
             };
 
-            // TODO: Extrair userId do token JWT
-            var userId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+            var errorResult = this.GetCurrentUserIdOrError(out var userId);
+            if (errorResult != null)
+                return errorResult;
 
             var result = await _processPaymentUseCase.ExecuteAsync(processRequest, userId, cancellationToken);
 

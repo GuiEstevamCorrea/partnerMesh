@@ -2,6 +2,7 @@ using Application.Interfaces.IUseCases;
 using Application.UseCases.AuditLogQuery.DTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Api.Extensions;
 
 namespace Api.Controllers;
 
@@ -11,7 +12,7 @@ namespace Api.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/audit")]
-//[Authorize] // Temporariamente removido para teste - TODO: Implementar verificação específica de Admin Global
+[Authorize]
 public class AuditQueryController : ControllerBase
 {
     private readonly IAuditLogQueryUseCase _auditLogQueryUseCase;
@@ -32,10 +33,11 @@ public class AuditQueryController : ControllerBase
     {
         try
         {
-            // TODO: Verificar se usuário é Admin Global
-            // var userProfile = GetUserProfile(); 
-            // if (userProfile != UserProfile.AdminGlobal)
-            //     return Forbid("Acesso restrito ao Admin Global");
+            // Verificar se usuário é Admin Global
+            if (!this.IsCurrentUserAdminGlobal())
+            {
+                return Forbid("Acesso restrito ao Admin Global");
+            }
 
             var result = await _auditLogQueryUseCase.ExecuteAsync(request);
 
@@ -68,7 +70,11 @@ public class AuditQueryController : ControllerBase
     {
         try
         {
-            // TODO: Verificar se usuário é Admin Global
+            // Verificar se usuário é Admin Global
+            if (!this.IsCurrentUserAdminGlobal())
+            {
+                return Forbid("Acesso restrito ao Admin Global");
+            }
             
             var result = await _auditLogQueryUseCase.ExecuteAsync(request);
 
