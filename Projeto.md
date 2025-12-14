@@ -670,7 +670,7 @@ Fluxo completo:
 - Totais por nível
 - Totais recebidos e pendentes
 
-### **UC-71 – Relatório Financeiro**
+### **UC-71 – Relatório Financeiro - OK**
 
 - Totais pagos
 - Totais pendentes
