@@ -664,7 +664,7 @@ Fluxo completo:
 
 # **8. Relatórios**
 
-### **UC-70 – Relatório de Parceiros**
+### **UC-70 – Relatório de Parceiros - OK**
 
 - Árvore
 - Totais por nível
