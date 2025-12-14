@@ -2,7 +2,7 @@ using Application.Interfaces.Repositories;
 using Domain.Entities;
 using Domain.ValueObjects;
 
-namespace Infrastructure.Repositories;
+namespace Infraestructure.Repositories;
 
 public class CommissionRepository : ICommissionRepository
 {

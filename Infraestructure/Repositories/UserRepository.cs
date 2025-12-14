@@ -2,7 +2,7 @@ using Application.Interfaces.Repositories;
 using Domain.Entities;
 using Domain.ValueTypes;
 
-namespace Infrastructure.Repositories;
+namespace Infraestructure.Repositories;
 
 /// <summary>
 /// Implementação temporária em memória do repositório de usuários.

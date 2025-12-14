@@ -7,7 +7,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 
-namespace Infrastructure.Services;
+namespace Infraestructure.Services;
 
 public sealed class TokenService : ITokenService
 {

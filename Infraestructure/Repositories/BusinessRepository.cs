@@ -1,7 +1,7 @@
 using Application.Interfaces.Repositories;
 using Domain.Entities;
 
-namespace Infrastructure.Repositories;
+namespace Infraestructure.Repositories;
 
 public class BusinessRepository : IBusinessRepository
 {

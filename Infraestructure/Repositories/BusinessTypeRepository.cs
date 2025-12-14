@@ -2,7 +2,7 @@ using Application.Interfaces.Repositories;
 using Application.UseCases.ListBusinessTypes.DTO;
 using Domain.Entities;
 
-namespace Infrastructure.Repositories;
+namespace Infraestructure.Repositories;
 
 public class BusinessTypeRepository : IBusinessTypeRepository
 {

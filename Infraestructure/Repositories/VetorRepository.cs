@@ -1,7 +1,7 @@
 using Application.Interfaces.Repositories;
 using Domain.Entities;
 
-namespace Infrastructure.Repositories;
+namespace Infraestructure.Repositories;
 
 /// <summary>
 /// Implementação temporária em memória do repositório de vetores.

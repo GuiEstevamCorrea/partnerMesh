@@ -37,8 +37,9 @@ using Application.UseCases.GetBusinessPayments;
 using Application.UseCases.PartnersReport;
 using Application.UseCases.FinancialReport;
 using Application.UseCases.BusinessReport;
-using Infrastructure.Repositories;
-using Infrastructure.Services;
+using Application.UseCases.LogAudit;
+using Infraestructure.Repositories;
+using Infraestructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -143,12 +144,14 @@ builder.Services.AddScoped<IGetBusinessPaymentsUseCase, GetBusinessPaymentsUseCa
 builder.Services.AddScoped<IPartnersReportUseCase, PartnersReportUseCase>();
 builder.Services.AddScoped<IFinancialReportUseCase, FinancialReportUseCase>();
 builder.Services.AddScoped<IBusinessReportUseCase, BusinessReportUseCase>();
+builder.Services.AddScoped<ILogAuditUseCase, LogAuditUseCase>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IVetorRepository, VetorRepository>();
 builder.Services.AddScoped<IPartnerRepository, PartnerRepository>();
 builder.Services.AddScoped<IBusinessTypeRepository, BusinessTypeRepository>();
 builder.Services.AddScoped<IBusinessRepository, BusinessRepository>();
 builder.Services.AddScoped<ICommissionRepository, CommissionRepository>();
+builder.Services.AddScoped<IAuditLogRepository, AuditLogRepository>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 

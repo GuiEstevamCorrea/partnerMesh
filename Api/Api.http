@@ -4,3 +4,40 @@ GET {{Api_HostAddress}}/weatherforecast/
 Accept: application/json
 
 ###
+
+# Login para obter token
+POST {{Api_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@test.com",
+  "password": "123456"
+}
+
+###
+
+# Variáveis para token (substituir pelo token obtido no login)
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+###
+
+# UC-80: Registrar log de auditoria
+POST {{Api_HostAddress}}/api/audit/log
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "userId": "550e8400-e29b-41d4-a716-446655440000",
+  "action": "CREATE",
+  "entity": "Partner",
+  "entityId": "550e8400-e29b-41d4-a716-446655440001",
+  "data": "{\"name\": \"Novo Parceiro\", \"email\": \"parceiro@test.com\"}"
+}
+
+###
+
+# UC-80: Exemplo de operação com auditoria automática
+POST {{Api_HostAddress}}/api/audit/example/550e8400-e29b-41d4-a716-446655440002
+Authorization: Bearer {{token}}
+
+###
