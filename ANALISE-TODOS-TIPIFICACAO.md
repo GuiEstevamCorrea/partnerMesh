@@ -1,3 +1,5 @@
+<!-- Baseado no documento ANALISE-TODOS-TIPIFICACAO.md, e na arquitetura do projeto, implemente o ponto -->
+
 # **ANÁLISE DE CÓDIGO - TODOs E TIPIFICAÇÃO**
 
 ## 📋 **TODOs Identificados**
