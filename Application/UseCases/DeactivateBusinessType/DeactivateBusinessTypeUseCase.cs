@@ -9,13 +9,16 @@ public class DeactivateBusinessTypeUseCase : IDeactivateBusinessTypeUseCase
 {
     private readonly IBusinessTypeRepository _businessTypeRepository;
     private readonly IUserRepository _userRepository;
+    private readonly IBusinessRepository _businessRepository;
 
     public DeactivateBusinessTypeUseCase(
         IBusinessTypeRepository businessTypeRepository,
-        IUserRepository userRepository)
+        IUserRepository userRepository,
+        IBusinessRepository businessRepository)
     {
         _businessTypeRepository = businessTypeRepository;
         _userRepository = userRepository;
+        _businessRepository = businessRepository;
     }
 
     public async Task<DeactivateBusinessTypeResult> ExecuteAsync(Guid businessTypeId, Guid userId)
@@ -49,14 +52,16 @@ public class DeactivateBusinessTypeUseCase : IDeactivateBusinessTypeUseCase
             throw new ArgumentException("Tipo de negócio já está inativo.");
         }
 
-        // TODO: Em uma implementação futura, aqui verificaríamos se existem negócios ativos 
-        // vinculados a este tipo antes de permitir a inativação
-        // Exemplo: 
-        // var hasActiveBusinesses = await _businessRepository.HasActiveBusinessesForTypeAsync(businessTypeId);
-        // if (hasActiveBusinesses)
-        // {
-        //     throw new ArgumentException("Não é possível inativar um tipo de negócio que possui negócios ativos vinculados.");
-        // }
+        // Verificar se existem negócios ativos vinculados a este tipo
+        var allBusinesses = await _businessRepository.GetAllAsync();
+        var activeBusinessesForType = allBusinesses.Where(b => 
+            b.BussinessTypeId == businessTypeId && 
+            b.Status != "cancelado").ToList();
+        
+        if (activeBusinessesForType.Any())
+        {
+            throw new ArgumentException($"Não é possível inativar este tipo de negócio. Existem {activeBusinessesForType.Count} negócio(s) ativo(s) vinculado(s) a ele.");
+        }
 
         // Inativar o tipo de negócio
         businessType.Deactivate(userId);

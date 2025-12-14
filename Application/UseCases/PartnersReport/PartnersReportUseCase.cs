@@ -11,17 +11,20 @@ public class PartnersReportUseCase : IPartnersReportUseCase
     private readonly IVetorRepository _vetorRepository;
     private readonly IBusinessRepository _businessRepository;
     private readonly ICommissionRepository _commissionRepository;
+    private readonly IUserRepository _userRepository;
 
     public PartnersReportUseCase(
         IPartnerRepository partnerRepository,
         IVetorRepository vetorRepository,
         IBusinessRepository businessRepository,
-        ICommissionRepository commissionRepository)
+        ICommissionRepository commissionRepository,
+        IUserRepository userRepository)
     {
         _partnerRepository = partnerRepository;
         _vetorRepository = vetorRepository;
         _businessRepository = businessRepository;
         _commissionRepository = commissionRepository;
+        _userRepository = userRepository;
     }
 
     public async Task<PartnersReportResult> ExecuteAsync(
@@ -31,12 +34,18 @@ public class PartnersReportUseCase : IPartnersReportUseCase
     {
         try
         {
-            // TODO: Implementar validação de acesso por vetor quando necessário
-            
-            // Se não especificou vetor, pegar o primeiro disponível (para demo)
+            // Buscar o usuário para validação de acesso
+            var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
+            if (user == null || !user.Active)
+            {
+                return PartnersReportResult.Failure("Usuário não encontrado ou inativo.");
+            }
+
+            // Validar acesso ao vetor
             Guid vetorId = request.VetorId ?? Guid.Empty;
             if (vetorId == Guid.Empty)
             {
+                // Se não especificou vetor, pegar o primeiro disponível
                 var vetores = await _vetorRepository.GetAllAsync(cancellationToken);
                 var firstVetor = vetores.FirstOrDefault();
                 if (firstVetor == null)
@@ -44,6 +53,19 @@ public class PartnersReportUseCase : IPartnersReportUseCase
                     return PartnersReportResult.Failure("Nenhum vetor encontrado.");
                 }
                 vetorId = firstVetor.Id;
+            }
+
+            // Verificar se o usuário tem acesso ao vetor solicitado
+            // AdminGlobal tem acesso a todos os vetores
+            var hasGlobalAccess = user.Permission.HasFlag(Domain.ValueTypes.PermissionEnum.AdminGlobal);
+            if (!hasGlobalAccess)
+            {
+                // Para outros usuários, verificar se estão vinculados ao vetor
+                var hasVetorAccess = user.UserVetores.Any(uv => uv.VetorId == vetorId && uv.Active);
+                if (!hasVetorAccess)
+                {
+                    return PartnersReportResult.Failure("Usuário não tem acesso ao vetor solicitado.");
+                }
             }
 
             // Buscar dados do vetor

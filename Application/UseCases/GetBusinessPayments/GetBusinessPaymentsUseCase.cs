@@ -11,17 +11,20 @@ public class GetBusinessPaymentsUseCase : IGetBusinessPaymentsUseCase
     private readonly ICommissionRepository _commissionRepository;
     private readonly IPartnerRepository _partnerRepository;
     private readonly IBusinessTypeRepository _businessTypeRepository;
+    private readonly IUserRepository _userRepository;
 
     public GetBusinessPaymentsUseCase(
         IBusinessRepository businessRepository,
         ICommissionRepository commissionRepository,
         IPartnerRepository partnerRepository,
-        IBusinessTypeRepository businessTypeRepository)
+        IBusinessTypeRepository businessTypeRepository,
+        IUserRepository userRepository)
     {
         _businessRepository = businessRepository;
         _commissionRepository = commissionRepository;
         _partnerRepository = partnerRepository;
         _businessTypeRepository = businessTypeRepository;
+        _userRepository = userRepository;
     }
 
     public async Task<GetBusinessPaymentsResult> ExecuteAsync(
@@ -44,8 +47,32 @@ public class GetBusinessPaymentsUseCase : IGetBusinessPaymentsUseCase
                 return GetBusinessPaymentsResult.Failure("Negócio não encontrado.");
             }
 
-            // TODO: Implementar validação de acesso por vetor quando necessário
-            // Verificar se o usuário tem acesso a este negócio baseado no vetor
+            // Validar acesso do usuário ao vetor do negócio
+            var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
+            if (user == null || !user.Active)
+            {
+                return GetBusinessPaymentsResult.Failure("Usuário não encontrado ou inativo.");
+            }
+
+            // Buscar o parceiro para obter o vetorId
+            var businessPartner = await _partnerRepository.GetByIdAsync(business.PartnerId, cancellationToken);
+            if (businessPartner == null)
+            {
+                return GetBusinessPaymentsResult.Failure("Parceiro do negócio não encontrado.");
+            }
+
+            // Verificar se o usuário tem acesso ao vetor do negócio
+            // AdminGlobal tem acesso a todos os vetores
+            var hasGlobalAccess = user.Permission.HasFlag(Domain.ValueTypes.PermissionEnum.AdminGlobal);
+            if (!hasGlobalAccess)
+            {
+                // Para outros usuários, verificar se estão vinculados ao vetor
+                var hasVetorAccess = user.UserVetores.Any(uv => uv.VetorId == businessPartner.VetorId && uv.Active);
+                if (!hasVetorAccess)
+                {
+                    return GetBusinessPaymentsResult.Failure("Usuário não tem acesso aos pagamentos deste negócio.");
+                }
+            }
 
             // Buscar a comissão associada ao negócio
             var commission = await _commissionRepository.GetByBusinessIdAsync(businessId, cancellationToken);
