@@ -21,7 +21,7 @@
 | `Application/UseCases/GetBusinessPayments/GetBusinessPaymentsUseCase.cs` | 47 | Implementar validação de acesso por vetor | **MÉDIA** |
 | `Application/UseCases/DeactivateBusinessType/DeactivateBusinessTypeUseCase.cs` | 52 | Verificar negócios ativos antes da desativação | **MÉDIA** |
 
-### **3. Relacionamentos e Dados**
+### **3. Relacionamentos e Dados - OK**
 | Arquivo | Linha | TODO | Prioridade |
 |---------|-------|------|------------|
 | `Infraestructure/Repositories/CommissionRepository.cs` | 93 | Implementar filtro por vetorId | **BAIXA** |

@@ -9,13 +9,19 @@ public sealed class GetVetorByIdUseCase : IGetVetorByIdUseCase
 {
     private readonly IVetorRepository _vetorRepository;
     private readonly IUserRepository _userRepository;
+    private readonly IPartnerRepository _partnerRepository;
+    private readonly IBusinessRepository _businessRepository;
 
     public GetVetorByIdUseCase(
         IVetorRepository vetorRepository,
-        IUserRepository userRepository)
+        IUserRepository userRepository,
+        IPartnerRepository partnerRepository,
+        IBusinessRepository businessRepository)
     {
         _vetorRepository = vetorRepository;
         _userRepository = userRepository;
+        _partnerRepository = partnerRepository;
+        _businessRepository = businessRepository;
     }
 
     public async Task<GetVetorByIdResult> GetByIdAsync(GetVetorByIdRequest request, Guid currentUserId, CancellationToken cancellationToken = default)
@@ -96,23 +102,35 @@ public sealed class GetVetorByIdUseCase : IGetVetorByIdUseCase
 
     private async Task<VetorStatisticsDto> CalculateVetorStatistics(Guid vetorId, CancellationToken cancellationToken)
     {
-        // Por enquanto, retornamos estatísticas básicas
-        // No futuro, quando tivermos mais entidades (Partner, Business, etc.), calcularemos valores reais
-        
+        // Buscar usuários do vetor
         var users = await _userRepository.GetAllAsync(cancellationToken);
-        var vetorUsers = users.Where(u => u.UserVetores?.Any(uv => uv.VetorId == vetorId) == true).ToList();
+        var vetorUsers = users.Where(u => u.UserVetores?.Any(uv => uv.VetorId == vetorId && uv.Active) == true).ToList();
+
+        // Buscar parceiros do vetor
+        var allPartners = await _partnerRepository.GetByVetorIdAsync(vetorId, cancellationToken);
+        var partnersList = allPartners.ToList();
+        var activePartners = partnersList.Count(p => p.Active);
+        var inactivePartners = partnersList.Count(p => !p.Active);
+
+        // Buscar negócios do vetor através dos parceiros
+        var allBusinesses = await _businessRepository.GetByVetorIdAsync(vetorId, cancellationToken);
+        var businessesList = allBusinesses.ToList();
+        var totalBusinessValue = businessesList.Where(b => b.Status != "cancelado").Sum(b => b.Value);
+
+        // Calcular comissões (10% do valor dos negócios ativos)
+        var totalCommissions = totalBusinessValue * 0.10m;
 
         return new VetorStatisticsDto
         {
             TotalUsers = vetorUsers.Count,
-            TotalPartners = 0, // TODO: Implementar quando tivermos Partner repository
-            ActivePartners = 0,
-            InactivePartners = 0,
-            TotalBusinesses = 0, // TODO: Implementar quando tivermos Business repository
-            TotalBusinessValue = 0m,
-            TotalCommissions = 0m,
-            PaidCommissions = 0m,
-            PendingCommissions = 0m
+            TotalPartners = partnersList.Count,
+            ActivePartners = activePartners,
+            InactivePartners = inactivePartners,
+            TotalBusinesses = businessesList.Count,
+            TotalBusinessValue = totalBusinessValue,
+            TotalCommissions = totalCommissions,
+            PaidCommissions = 0m, // Requer integração com CommissionRepository
+            PendingCommissions = totalCommissions // Por enquanto, assume tudo pendente
         };
     }
 }

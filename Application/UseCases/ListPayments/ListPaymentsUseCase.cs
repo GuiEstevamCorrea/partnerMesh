@@ -10,15 +10,18 @@ public class ListPaymentsUseCase : IListPaymentsUseCase
     private readonly ICommissionRepository _commissionRepository;
     private readonly IPartnerRepository _partnerRepository;
     private readonly IBusinessRepository _businessRepository;
+    private readonly IVetorRepository _vetorRepository;
 
     public ListPaymentsUseCase(
         ICommissionRepository commissionRepository,
         IPartnerRepository partnerRepository,
-        IBusinessRepository businessRepository)
+        IBusinessRepository businessRepository,
+        IVetorRepository vetorRepository)
     {
         _commissionRepository = commissionRepository;
         _partnerRepository = partnerRepository;
         _businessRepository = businessRepository;
+        _vetorRepository = vetorRepository;
     }
 
     public async Task<ListPaymentsResult> ExecuteAsync(
@@ -74,6 +77,21 @@ public class ListPaymentsUseCase : IListPaymentsUseCase
                 // Buscar dados do negócio através da comissão
                 var business = await _businessRepository.GetByIdAsync(payment.Comission.BussinessId, cancellationToken);
 
+                // Buscar o parceiro do negócio para obter o VetorId
+                Guid vetorId = Guid.Empty;
+                string vetorName = "";
+                
+                if (business != null)
+                {
+                    var businessPartner = await _partnerRepository.GetByIdAsync(business.PartnerId, cancellationToken);
+                    if (businessPartner != null)
+                    {
+                        vetorId = businessPartner.VetorId;
+                        var vetor = await _vetorRepository.GetByIdAsync(vetorId, cancellationToken);
+                        vetorName = vetor?.Name ?? "Vetor não encontrado";
+                    }
+                }
+
                 var paymentDto = new PaymentListDto
                 {
                     Id = payment.Id,
@@ -89,8 +107,8 @@ public class ListPaymentsUseCase : IListPaymentsUseCase
                     BusinessDescription = business?.Observations ?? "",
                     BusinessTotalValue = business?.Value ?? 0,
                     BusinessDate = business?.CreatedAt ?? DateTime.MinValue,
-                    VetorId = Guid.Empty, // TODO: Implementar quando houver relação direta
-                    VetorName = "" // TODO: Implementar quando houver relação direta
+                    VetorId = vetorId,
+                    VetorName = vetorName
                 };
 
                 paymentDtos.Add(paymentDto);

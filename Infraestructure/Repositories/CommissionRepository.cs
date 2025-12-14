@@ -90,7 +90,18 @@ public class CommissionRepository : ICommissionRepository
             allPayments = allPayments.Where(p => p.Comission.CreatedAt <= endDate.Value);
         }
 
-        // TODO: Implementar filtro por vetorId quando houver relação direta
+        // Filtro por vetorId usando a relação Business -> Partner -> Vetor
+        if (vetorId.HasValue)
+        {
+            var commissionsForVetor = _commissions
+                .Where(c => c.Bussiness != null && 
+                           c.Bussiness.Partner != null && 
+                           c.Bussiness.Partner.VetorId == vetorId.Value)
+                .Select(c => c.Id)
+                .ToHashSet();
+            
+            allPayments = allPayments.Where(p => commissionsForVetor.Contains(p.ComissionId));
+        }
 
         // Contar total antes da paginação
         var totalCount = allPayments.Count();
