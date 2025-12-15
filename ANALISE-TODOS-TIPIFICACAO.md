@@ -254,3 +254,20 @@ O projeto tem uma base sólida, mas pode se beneficiar significativamente de:
 4. **Conversão de strings hardcoded** para enums tipados
 
 A implementação desses pontos aumentará a **robustez**, **maintibilidade** e **segurança** do sistema.
+
+
+
+Arrume a regra de negócio pois posso ter niveis infinitos e a rede de comissionamento vai andar como uma corrente, 
+então, dos 10% do valor do negócio fechado, de um certo nivel o vetor sempre fica com 10%, por exemplo:
+
+1. Vetor -> Finder 1 -> "Recomendação do Finder 1 que fechou negócio"
+1. 50% / 50%
+
+2. Vetor -> Finder 1 -> Finder 2 -> "Recomendação do Finder 2 que fechou negócio"
+2. 15% / 35% / 50%
+
+3. Vetor -> Finder 1 -> Finder 2 -> Finder 3 -> "Recomendação do Finder 3 que fechou negócio"
+3. 10% / 15% / 25% / 50%
+
+4. Vetor -> Finder 1 -> Finder 2 -> Finder 3 -> Finder 4 -> "Recomendação do Finder  que fechou negócio"
+4. 10% / 0% / 15% / 25% / 50%
