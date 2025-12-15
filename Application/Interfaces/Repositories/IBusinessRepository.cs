@@ -1,4 +1,5 @@
 using Domain.Entities;
+using Domain.ValueTypes;
 
 namespace Application.Interfaces.Repositories;
 
@@ -17,8 +18,8 @@ public interface IBusinessRepository
         DateTime? startDate = null,
         DateTime? endDate = null,
         string? searchText = null,
-        string sortBy = "date",
-        string sortDirection = "desc",
+        BusinessSortField sortBy = BusinessSortField.Date,
+        SortDirection sortDirection = SortDirection.Descending,
         int page = 1,
         int pageSize = 10,
         CancellationToken cancellationToken = default);

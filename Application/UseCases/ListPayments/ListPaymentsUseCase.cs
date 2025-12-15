@@ -2,6 +2,8 @@ using Application.Interfaces.IUseCases;
 using Application.Interfaces.Repositories;
 using Application.UseCases.ListPayments.DTO;
 using Application.UseCases.ListPartners.DTO;
+using Domain.ValueTypes;
+using Domain.Extensions;
 
 namespace Application.UseCases.ListPayments;
 
@@ -52,6 +54,20 @@ public class ListPaymentsUseCase : IListPaymentsUseCase
                 return ListPaymentsResult.Failure("Tamanho da página deve estar entre 1 e 100.");
             }
 
+            // Converter strings de ordenação para enums
+            var sortField = PaymentSortField.CreatedAt;
+            var sortDirection = SortDirection.Descending;
+            
+            if (!string.IsNullOrWhiteSpace(request.SortBy))
+            {
+                PaymentSortFieldExtensions.TryParse(request.SortBy, out sortField);
+            }
+            
+            if (!string.IsNullOrWhiteSpace(request.SortDirection))
+            {
+                SortDirectionExtensions.TryParse(request.SortDirection, out sortDirection);
+            }
+
             // Buscar pagamentos com filtros
             var (payments, totalCount) = await _commissionRepository.GetPaymentsWithFiltersAsync(
                 request.VetorId,
@@ -60,8 +76,8 @@ public class ListPaymentsUseCase : IListPaymentsUseCase
                 request.EndDate,
                 request.Status,
                 request.TipoPagamento,
-                request.SortBy,
-                request.SortDirection,
+                sortField,
+                sortDirection,
                 request.Page,
                 request.PageSize,
                 cancellationToken);

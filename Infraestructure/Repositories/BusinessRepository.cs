@@ -1,5 +1,7 @@
 using Application.Interfaces.Repositories;
 using Domain.Entities;
+using Domain.ValueTypes;
+using Domain.Extensions;
 
 namespace Infraestructure.Repositories;
 
@@ -40,8 +42,8 @@ public class BusinessRepository : IBusinessRepository
         DateTime? startDate = null,
         DateTime? endDate = null,
         string? searchText = null,
-        string sortBy = "date",
-        string sortDirection = "desc",
+        BusinessSortField sortBy = BusinessSortField.Date,
+        SortDirection sortDirection = SortDirection.Descending,
         int page = 1,
         int pageSize = 10,
         CancellationToken cancellationToken = default)
@@ -82,21 +84,23 @@ public class BusinessRepository : IBusinessRepository
         var totalCount = query.Count();
 
         // Aplicar ordenação
-        query = sortBy.ToLower() switch
+        var isAscending = sortDirection == SortDirection.Ascending;
+        
+        query = sortBy switch
         {
-            "value" => sortDirection.ToLower() == "asc" 
+            BusinessSortField.Value => isAscending
                 ? query.OrderBy(b => b.Value) 
                 : query.OrderByDescending(b => b.Value),
-            "partner" => sortDirection.ToLower() == "asc" 
+            BusinessSortField.Partner => isAscending
                 ? query.OrderBy(b => b.PartnerId) 
                 : query.OrderByDescending(b => b.PartnerId),
-            "businesstype" => sortDirection.ToLower() == "asc" 
+            BusinessSortField.BusinessType => isAscending
                 ? query.OrderBy(b => b.BussinessTypeId) 
                 : query.OrderByDescending(b => b.BussinessTypeId),
-            "status" => sortDirection.ToLower() == "asc" 
+            BusinessSortField.Status => isAscending
                 ? query.OrderBy(b => b.Status) 
                 : query.OrderByDescending(b => b.Status),
-            _ => sortDirection.ToLower() == "asc" 
+            _ => isAscending
                 ? query.OrderBy(b => b.Date) 
                 : query.OrderByDescending(b => b.Date)
         };

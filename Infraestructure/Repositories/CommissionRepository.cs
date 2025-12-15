@@ -1,6 +1,7 @@
 using Application.Interfaces.Repositories;
 using Domain.Entities;
 using Domain.ValueObjects;
+using Domain.ValueTypes;
 using Domain.Extensions;
 
 namespace Infraestructure.Repositories;
@@ -56,8 +57,8 @@ public class CommissionRepository : ICommissionRepository
         DateTime? endDate = null,
         string? status = null,
         string? tipoPagamento = null,
-        string sortBy = "createdAt",
-        string sortDirection = "desc",
+        PaymentSortField sortBy = PaymentSortField.CreatedAt,
+        SortDirection sortDirection = SortDirection.Descending,
         int page = 1,
         int pageSize = 10,
         CancellationToken cancellationToken = default)
@@ -111,18 +112,20 @@ public class CommissionRepository : ICommissionRepository
         var totalCount = allPayments.Count();
 
         // Aplicar ordenação
-        allPayments = sortBy.ToLower() switch
+        var isAscending = sortDirection == SortDirection.Ascending;
+        
+        allPayments = sortBy switch
         {
-            "value" => sortDirection.ToLower() == "asc" 
+            PaymentSortField.Value => isAscending
                 ? allPayments.OrderBy(p => p.Value)
                 : allPayments.OrderByDescending(p => p.Value),
-            "status" => sortDirection.ToLower() == "asc"
+            PaymentSortField.Status => isAscending
                 ? allPayments.OrderBy(p => p.Status)
                 : allPayments.OrderByDescending(p => p.Status),
-            "paidon" => sortDirection.ToLower() == "asc"
+            PaymentSortField.PaidOn => isAscending
                 ? allPayments.OrderBy(p => p.PaidOn ?? DateTime.MinValue)
                 : allPayments.OrderByDescending(p => p.PaidOn ?? DateTime.MinValue),
-            _ => sortDirection.ToLower() == "asc"
+            _ => isAscending
                 ? allPayments.OrderBy(p => p.Comission.CreatedAt)
                 : allPayments.OrderByDescending(p => p.Comission.CreatedAt)
         };

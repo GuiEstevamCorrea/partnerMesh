@@ -1,6 +1,8 @@
 using Application.Interfaces.Repositories;
 using Application.UseCases.ListPartners.DTO;
 using Domain.Entities;
+using Domain.ValueTypes;
+using Domain.Extensions;
 
 namespace Infraestructure.Repositories;
 
@@ -109,23 +111,29 @@ public class PartnerRepository : IPartnerRepository
         }
 
         // Ordenação
+        var sortField = PartnerSortField.Name;
+        var sortDirection = SortDirection.Ascending;
+        
         if (!string.IsNullOrWhiteSpace(request.OrderBy))
         {
-            var orderBy = request.OrderBy.ToLower();
-            var orderDirection = request.OrderDirection?.ToLower() == "desc";
-
-            query = orderBy switch
-            {
-                "name" => orderDirection ? query.OrderByDescending(p => p.Name) : query.OrderBy(p => p.Name),
-                "email" => orderDirection ? query.OrderByDescending(p => p.Email) : query.OrderBy(p => p.Email),
-                "createdat" => orderDirection ? query.OrderByDescending(p => p.CreatedAt) : query.OrderBy(p => p.CreatedAt),
-                _ => query.OrderBy(p => p.Name)
-            };
+            PartnerSortFieldExtensions.TryParse(request.OrderBy, out sortField);
         }
-        else
+        
+        if (!string.IsNullOrWhiteSpace(request.OrderDirection))
         {
-            query = query.OrderBy(p => p.Name);
+            SortDirectionExtensions.TryParse(request.OrderDirection, out sortDirection);
         }
+        
+        var isAscending = sortDirection == SortDirection.Ascending;
+        
+        query = sortField switch
+        {
+            PartnerSortField.Name => isAscending ? query.OrderBy(p => p.Name) : query.OrderByDescending(p => p.Name),
+            PartnerSortField.Email => isAscending ? query.OrderBy(p => p.Email) : query.OrderByDescending(p => p.Email),
+            PartnerSortField.CreatedAt => isAscending ? query.OrderBy(p => p.CreatedAt) : query.OrderByDescending(p => p.CreatedAt),
+            PartnerSortField.Active => isAscending ? query.OrderBy(p => p.Active) : query.OrderByDescending(p => p.Active),
+            _ => query.OrderBy(p => p.Name)
+        };
 
         var totalCount = query.Count();
 

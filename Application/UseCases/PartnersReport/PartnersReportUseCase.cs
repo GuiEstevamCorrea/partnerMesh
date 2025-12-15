@@ -2,6 +2,8 @@ using Application.Interfaces.IUseCases;
 using Application.Interfaces.Repositories;
 using Application.UseCases.PartnersReport.DTO;
 using Domain.ValueObjects;
+using Domain.ValueTypes;
+using Domain.Extensions;
 
 namespace Application.UseCases.PartnersReport;
 
@@ -137,7 +139,21 @@ public class PartnersReportUseCase : IPartnersReportUseCase
             var partnersTree = BuildPartnersTree(filteredPartners.ToList(), partnerFinancialData, null, 0);
 
             // Aplicar ordenação
-            partnersTree = ApplySorting(partnersTree, request.SortBy, request.SortDirection);
+            // Converter strings de ordenação para enums
+            var sortField = PartnerReportSortField.Name;
+            var sortDirection = SortDirection.Ascending;
+            
+            if (!string.IsNullOrWhiteSpace(request.SortBy))
+            {
+                PartnerReportSortFieldExtensions.TryParse(request.SortBy, out sortField);
+            }
+            
+            if (!string.IsNullOrWhiteSpace(request.SortDirection))
+            {
+                SortDirectionExtensions.TryParse(request.SortDirection, out sortDirection);
+            }
+            
+            partnersTree = ApplySorting(partnersTree, sortField, sortDirection);
 
             // Calcular resumo por níveis
             var levelsSummary = CalculateLevelsSummary(partnersList, partnerFinancialData);
@@ -185,15 +201,15 @@ public class PartnersReportUseCase : IPartnersReportUseCase
                 IsActive = partner.Active,
                 CreatedAt = partner.CreatedAt,
                 Level = level,
-                TotalReceived = financial.received,
-                TotalPending = financial.pending,
-                BusinessCount = financial.businessCount,
-                RecommenderId = parentId,
-                RecommenderName = recommender?.Name ?? "",
-                Children = BuildPartnersTree(partners, financialData, partner.Id, level + 1)
-            };
+                TotalReceived = financial.received,PartnerReportSortField sortBy, SortDirection sortDirection)
+    {
+        bool ascending = sortDirection == SortDirection.Ascending;
 
-            result.Add(node);
+        var sorted = sortBy switch
+        {
+            PartnerReportSortField.Level => ascending ? tree.OrderBy(p => p.Level).ToList() : tree.OrderByDescending(p => p.Level).ToList(),
+            PartnerReportSortField.TotalReceived => ascending ? tree.OrderBy(p => p.TotalReceived).ToList() : tree.OrderByDescending(p => p.TotalReceived).ToList(),
+            PartnerReportSortField.TotalPendinge);
         }
 
         return result;

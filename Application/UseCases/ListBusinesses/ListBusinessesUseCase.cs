@@ -2,6 +2,8 @@ using Application.Interfaces.IUseCases;
 using Application.Interfaces.Repositories;
 using Application.UseCases.ListBusinesses.DTO;
 using Domain.ValueObjects;
+using Domain.ValueTypes;
+using Domain.Extensions;
 
 namespace Application.UseCases.ListBusinesses;
 
@@ -39,6 +41,20 @@ public class ListBusinessesUseCase : IListBusinessesUseCase
                 return ListBusinessesResult.Failure("Data inicial não pode ser maior que a data final");
             }
 
+            // Converter strings de ordenação para enums
+            var sortField = BusinessSortField.Date;
+            var sortDirection = SortDirection.Descending;
+            
+            if (!string.IsNullOrWhiteSpace(request.SortBy))
+            {
+                BusinessSortFieldExtensions.TryParse(request.SortBy, out sortField);
+            }
+            
+            if (!string.IsNullOrWhiteSpace(request.SortDirection))
+            {
+                SortDirectionExtensions.TryParse(request.SortDirection, out sortDirection);
+            }
+
             // Buscar negócios com filtros e paginação
             var (businesses, totalCount) = await _businessRepository.GetWithFiltersAsync(
                 partnerId: request.PartnerId,
@@ -49,8 +65,8 @@ public class ListBusinessesUseCase : IListBusinessesUseCase
                 startDate: request.StartDate,
                 endDate: request.EndDate,
                 searchText: request.SearchText,
-                sortBy: request.SortBy ?? "date",
-                sortDirection: request.SortDirection ?? "desc",
+                sortBy: sortField,
+                sortDirection: sortDirection,
                 page: request.Page,
                 pageSize: request.PageSize);
 

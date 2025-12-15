@@ -1,5 +1,6 @@
 using Domain.Entities;
 using Domain.ValueObjects;
+using Domain.ValueTypes;
 
 namespace Application.Interfaces.Repositories;
 
@@ -19,8 +20,8 @@ public interface ICommissionRepository
         DateTime? endDate = null,
         string? status = null,
         string? tipoPagamento = null,
-        string sortBy = "createdAt",
-        string sortDirection = "desc",
+        PaymentSortField sortBy = PaymentSortField.CreatedAt,
+        SortDirection sortDirection = SortDirection.Descending,
         int page = 1,
         int pageSize = 10,
         CancellationToken cancellationToken = default);
