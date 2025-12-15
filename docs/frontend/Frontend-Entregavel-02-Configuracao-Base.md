@@ -615,7 +615,7 @@ export default App;
 
 ---
 
-### Tarefa 2.6 - Criar Rotas Base
+### Tarefa 2.6 - Criar Rotas Base - OK
 
 **Arquivo: `src/routes/PrivateRoute.tsx`**
 
