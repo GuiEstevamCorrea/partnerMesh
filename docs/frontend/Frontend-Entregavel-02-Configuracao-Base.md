@@ -417,7 +417,7 @@ export default api;
 
 ---
 
-### Tarefa 2.3 - Criar Endpoints da API
+### Tarefa 2.3 - Criar Endpoints da API - OK 
 
 **Arquivo: `src/api/endpoints/auth.api.ts`**
 
