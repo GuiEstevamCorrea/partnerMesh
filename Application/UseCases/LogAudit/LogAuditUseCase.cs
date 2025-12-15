@@ -2,6 +2,7 @@ using Application.Interfaces.IUseCases;
 using Application.Interfaces.Repositories;
 using Application.UseCases.LogAudit.DTO;
 using Domain.Entities;
+using Domain.Extensions;
 
 namespace Application.UseCases.LogAudit;
 
@@ -39,11 +40,22 @@ public class LogAuditUseCase : ILogAuditUseCase
                 return LogAuditResult.Failure("ID da entidade é obrigatório.");
             }
 
+            // Converter strings para enums
+            if (!AuditActionExtensions.TryParse(request.Action, out var actionEnum))
+            {
+                return LogAuditResult.Failure($"Ação de auditoria inválida: {request.Action}");
+            }
+
+            if (!AuditEntityTypeExtensions.TryParse(request.Entity, out var entityEnum))
+            {
+                return LogAuditResult.Failure($"Tipo de entidade inválido: {request.Entity}");
+            }
+
             // Criar entidade de auditoria
             var auditLog = new AuditLog(
                 userId: request.UserId,
-                action: request.Action.ToUpper(), // Padronizar em maiúscula
-                entity: request.Entity,
+                action: actionEnum,
+                entity: entityEnum,
                 entityId: request.EntityId,
                 datas: request.Data ?? string.Empty
             );
@@ -57,8 +69,8 @@ public class LogAuditUseCase : ILogAuditUseCase
                 LogId = savedAuditLog.Id,
                 CreatedAt = savedAuditLog.CreatedAt,
                 UserId = savedAuditLog.UserId,
-                Action = savedAuditLog.Action,
-                Entity = savedAuditLog.Entity,
+                Action = savedAuditLog.Action.ToLegacyString(),
+                Entity = savedAuditLog.Entity.ToLegacyString(),
                 EntityId = savedAuditLog.EntityId
             };
 

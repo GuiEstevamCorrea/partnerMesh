@@ -47,8 +47,9 @@ public record LogAuditData
 }
 
 /// <summary>
-/// Constantes para ações de auditoria
+/// Constantes para ações de auditoria (OBSOLETO - Use Domain.ValueTypes.AuditAction)
 /// </summary>
+[Obsolete("Use Domain.ValueTypes.AuditAction com extensão ToLegacyString() em vez disso")]
 public static class AuditActions
 {
     // Autenticação
@@ -81,8 +82,9 @@ public static class AuditActions
 }
 
 /// <summary>
-/// Constantes para entidades
+/// Constantes para entidades (OBSOLETO - Use Domain.ValueTypes.AuditEntityType)
 /// </summary>
+[Obsolete("Use Domain.ValueTypes.AuditEntityType com extensão ToLegacyString() em vez disso")]
 public static class AuditEntities
 {
     public const string USER = "User";
