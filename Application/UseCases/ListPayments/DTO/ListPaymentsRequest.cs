@@ -1,4 +1,6 @@
 using Domain.ValueObjects;
+using Domain.ValueTypes;
+using Domain.Extensions;
 
 namespace Application.UseCases.ListPayments.DTO;
 
@@ -19,9 +21,9 @@ public sealed record ListPaymentsRequest
     {
         if (string.IsNullOrEmpty(Status)) return true;
         
-        return Status == ComissionPayment.APagar ||
-               Status == ComissionPayment.Pago ||
-               Status == ComissionPayment.Cancelado;
+        return Status == PaymentStatus.APagar.ToLegacyString() ||
+               Status == PaymentStatus.Pago.ToLegacyString() ||
+               Status == PaymentStatus.Cancelado.ToLegacyString();
     }
 
     public bool IsValidTipoPagamento()

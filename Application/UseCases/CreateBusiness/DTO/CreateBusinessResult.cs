@@ -1,4 +1,5 @@
 using Domain.Entities;
+using Domain.Extensions;
 
 namespace Application.UseCases.CreateBusiness.DTO;
 

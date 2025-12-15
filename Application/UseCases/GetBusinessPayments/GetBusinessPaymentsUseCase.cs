@@ -2,6 +2,8 @@ using Application.Interfaces.IUseCases;
 using Application.Interfaces.Repositories;
 using Application.UseCases.GetBusinessPayments.DTO;
 using Domain.ValueObjects;
+using Domain.ValueTypes;
+using Domain.Extensions;
 
 namespace Application.UseCases.GetBusinessPayments;
 
@@ -109,12 +111,12 @@ public class GetBusinessPaymentsUseCase : IGetBusinessPaymentsUseCase
             // Calcular resumo
             var summary = new PaymentSummaryDto
             {
-                TotalPago = paymentDtos.Where(p => p.Status == Domain.ValueTypes.PaymentStatus.Pago).Sum(p => p.Value),
-                TotalPendente = paymentDtos.Where(p => p.Status == Domain.ValueTypes.PaymentStatus.APagar).Sum(p => p.Value),
-                TotalCancelado = paymentDtos.Where(p => p.Status == Domain.ValueTypes.PaymentStatus.Cancelado).Sum(p => p.Value),
-                QuantidadePagos = paymentDtos.Count(p => p.Status == Domain.ValueTypes.PaymentStatus.Pago),
-                QuantidadePendentes = paymentDtos.Count(p => p.Status == Domain.ValueTypes.PaymentStatus.APagar),
-                QuantidadeCancelados = paymentDtos.Count(p => p.Status == Domain.ValueTypes.PaymentStatus.Cancelado)
+                TotalPago = paymentDtos.Where(p => p.Status == PaymentStatus.Pago.ToLegacyString()).Sum(p => p.Value),
+                TotalPendente = paymentDtos.Where(p => p.Status == PaymentStatus.APagar.ToLegacyString()).Sum(p => p.Value),
+                TotalCancelado = paymentDtos.Where(p => p.Status == PaymentStatus.Cancelado.ToLegacyString()).Sum(p => p.Value),
+                QuantidadePagos = paymentDtos.Count(p => p.Status == PaymentStatus.Pago.ToLegacyString()),
+                QuantidadePendentes = paymentDtos.Count(p => p.Status == PaymentStatus.APagar.ToLegacyString()),
+                QuantidadeCancelados = paymentDtos.Count(p => p.Status == PaymentStatus.Cancelado.ToLegacyString())
             };
 
             // Criar DTO principal

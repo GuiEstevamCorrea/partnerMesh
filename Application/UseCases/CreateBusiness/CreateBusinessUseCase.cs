@@ -2,6 +2,7 @@ using Application.Interfaces.IUseCases;
 using Application.Interfaces.Repositories;
 using Application.UseCases.CreateBusiness.DTO;
 using Domain.Entities;
+using Domain.Extensions;
 using Domain.ValueObjects;
 using Domain.ValueTypes;
 
@@ -14,12 +15,6 @@ public class CreateBusinessUseCase : ICreateBusinessUseCase
     private readonly IPartnerRepository _partnerRepository;
     private readonly IBusinessTypeRepository _businessTypeRepository;
     private readonly CommissionSettings _commissionSettings;
-
-    /// <summary>
-    /// Número máximo de níveis na cadeia de recomendação
-    /// Valor baseado em RecommendationLevel (Level1, Level2, Level3)
-    /// </summary>
-    private const int MaxRecommendationLevels = 3;
 
     public CreateBusinessUseCase(
         IBusinessRepository businessRepository,
@@ -78,9 +73,9 @@ public class CreateBusinessUseCase : ICreateBusinessUseCase
                 {
                     Id = p.Id,
                     ReceiverId = p.PartnerId,
-                    ReceiverType = p.TipoPagamento,
+                    ReceiverType = p.TipoPagamento.ToLegacyString(),
                     Value = p.Value,
-                    Status = p.Status
+                    Status = p.Status.ToLegacyString()
                 }).ToList()
             }
         );
@@ -94,33 +89,27 @@ public class CreateBusinessUseCase : ICreateBusinessUseCase
         var commissionValue = business.Value * _commissionSettings.TotalPercentage;
         var commission = new Comission(business.Id, commissionValue);
 
-        // Construir a cadeia de recomendação até o máximo de níveis permitido
-        var recommendationChain = await BuildRecommendationChainAsync(partner, MaxRecommendationLevels);
+        // Construir a cadeia completa de recomendação (sem limite)
+        var recommendationChain = await BuildRecommendationChainAsync(partner);
 
-        // Distribuir comissões baseado no nível da recomendação
-        switch (recommendationChain.Count)
-        {
-            case 1: // Nível 1
-                await DistributeLevel1CommissionAsync(commission, recommendationChain, commissionValue);
-                break;
-            case 2: // Nível 2
-                await DistributeLevel2CommissionAsync(commission, recommendationChain, commissionValue);
-                break;
-            case 3: // Nível 3
-                await DistributeLevel3CommissionAsync(commission, recommendationChain, commissionValue);
-                break;
-        }
+        // Distribuir comissões dinamicamente baseado no tamanho da cadeia
+        await DistributeCommissionDynamicallyAsync(commission, recommendationChain, commissionValue);
 
         await _commissionRepository.AddAsync(commission);
         return commission;
     }
 
-    private async Task<List<Partner>> BuildRecommendationChainAsync(Partner startPartner, int maxLevels)
+    /// <summary>
+    /// Constrói a cadeia completa de recomendação, indo do parceiro que fechou até o Vetor
+    /// Suporta níveis infinitos
+    /// </summary>
+    private async Task<List<Partner>> BuildRecommendationChainAsync(Partner startPartner)
     {
         var chain = new List<Partner> { startPartner };
         var current = startPartner;
 
-        while (chain.Count < maxLevels && current.RecommenderId.HasValue)
+        // Continuar até não haver mais recomendadores
+        while (current.RecommenderId.HasValue)
         {
             var recommender = await _partnerRepository.GetByIdAsync(current.RecommenderId.Value);
             if (recommender == null) break;
@@ -133,70 +122,64 @@ public class CreateBusinessUseCase : ICreateBusinessUseCase
     }
 
     /// <summary>
-    /// Distribui comissão para cadeia de RecommendationLevel.Level1 (1 nível)
-    /// Regra: Se existe recomendador, divide 50/50. Senão, 100% para o parceiro.
+    /// Distribui a comissão dinamicamente baseado no tamanho da cadeia
+    /// Usa CommissionSettings.CalculateDistribution para obter os percentuais
     /// </summary>
-    private async Task DistributeLevel1CommissionAsync(Comission commission, List<Partner> chain, decimal totalValue)
+    private async Task DistributeCommissionDynamicallyAsync(
+        Comission commission, 
+        List<Partner> chain, 
+        decimal totalValue)
     {
-        var partner = chain[0];
-        var recommender = chain.Count > 1 ? chain[1] : null;
+        if (chain.Count == 0) return;
 
-        if (recommender != null)
+        // Obter distribuição de percentuais
+        var distribution = _commissionSettings.CalculateDistribution(chain.Count);
+
+        // O último da cadeia é o Vetor, então precisamos inverter
+        // chain[0] = quem fechou, chain[n-1] = Vetor
+        // distribution[0] = Vetor, distribution[n-1] = quem fechou
+
+        for (int i = 0; i < chain.Count; i++)
         {
-            // Vetor: 50%, Recomendador: 50%
-            var vetorValue = totalValue * 0.50m;
-            var recommenderValue = totalValue * 0.50m;
+            var partner = chain[i];
+            var percentage = distribution[chain.Count - 1 - i]; // Inverter índice
+            var value = totalValue * percentage;
 
-            commission.AddPagamento(partner.Id, vetorValue, Domain.ValueTypes.PaymentType.Vetor);
-            commission.AddPagamento(recommender.Id, recommenderValue, Domain.ValueTypes.PaymentType.Recomendador);
+            if (value > 0)
+            {
+                // Determinar tipo de pagamento baseado na posição
+                var paymentType = DeterminePaymentType(i, chain.Count);
+                commission.AddPagamento(partner.Id, value, paymentType);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Determina o tipo de pagamento baseado na posição na cadeia
+    /// </summary>
+    /// <param name="position">Posição na cadeia (0 = quem fechou, n-1 = Vetor)</param>
+    /// <param name="chainLength">Tamanho total da cadeia</param>
+    private PaymentType DeterminePaymentType(int position, int chainLength)
+    {
+        if (position == 0)
+        {
+            // Quem fechou o negócio
+            return chainLength == 1 ? PaymentType.Vetor : PaymentType.Participante;
+        }
+        else if (position == chainLength - 1)
+        {
+            // Último da cadeia (Vetor)
+            return PaymentType.Vetor;
+        }
+        else if (position == 1 && chainLength == 2)
+        {
+            // Apenas 2 níveis: o segundo é Recomendador
+            return PaymentType.Recomendador;
         }
         else
         {
-            // Apenas o vetor recebe 100%
-            commission.AddPagamento(partner.Id, totalValue, Domain.ValueTypes.PaymentType.Vetor);
+            // Intermediários
+            return PaymentType.Intermediario;
         }
-    }
-
-    /// <summary>
-    /// Distribui comissão para cadeia de RecommendationLevel.Level2 (2 níveis)
-    /// Regra: Vetor 15%, Participante 35%, Intermediário 50%
-    /// </summary>
-    private async Task DistributeLevel2CommissionAsync(Comission commission, List<Partner> chain, decimal totalValue)
-    {
-        var you = chain[0];        // Você (Participante)
-        var level1 = chain[1];     // Nível 1 (Intermediário)
-        var level2 = chain[2];     // Nível 2 (Vetor)
-
-        // Vetor (Level 2): 15%, Você: 35%, Intermediário (Level 1): 50%
-        var vetorValue = totalValue * 0.15m;
-        var youValue = totalValue * 0.35m;
-        var intermediaryValue = totalValue * 0.50m;
-
-        commission.AddPagamento(level2.Id, vetorValue, Domain.ValueTypes.PaymentType.Vetor);
-        commission.AddPagamento(you.Id, youValue, Domain.ValueTypes.PaymentType.Participante);
-        commission.AddPagamento(level1.Id, intermediaryValue, Domain.ValueTypes.PaymentType.Intermediario);
-    }
-
-    /// <summary>
-    /// Distribui comissão para cadeia de RecommendationLevel.Level3 (3 níveis - máximo)
-    /// Regra: Vetor 10%, Participante 15%, Intermediários 25% e 50%
-    /// </summary>
-    private async Task DistributeLevel3CommissionAsync(Comission commission, List<Partner> chain, decimal totalValue)
-    {
-        var you = chain[0];        // Você (Participante)
-        var level1 = chain[1];     // Nível 1 (Intermediário)
-        var level2 = chain[2];     // Nível 2 (Intermediário)
-        var level3 = chain[3];     // Nível 3 (Vetor)
-
-        // Vetor (Level 3): 10%, Você: 15%, Level1: 25%, Level2: 50%
-        var vetorValue = totalValue * 0.10m;
-        var youValue = totalValue * 0.15m;
-        var level1Value = totalValue * 0.25m;
-        var level2Value = totalValue * 0.50m;
-
-        commission.AddPagamento(level3.Id, vetorValue, Domain.ValueTypes.PaymentType.Vetor);
-        commission.AddPagamento(you.Id, youValue, Domain.ValueTypes.PaymentType.Participante);
-        commission.AddPagamento(level1.Id, level1Value, Domain.ValueTypes.PaymentType.Intermediario);
-        commission.AddPagamento(level2.Id, level2Value, Domain.ValueTypes.PaymentType.Intermediario);
     }
 }

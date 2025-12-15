@@ -1,5 +1,6 @@
 using Application.Interfaces.Repositories;
 using Domain.Entities;
+using Domain.Extensions;
 
 namespace Infraestructure.Repositories;
 
@@ -26,13 +27,15 @@ public class AuditLogRepository : IAuditLogRepository
 
     public Task<IEnumerable<AuditLog>> GetByEntityAsync(string entity, Guid entityId, CancellationToken cancellationToken = default)
     {
-        var logs = _auditLogs.Where(log => log.Entity == entity && log.EntityId == entityId);
+        var entityEnum = AuditEntityTypeExtensions.FromLegacyString(entity);
+        var logs = _auditLogs.Where(log => log.Entity == entityEnum && log.EntityId == entityId);
         return Task.FromResult(logs);
     }
 
     public Task<IEnumerable<AuditLog>> GetByActionAsync(string action, CancellationToken cancellationToken = default)
     {
-        var logs = _auditLogs.Where(log => log.Action == action);
+        var actionEnum = AuditActionExtensions.FromLegacyString(action);
+        var logs = _auditLogs.Where(log => log.Action == actionEnum);
         return Task.FromResult(logs);
     }
 
@@ -63,10 +66,10 @@ public class AuditLogRepository : IAuditLogRepository
             query = query.Where(log => log.UserId == userId.Value);
 
         if (!string.IsNullOrEmpty(action))
-            query = query.Where(log => log.Action.Contains(action, StringComparison.OrdinalIgnoreCase));
+            query = query.Where(log => log.Action.ToLegacyString().Contains(action, StringComparison.OrdinalIgnoreCase));
 
         if (!string.IsNullOrEmpty(entity))
-            query = query.Where(log => log.Entity.Contains(entity, StringComparison.OrdinalIgnoreCase));
+            query = query.Where(log => log.Entity.ToLegacyString().Contains(entity, StringComparison.OrdinalIgnoreCase));
 
         if (entityId.HasValue)
             query = query.Where(log => log.EntityId == entityId.Value);
@@ -121,10 +124,10 @@ public class AuditLogRepository : IAuditLogRepository
             query = query.Where(log => log.UserId == userId.Value);
 
         if (!string.IsNullOrEmpty(action))
-            query = query.Where(log => log.Action.Contains(action, StringComparison.OrdinalIgnoreCase));
+            query = query.Where(log => log.Action.ToLegacyString().Contains(action, StringComparison.OrdinalIgnoreCase));
 
         if (!string.IsNullOrEmpty(entity))
-            query = query.Where(log => log.Entity.Contains(entity, StringComparison.OrdinalIgnoreCase));
+            query = query.Where(log => log.Entity.ToLegacyString().Contains(entity, StringComparison.OrdinalIgnoreCase));
 
         if (entityId.HasValue)
             query = query.Where(log => log.EntityId == entityId.Value);

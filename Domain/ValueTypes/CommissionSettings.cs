@@ -3,6 +3,7 @@ namespace Domain.ValueTypes;
 /// <summary>
 /// Configurações de comissão do sistema
 /// Define os percentuais de comissão distribuídos na cadeia de recomendação
+/// Suporta níveis infinitos de recomendação com regras dinâmicas
 /// </summary>
 public class CommissionSettings
 {
@@ -13,53 +14,82 @@ public class CommissionSettings
     public decimal TotalPercentage { get; init; } = 0.10m;
 
     /// <summary>
-    /// Percentual para parceiro de nível 1 (recomendador direto)
-    /// Padrão: 5% (0.05)
+    /// Percentual fixo que quem fechou o negócio sempre recebe
+    /// Padrão: 50% (0.50) do total da comissão
     /// </summary>
-    public decimal Level1Percentage { get; init; } = 0.05m;
+    public decimal CloserPercentage { get; init; } = 0.50m;
 
     /// <summary>
-    /// Percentual para parceiro de nível 2 (segundo nível da cadeia)
-    /// Padrão: 3% (0.03)
+    /// Calcula a distribuição de percentuais para uma cadeia de recomendação
     /// </summary>
-    public decimal Level2Percentage { get; init; } = 0.03m;
-
-    /// <summary>
-    /// Percentual para parceiro de nível 3 (terceiro nível da cadeia)
-    /// Padrão: 2% (0.02)
-    /// </summary>
-    public decimal Level3Percentage { get; init; } = 0.02m;
-
-    /// <summary>
-    /// Retorna o percentual de comissão para um determinado nível
-    /// </summary>
-    /// <param name="level">Nível de recomendação</param>
-    /// <returns>Percentual de comissão para o nível especificado</returns>
-    public decimal GetPercentageForLevel(RecommendationLevel level)
+    /// <param name="chainLength">Número total de pessoas na cadeia (incluindo quem fechou)</param>
+    /// <returns>Array de percentuais, onde [0] é o Vetor e [chainLength-1] é quem fechou</returns>
+    /// <remarks>
+    /// Regras de distribuição:
+    /// - Quem fecha sempre recebe 50%
+    /// - 2 pessoas: Vetor 50% / Closer 50%
+    /// - 3 pessoas: Vetor 15% / Finder1 35% / Closer 50%
+    /// - 4 pessoas: Vetor 10% / Finder1 15% / Finder2 25% / Closer 50%
+    /// - 5+ pessoas: Vetor 10% / Finder1 0% / Finder2 15% / Finder3 25% / ... / Closer 50%
+    /// A partir do 4º nível, Finder1 não recebe mais (0%)
+    /// </remarks>
+    public decimal[] CalculateDistribution(int chainLength)
     {
-        return level switch
-        {
-            RecommendationLevel.Level1 => Level1Percentage,
-            RecommendationLevel.Level2 => Level2Percentage,
-            RecommendationLevel.Level3 => Level3Percentage,
-            _ => 0m
-        };
-    }
+        if (chainLength <= 0)
+            throw new ArgumentException("Cadeia deve ter pelo menos 1 pessoa", nameof(chainLength));
 
-    /// <summary>
-    /// Retorna o percentual de comissão para um determinado nível (versão int)
-    /// </summary>
-    /// <param name="level">Nível de recomendação (1, 2 ou 3)</param>
-    /// <returns>Percentual de comissão para o nível especificado</returns>
-    public decimal GetPercentageForLevel(int level)
-    {
-        return level switch
+        var distribution = new decimal[chainLength];
+
+        // Quem fechou sempre recebe 50%
+        distribution[chainLength - 1] = CloserPercentage;
+
+        if (chainLength == 1)
         {
-            1 => Level1Percentage,
-            2 => Level2Percentage,
-            3 => Level3Percentage,
-            _ => 0m
-        };
+            // Apenas 1 pessoa (Vetor): recebe 100%
+            distribution[0] = 1.0m;
+        }
+        else if (chainLength == 2)
+        {
+            // Vetor -> Closer: 50% / 50%
+            distribution[0] = 0.50m; // Vetor
+        }
+        else if (chainLength == 3)
+        {
+            // Vetor -> Finder1 -> Closer: 15% / 35% / 50%
+            distribution[0] = 0.15m; // Vetor
+            distribution[1] = 0.35m; // Finder1
+        }
+        else if (chainLength == 4)
+        {
+            // Vetor -> Finder1 -> Finder2 -> Closer: 10% / 15% / 25% / 50%
+            distribution[0] = 0.10m; // Vetor
+            distribution[1] = 0.15m; // Finder1
+            distribution[2] = 0.25m; // Finder2
+        }
+        else // chainLength >= 5
+        {
+            // Vetor -> Finder1 -> Finder2 -> Finder3 -> ... -> Closer
+            // 10% / 0% / 15% / 25% / ... / 50%
+            distribution[0] = 0.10m;  // Vetor
+            distribution[1] = 0.00m;  // Finder1 não recebe mais
+            distribution[2] = 0.15m;  // Finder2
+            distribution[3] = 0.25m;  // Finder3
+
+            // A partir do 4º finder, distribui o restante igualmente
+            var remaining = 1.0m - (0.10m + 0.15m + 0.25m + 0.50m);
+            var intermediaries = chainLength - 5; // Quantos intermediários há após Finder3
+
+            if (intermediaries > 0)
+            {
+                var perIntermediary = remaining / intermediaries;
+                for (int i = 4; i < chainLength - 1; i++)
+                {
+                    distribution[i] = perIntermediary;
+                }
+            }
+        }
+
+        return distribution;
     }
 
     /// <summary>
@@ -67,13 +97,10 @@ public class CommissionSettings
     /// </summary>
     public bool IsValid()
     {
-        // A soma dos percentuais individuais deve ser igual ao percentual total
-        var sum = Level1Percentage + Level2Percentage + Level3Percentage;
-        return Math.Abs(sum - TotalPercentage) < 0.0001m &&
-               TotalPercentage > 0 &&
-               Level1Percentage >= 0 &&
-               Level2Percentage >= 0 &&
-               Level3Percentage >= 0;
+        return TotalPercentage > 0 &&
+               TotalPercentage <= 1.0m &&
+               CloserPercentage > 0 &&
+               CloserPercentage <= 1.0m;
     }
 
     /// <summary>

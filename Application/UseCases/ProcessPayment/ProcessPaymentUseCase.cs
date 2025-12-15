@@ -2,6 +2,7 @@ using Application.Interfaces.IUseCases;
 using Application.Interfaces.Repositories;
 using Application.UseCases.ProcessPayment.DTO;
 using Domain.ValueObjects;
+using Domain.Extensions;
 
 namespace Application.UseCases.ProcessPayment;
 

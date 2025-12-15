@@ -1,4 +1,6 @@
 using Domain.Entities;
+using Domain.Extensions;
+using Domain.ValueTypes;
 
 namespace Application.UseCases.AuditLogQuery.DTO;
 
@@ -121,8 +123,8 @@ public record AuditLogDto
         {
             Id = auditLog.Id,
             UserId = auditLog.UserId,
-            Action = auditLog.Action,
-            Entity = auditLog.Entity,
+            Action = auditLog.Action.ToLegacyString(),
+            Entity = auditLog.Entity.ToLegacyString(),
             EntityId = auditLog.EntityId,
             Data = auditLog.Datas,
             CreatedAt = auditLog.CreatedAt

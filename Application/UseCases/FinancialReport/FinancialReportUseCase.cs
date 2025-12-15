@@ -2,6 +2,7 @@ using Application.Interfaces.IUseCases;
 using Application.Interfaces.Repositories;
 using Application.UseCases.FinancialReport.DTO;
 using Domain.ValueObjects;
+using Domain.ValueTypes;
 
 namespace Application.UseCases.FinancialReport;
 
@@ -146,7 +147,7 @@ public class FinancialReportUseCase : IFinancialReportUseCase
         // Filtro por status de pagamento
         if (request.IsPaid.HasValue)
         {
-            var targetStatus = request.IsPaid.Value ? Domain.ValueObjects.ComissionPayment.Pago : Domain.ValueObjects.ComissionPayment.APagar;
+            var targetStatus = request.IsPaid.Value ? PaymentStatus.Pago : PaymentStatus.APagar;
             filtered = filtered.Where(p => p.Status == targetStatus);
         }
 
@@ -258,8 +259,8 @@ public class FinancialReportUseCase : IFinancialReportUseCase
         List<Domain.ValueObjects.ComissionPayment> payments,
         List<Domain.Entities.Bussiness> businesses)
     {
-        var paidPayments = payments.Where(p => p.Status == Domain.ValueObjects.ComissionPayment.Pago).ToList();
-        var pendingPayments = payments.Where(p => p.Status == Domain.ValueObjects.ComissionPayment.APagar).ToList();
+        var paidPayments = payments.Where(p => p.Status == PaymentStatus.Pago).ToList();
+        var pendingPayments = payments.Where(p => p.Status == PaymentStatus.APagar).ToList();
 
         // Contar negócios únicos que geraram esses pagamentos
         var commissionIds = payments.Select(p => p.ComissionId).Distinct().ToList();
@@ -299,8 +300,8 @@ public class FinancialReportUseCase : IFinancialReportUseCase
             var level = levelGroup.Key;
             var levelPayments = levelGroup.ToList();
 
-            var paidPayments = levelPayments.Where(p => p.Status == Domain.ValueObjects.ComissionPayment.Pago).ToList();
-            var pendingPayments = levelPayments.Where(p => p.Status == Domain.ValueObjects.ComissionPayment.APagar).ToList();
+            var paidPayments = levelPayments.Where(p => p.Status == PaymentStatus.Pago).ToList();
+            var pendingPayments = levelPayments.Where(p => p.Status == PaymentStatus.APagar).ToList();
 
             // Contar parceiros únicos neste nível
             var partnerIds = levelPayments.Select(p => p.PartnerId).Distinct().ToList();
@@ -332,8 +333,8 @@ public class FinancialReportUseCase : IFinancialReportUseCase
             // Para simplificar, vou calcular por tipo de negócio sem relações complexas
             // Em uma implementação real, seria necessário carregar as comissões com seus relacionamentos
             
-            var paidPayments = payments.Where(p => p.Status == Domain.ValueObjects.ComissionPayment.Pago).ToList();
-            var pendingPayments = payments.Where(p => p.Status == Domain.ValueObjects.ComissionPayment.APagar).ToList();
+            var paidPayments = payments.Where(p => p.Status == PaymentStatus.Pago).ToList();
+            var pendingPayments = payments.Where(p => p.Status == PaymentStatus.APagar).ToList();
 
             // Simplified calculation - assumindo distribuição proporcional
             var typeBusinessCount = businesses.Count(b => b.BussinessTypeId == businessType.Id);
@@ -374,8 +375,8 @@ public class FinancialReportUseCase : IFinancialReportUseCase
             if (partner == null) continue;
 
             var partnerPayments = partnerGroup.ToList();
-            var paidPayments = partnerPayments.Where(p => p.Status == Domain.ValueObjects.ComissionPayment.Pago).ToList();
-            var pendingPayments = partnerPayments.Where(p => p.Status == Domain.ValueObjects.ComissionPayment.APagar).ToList();
+            var paidPayments = partnerPayments.Where(p => p.Status == PaymentStatus.Pago).ToList();
+            var pendingPayments = partnerPayments.Where(p => p.Status == PaymentStatus.APagar).ToList();
 
             // Mapear tipo de pagamento mais comum para nível
             var typeToLevelMap = new Dictionary<Domain.ValueTypes.PaymentType, int>

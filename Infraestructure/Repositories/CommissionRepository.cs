@@ -82,7 +82,10 @@ public class CommissionRepository : ICommissionRepository
 
         if (!string.IsNullOrEmpty(tipoPagamento))
         {
-            allPayments = allPayments.Where(p => p.TipoPagamento == tipoPagamento);
+            if (PaymentTypeExtensions.TryParse(tipoPagamento, out var typeEnum))
+            {
+                allPayments = allPayments.Where(p => p.TipoPagamento == typeEnum);
+            }
         }
 
         if (startDate.HasValue)

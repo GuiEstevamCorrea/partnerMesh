@@ -2,6 +2,8 @@ using Application.Interfaces.IUseCases;
 using Application.Interfaces.Repositories;
 using Application.UseCases.GetBusinessById.DTO;
 using Domain.ValueObjects;
+using Domain.ValueTypes;
+using Domain.Extensions;
 
 namespace Application.UseCases.GetBusinessById;
 
@@ -94,20 +96,20 @@ public class GetBusinessByIdUseCase : IGetBusinessByIdUseCase
         }
 
         var totalPayments = commission.Pagamentos.Count;
-        var paidPayments = commission.Pagamentos.Count(p => p.Status == ComissionPayment.Pago);
-        var pendingPayments = commission.Pagamentos.Count(p => p.Status == ComissionPayment.APagar);
-        var cancelledPayments = commission.Pagamentos.Count(p => p.Status == ComissionPayment.Cancelado);
+        var paidPayments = commission.Pagamentos.Count(p => p.Status == PaymentStatus.Pago);
+        var pendingPayments = commission.Pagamentos.Count(p => p.Status == PaymentStatus.APagar);
+        var cancelledPayments = commission.Pagamentos.Count(p => p.Status == PaymentStatus.Cancelado);
 
         var totalPaidValue = commission.Pagamentos
-            .Where(p => p.Status == ComissionPayment.Pago)
+            .Where(p => p.Status == PaymentStatus.Pago)
             .Sum(p => p.Value);
 
         var totalPendingValue = commission.Pagamentos
-            .Where(p => p.Status == ComissionPayment.APagar)
+            .Where(p => p.Status == PaymentStatus.APagar)
             .Sum(p => p.Value);
 
         var totalCancelledValue = commission.Pagamentos
-            .Where(p => p.Status == ComissionPayment.Cancelado)
+            .Where(p => p.Status == PaymentStatus.Cancelado)
             .Sum(p => p.Value);
 
         // Determinar status da comissão

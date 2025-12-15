@@ -201,7 +201,19 @@ public class PartnersReportUseCase : IPartnersReportUseCase
                 IsActive = partner.Active,
                 CreatedAt = partner.CreatedAt,
                 Level = level,
-                TotalReceived = financial.received,PartnerReportSortField sortBy, SortDirection sortDirection)
+                TotalReceived = financial.received,
+                TotalPending = financial.pending,
+                BusinessCount = financial.businessCount,
+                Children = new List<PartnerTreeNodeDto>()
+            };
+
+            result.Add(node);
+        }
+
+        return result;
+    }
+
+    private List<PartnerTreeNodeDto> ApplySorting(List<PartnerTreeNodeDto> tree, PartnerReportSortField sortBy, SortDirection sortDirection)
     {
         bool ascending = sortDirection == SortDirection.Ascending;
 
@@ -209,21 +221,7 @@ public class PartnersReportUseCase : IPartnersReportUseCase
         {
             PartnerReportSortField.Level => ascending ? tree.OrderBy(p => p.Level).ToList() : tree.OrderByDescending(p => p.Level).ToList(),
             PartnerReportSortField.TotalReceived => ascending ? tree.OrderBy(p => p.TotalReceived).ToList() : tree.OrderByDescending(p => p.TotalReceived).ToList(),
-            PartnerReportSortField.TotalPendinge);
-        }
-
-        return result;
-    }
-
-    private List<PartnerTreeNodeDto> ApplySorting(List<PartnerTreeNodeDto> tree, string sortBy, string sortDirection)
-    {
-        bool ascending = sortDirection.ToLower() == "asc";
-
-        var sorted = sortBy.ToLower() switch
-        {
-            "level" => ascending ? tree.OrderBy(p => p.Level).ToList() : tree.OrderByDescending(p => p.Level).ToList(),
-            "totalreceived" => ascending ? tree.OrderBy(p => p.TotalReceived).ToList() : tree.OrderByDescending(p => p.TotalReceived).ToList(),
-            "totalpending" => ascending ? tree.OrderBy(p => p.TotalPending).ToList() : tree.OrderByDescending(p => p.TotalPending).ToList(),
+            PartnerReportSortField.TotalPending => ascending ? tree.OrderBy(p => p.TotalPending).ToList() : tree.OrderByDescending(p => p.TotalPending).ToList(),
             _ => ascending ? tree.OrderBy(p => p.Name).ToList() : tree.OrderByDescending(p => p.Name).ToList()
         };
 

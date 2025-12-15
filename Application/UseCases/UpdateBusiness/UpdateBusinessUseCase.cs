@@ -2,6 +2,7 @@ using Application.Interfaces.IUseCases;
 using Application.Interfaces.Repositories;
 using Application.UseCases.UpdateBusiness.DTO;
 using Domain.Entities;
+using Domain.Extensions;
 
 namespace Application.UseCases.UpdateBusiness;
 

@@ -133,16 +133,16 @@ public class ListBusinessesUseCase : IListBusinessesUseCase
         }
 
         var totalPayments = commission.Pagamentos.Count;
-        var paidPayments = commission.Pagamentos.Count(p => p.Status == ComissionPayment.Pago);
-        var pendingPayments = commission.Pagamentos.Count(p => p.Status == ComissionPayment.APagar);
-        var cancelledPayments = commission.Pagamentos.Count(p => p.Status == ComissionPayment.Cancelado);
+        var paidPayments = commission.Pagamentos.Count(p => p.Status == PaymentStatus.Pago);
+        var pendingPayments = commission.Pagamentos.Count(p => p.Status == PaymentStatus.APagar);
+        var cancelledPayments = commission.Pagamentos.Count(p => p.Status == PaymentStatus.Cancelado);
         
         var paidValue = commission.Pagamentos
-            .Where(p => p.Status == ComissionPayment.Pago)
+            .Where(p => p.Status == PaymentStatus.Pago)
             .Sum(p => p.Value);
         
         var pendingValue = commission.Pagamentos
-            .Where(p => p.Status == ComissionPayment.APagar)
+            .Where(p => p.Status == PaymentStatus.APagar)
             .Sum(p => p.Value);
 
         // Determinar status da comissão
@@ -189,10 +189,10 @@ public class ListBusinessesUseCase : IListBusinessesUseCase
             {
                 totalCommissions += commission.TotalValue;
                 paidCommissions += commission.Pagamentos
-                    .Where(p => p.Status == ComissionPayment.Pago)
+                    .Where(p => p.Status == PaymentStatus.Pago)
                     .Sum(p => p.Value);
                 pendingCommissions += commission.Pagamentos
-                    .Where(p => p.Status == ComissionPayment.APagar)
+                    .Where(p => p.Status == PaymentStatus.APagar)
                     .Sum(p => p.Value);
             }
         }

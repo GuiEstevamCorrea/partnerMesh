@@ -2,6 +2,8 @@ using Application.Interfaces.IUseCases;
 using Application.Interfaces.Repositories;
 using Application.UseCases.BusinessReport.DTO;
 using Domain.ValueObjects;
+using Domain.ValueTypes;
+using Domain.Extensions;
 
 namespace Application.UseCases.BusinessReport;
 
@@ -168,7 +170,7 @@ public class BusinessReportUseCase : IBusinessReportUseCase
         // Filtro por status do negócio
         if (!string.IsNullOrEmpty(request.Status))
         {
-            filtered = filtered.Where(b => b.Status == request.Status);
+            filtered = filtered.Where(b => b.Status.ToLegacyString() == request.Status);
         }
 
         // Filtro por status da comissão (se solicitado)
@@ -178,13 +180,13 @@ public class BusinessReportUseCase : IBusinessReportUseCase
             {
                 // Negócios com comissões totalmente pagas
                 filtered = filtered.Where(b => b.Comissao != null && 
-                    b.Comissao.Pagamentos.All(p => p.Status == ComissionPayment.Pago));
+                    b.Comissao.Pagamentos.All(p => p.Status == PaymentStatus.Pago));
             }
             else
             {
                 // Negócios com comissões pendentes
                 filtered = filtered.Where(b => b.Comissao == null || 
-                    b.Comissao.Pagamentos.Any(p => p.Status == ComissionPayment.APagar));
+                    b.Comissao.Pagamentos.Any(p => p.Status == PaymentStatus.APagar));
             }
         }
 
@@ -311,10 +313,10 @@ public class BusinessReportUseCase : IBusinessReportUseCase
         if (commission != null)
         {
             var payments = commission.Pagamentos.ToList();
-            paidPayments = payments.Count(p => p.Status == ComissionPayment.Pago);
-            pendingPayments = payments.Count(p => p.Status == ComissionPayment.APagar);
-            paidValue = payments.Where(p => p.Status == ComissionPayment.Pago).Sum(p => p.Value);
-            pendingValue = payments.Where(p => p.Status == ComissionPayment.APagar).Sum(p => p.Value);
+            paidPayments = payments.Count(p => p.Status == PaymentStatus.Pago);
+            pendingPayments = payments.Count(p => p.Status == PaymentStatus.APagar);
+            paidValue = payments.Where(p => p.Status == PaymentStatus.Pago).Sum(p => p.Value);
+            pendingValue = payments.Where(p => p.Status == PaymentStatus.APagar).Sum(p => p.Value);
 
             commissionStatus = pendingPayments == 0 ? "Totalmente Paga" :
                               paidPayments > 0 ? "Parcialmente Paga" : "Pendente";
@@ -363,11 +365,11 @@ public class BusinessReportUseCase : IBusinessReportUseCase
         var allPayments = businessesWithCommission.SelectMany(b => b.Comissao!.Pagamentos).ToList();
 
         var totalCommissionValue = businessesWithCommission.Sum(b => b.Comissao!.TotalValue);
-        var paidCommissionValue = allPayments.Where(p => p.Status == ComissionPayment.Pago).Sum(p => p.Value);
-        var pendingCommissionValue = allPayments.Where(p => p.Status == ComissionPayment.APagar).Sum(p => p.Value);
+        var paidCommissionValue = allPayments.Where(p => p.Status == PaymentStatus.Pago).Sum(p => p.Value);
+        var pendingCommissionValue = allPayments.Where(p => p.Status == PaymentStatus.APagar).Sum(p => p.Value);
 
-        var paidPaymentsCount = allPayments.Count(p => p.Status == ComissionPayment.Pago);
-        var pendingPaymentsCount = allPayments.Count(p => p.Status == ComissionPayment.APagar);
+        var paidPaymentsCount = allPayments.Count(p => p.Status == PaymentStatus.Pago);
+        var pendingPaymentsCount = allPayments.Count(p => p.Status == PaymentStatus.APagar);
 
         var uniquePartnersCount = businesses.Select(b => b.PartnerId).Distinct().Count();
         var uniqueBusinessTypesCount = businesses.Select(b => b.BussinessTypeId).Distinct().Count();
@@ -435,8 +437,8 @@ public class BusinessReportUseCase : IBusinessReportUseCase
             var totalCommissionValue = businessesWithCommission.Sum(b => b.Comissao!.TotalValue);
             
             var allPayments = businessesWithCommission.SelectMany(b => b.Comissao!.Pagamentos).ToList();
-            var paidCommissionValue = allPayments.Where(p => p.Status == ComissionPayment.Pago).Sum(p => p.Value);
-            var pendingCommissionValue = allPayments.Where(p => p.Status == ComissionPayment.APagar).Sum(p => p.Value);
+            var paidCommissionValue = allPayments.Where(p => p.Status == PaymentStatus.Pago).Sum(p => p.Value);
+            var pendingCommissionValue = allPayments.Where(p => p.Status == PaymentStatus.APagar).Sum(p => p.Value);
 
             var percentage = totalValue > 0 ? (typeValue / totalValue) * 100 : 0;
 
@@ -479,8 +481,8 @@ public class BusinessReportUseCase : IBusinessReportUseCase
             var totalCommissionValue = businessesWithCommission.Sum(b => b.Comissao!.TotalValue);
             
             var allPayments = businessesWithCommission.SelectMany(b => b.Comissao!.Pagamentos).ToList();
-            var paidCommissionValue = allPayments.Where(p => p.Status == ComissionPayment.Pago).Sum(p => p.Value);
-            var pendingCommissionValue = allPayments.Where(p => p.Status == ComissionPayment.APagar).Sum(p => p.Value);
+            var paidCommissionValue = allPayments.Where(p => p.Status == PaymentStatus.Pago).Sum(p => p.Value);
+            var pendingCommissionValue = allPayments.Where(p => p.Status == PaymentStatus.APagar).Sum(p => p.Value);
 
             var lastBusinessDate = partnerBusinesses.Max(b => b.Date);
 

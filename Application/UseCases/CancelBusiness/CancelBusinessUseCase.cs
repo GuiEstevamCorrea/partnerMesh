@@ -2,6 +2,8 @@ using Application.Interfaces.IUseCases;
 using Application.Interfaces.Repositories;
 using Application.UseCases.CancelBusiness.DTO;
 using Domain.ValueObjects;
+using Domain.ValueTypes;
+using Domain.Extensions;
 
 namespace Application.UseCases.CancelBusiness;
 
@@ -66,7 +68,7 @@ public class CancelBusinessUseCase : ICancelBusinessUseCase
         foreach (var payment in commission.Pagamentos)
         {
             var paymentPartner = await _partnerRepository.GetByIdAsync(payment.PartnerId);
-            var wasCancelled = payment.Status == ComissionPayment.APagar;
+            var wasCancelled = payment.Status == PaymentStatus.APagar;
             
             paymentDetails.Add(new PaymentCancellationDetail
             {
@@ -76,10 +78,10 @@ public class CancelBusinessUseCase : ICancelBusinessUseCase
                 PaymentType = payment.TipoPagamento.ToLegacyString(),
                 Value = payment.Value,
                 OriginalStatus = payment.Status.ToLegacyString(),
-                FinalStatus = wasCancelled ? ComissionPayment.Cancelado : payment.Status,
+                FinalStatus = wasCancelled ? PaymentStatus.Cancelado.ToLegacyString() : payment.Status.ToLegacyString(),
                 WasCancelled = wasCancelled,
                 CancellationNote = wasCancelled ? "Cancelado devido ao cancelamento do negócio" : 
-                                 payment.Status == ComissionPayment.Pago ? "Mantido - já estava pago" : "Não alterado"
+                                 payment.Status == PaymentStatus.Pago ? "Mantido - já estava pago" : "Não alterado"
             });
         }
 
