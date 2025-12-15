@@ -68,25 +68,20 @@ public class CommissionSettings
         }
         else // chainLength >= 5
         {
-            // Vetor -> Finder1 -> Finder2 -> Finder3 -> ... -> Closer
-            // 10% / 0% / 15% / 25% / ... / 50%
-            distribution[0] = 0.10m;  // Vetor
-            distribution[1] = 0.00m;  // Finder1 não recebe mais
-            distribution[2] = 0.15m;  // Finder2
-            distribution[3] = 0.25m;  // Finder3
+            // CORRENTE DINÂMICA: Os percentuais "andam" para frente conforme novos níveis entram
+            
+            // Vetor sempre recebe 10% a partir do 4º nível
+            distribution[0] = 0.10m;
 
-            // A partir do 4º finder, distribui o restante igualmente
-            var remaining = 1.0m - (0.10m + 0.15m + 0.25m + 0.50m);
-            var intermediaries = chainLength - 5; // Quantos intermediários há após Finder3
-
-            if (intermediaries > 0)
+            // Todos os intermediários entre Vetor e os 2 últimos ativos recebem 0%
+            // Os 2 últimos antes do Closer sempre recebem 15% e 25%
+            for (int i = 1; i < chainLength - 2; i++)
             {
-                var perIntermediary = remaining / intermediaries;
-                for (int i = 4; i < chainLength - 1; i++)
-                {
-                    distribution[i] = perIntermediary;
-                }
+                distribution[i] = 0.00m;
             }
+
+            distribution[chainLength - 3] = 0.15m;
+            distribution[chainLength - 2] = 0.25m;
         }
 
         return distribution;
