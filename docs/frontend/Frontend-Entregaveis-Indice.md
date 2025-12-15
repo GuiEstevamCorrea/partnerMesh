@@ -8,7 +8,7 @@ Este documento organiza a implementação do frontend React em **10 entregáveis
 
 ## 📋 Lista de Entregáveis
 
-### **[Entregável 01 - Setup Inicial](./Frontend-Entregavel-01-Setup-Inicial.md)**
+### **[Entregável 01 - Setup Inicial](./Frontend-Entregavel-01-Setup-Inicial.md) - OK**
 **Duração estimada:** 1-2 dias  
 **Objetivo:** Configurar o ambiente de desenvolvimento e estrutura base do projeto
 
