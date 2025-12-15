@@ -492,7 +492,7 @@ Continue criando os demais arquivos de API seguindo o mesmo padrão...
 
 ---
 
-### Tarefa 2.4 - Implementar Auth Store
+### Tarefa 2.4 - Implementar Auth Store - OK
 
 **Arquivo: `src/store/auth.store.ts`**
 
