@@ -575,7 +575,7 @@ export const authStore = create<AuthState>()(
 
 ---
 
-### Tarefa 2.5 - Configurar React Query
+### Tarefa 2.5 - Configurar React Query - OK
 
 **Arquivo: `src/App.tsx` atualizado:**
 

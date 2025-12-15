@@ -1,31 +1,30 @@
-import React from 'react'
+import React from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+      staleTime: 5 * 60 * 1000, // 5 minutos
+    },
+  },
+});
 
 function App() {
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold text-black mb-4">
-          Sistema de Rede de Credenciamento
-        </h1>
-        <p className="text-gray-600 text-lg">
-          Frontend React - Setup Completo ✓
-        </p>
-        <div className="mt-8 p-6 bg-white rounded-lg shadow-lg border-2 border-black max-w-md mx-auto">
-          <h2 className="text-2xl font-semibold mb-4">Tecnologias</h2>
-          <ul className="text-left space-y-2 text-gray-700">
-            <li>✓ React 18 + TypeScript</li>
-            <li>✓ Vite</li>
-            <li>✓ Tailwind CSS (Preto e Branco)</li>
-            <li>✓ React Router</li>
-            <li>✓ React Query</li>
-            <li>✓ Zustand</li>
-            <li>✓ Axios</li>
-            <li>✓ React Hook Form + Zod</li>
-          </ul>
+    <QueryClientProvider client={queryClient}>
+      <div className="min-h-screen bg-gray-50">
+        <div className="flex items-center justify-center h-screen">
+          <h1 className="text-3xl font-bold text-black">
+            Configuração Base Completa ✓
+          </h1>
         </div>
       </div>
-    </div>
-  )
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
+  );
 }
 
-export default App
+export default App;
