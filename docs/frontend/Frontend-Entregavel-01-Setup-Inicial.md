@@ -1,4 +1,4 @@
-# Entregável 01 - Setup Inicial
+# Entregável 01 - Setup Inicial - OK
 
 ## 📋 Informações Gerais
 
