@@ -140,7 +140,7 @@ public enum AuditEntityType
 }
 ```
 
-### **4. CAMPOS STRING QUE DEVERIAM SER TIPIFICADOS**
+### **4. CAMPOS STRING QUE DEVERIAM SER TIPIFICADOS - OK**
 
 #### **Ordenação e Filtros**
 **Arquivo:** `Infraestructure/Repositories/PartnerRepository.cs`
