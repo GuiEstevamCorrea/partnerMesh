@@ -347,7 +347,7 @@ export * from './common.types';
 
 ---
 
-### Tarefa 2.2 - Configurar Axios
+### Tarefa 2.2 - Configurar Axios - OK
 
 **Arquivo: `src/api/axios.config.ts`**
 
