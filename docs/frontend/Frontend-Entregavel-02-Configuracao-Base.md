@@ -64,7 +64,7 @@ Implementar a infraestrutura base de comunicação com API, gerenciamento de est
 
 ## 🔧 Tarefas Detalhadas
 
-### Tarefa 2.1 - Criar Tipos TypeScript
+### Tarefa 2.1 - Criar Tipos TypeScript - OK
 
 **Arquivo: `src/types/auth.types.ts`**
 
