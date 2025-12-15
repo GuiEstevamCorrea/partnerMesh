@@ -271,3 +271,6 @@ então, dos 10% do valor do negócio fechado, de um certo nivel o vetor sempre f
 
 4. Vetor -> Finder 1 -> Finder 2 -> Finder 3 -> Finder 4 -> "Recomendação do Finder  que fechou negócio"
 4. 10% / 0% / 15% / 25% / 50%
+
+4. Vetor -> Finder 1 -> Finder 2 -> Finder 3 -> Finder 4 -> Finder 5 -> "Recomendação do Finder  que fechou negócio"
+4. 10% / 0% / 0% / 15% / 25% / 50%
