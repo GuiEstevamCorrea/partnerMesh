@@ -115,10 +115,11 @@ public sealed class GetVetorByIdUseCase : IGetVetorByIdUseCase
         // Buscar negócios do vetor através dos parceiros
         var allBusinesses = await _businessRepository.GetByVetorIdAsync(vetorId, cancellationToken);
         var businessesList = allBusinesses.ToList();
-        var totalBusinessValue = businessesList.Where(b => b.Status != Domain.ValueTypes.BusinessStatus.Cancelado).Sum(b => b.Value);
+        var totalBusinessValue = businessesList.Where(b => b.Status != BusinessStatus.Cancelado).Sum(b => b.Value);
 
-        // Calcular comissões (10% do valor dos negócios ativos)
-        var totalCommissions = totalBusinessValue * 0.10m;
+        // Calcular comissões usando configuração tipada
+        var commissionSettings = CommissionSettings.Default;
+        var totalCommissions = totalBusinessValue * commissionSettings.TotalPercentage;
 
         return new VetorStatisticsDto
         {

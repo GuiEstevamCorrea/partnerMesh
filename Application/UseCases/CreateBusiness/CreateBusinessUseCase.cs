@@ -3,6 +3,7 @@ using Application.Interfaces.Repositories;
 using Application.UseCases.CreateBusiness.DTO;
 using Domain.Entities;
 using Domain.ValueObjects;
+using Domain.ValueTypes;
 
 namespace Application.UseCases.CreateBusiness;
 
@@ -12,6 +13,13 @@ public class CreateBusinessUseCase : ICreateBusinessUseCase
     private readonly ICommissionRepository _commissionRepository;
     private readonly IPartnerRepository _partnerRepository;
     private readonly IBusinessTypeRepository _businessTypeRepository;
+    private readonly CommissionSettings _commissionSettings;
+
+    /// <summary>
+    /// Número máximo de níveis na cadeia de recomendação
+    /// Valor baseado em RecommendationLevel (Level1, Level2, Level3)
+    /// </summary>
+    private const int MaxRecommendationLevels = 3;
 
     public CreateBusinessUseCase(
         IBusinessRepository businessRepository,
@@ -23,6 +31,7 @@ public class CreateBusinessUseCase : ICreateBusinessUseCase
         _commissionRepository = commissionRepository;
         _partnerRepository = partnerRepository;
         _businessTypeRepository = businessTypeRepository;
+        _commissionSettings = CommissionSettings.Default;
     }
 
     public async Task<CreateBusinessResult> ExecuteAsync(CreateBusinessRequest request, Guid userId)
@@ -81,11 +90,12 @@ public class CreateBusinessUseCase : ICreateBusinessUseCase
 
     private async Task<Comission> CreateCommissionAsync(Bussiness business, Partner partner)
     {
-        var commissionValue = business.Value * 0.10m; // 10% do valor do negócio
+        // Calcular comissão usando configuração tipada
+        var commissionValue = business.Value * _commissionSettings.TotalPercentage;
         var commission = new Comission(business.Id, commissionValue);
 
-        // Construir a cadeia de recomendação até 3 níveis
-        var recommendationChain = await BuildRecommendationChainAsync(partner, 3);
+        // Construir a cadeia de recomendação até o máximo de níveis permitido
+        var recommendationChain = await BuildRecommendationChainAsync(partner, MaxRecommendationLevels);
 
         // Distribuir comissões baseado no nível da recomendação
         switch (recommendationChain.Count)
@@ -122,6 +132,10 @@ public class CreateBusinessUseCase : ICreateBusinessUseCase
         return chain;
     }
 
+    /// <summary>
+    /// Distribui comissão para cadeia de RecommendationLevel.Level1 (1 nível)
+    /// Regra: Se existe recomendador, divide 50/50. Senão, 100% para o parceiro.
+    /// </summary>
     private async Task DistributeLevel1CommissionAsync(Comission commission, List<Partner> chain, decimal totalValue)
     {
         var partner = chain[0];
@@ -143,9 +157,13 @@ public class CreateBusinessUseCase : ICreateBusinessUseCase
         }
     }
 
+    /// <summary>
+    /// Distribui comissão para cadeia de RecommendationLevel.Level2 (2 níveis)
+    /// Regra: Vetor 15%, Participante 35%, Intermediário 50%
+    /// </summary>
     private async Task DistributeLevel2CommissionAsync(Comission commission, List<Partner> chain, decimal totalValue)
     {
-        var you = chain[0];        // Você
+        var you = chain[0];        // Você (Participante)
         var level1 = chain[1];     // Nível 1 (Intermediário)
         var level2 = chain[2];     // Nível 2 (Vetor)
 
@@ -159,11 +177,15 @@ public class CreateBusinessUseCase : ICreateBusinessUseCase
         commission.AddPagamento(level1.Id, intermediaryValue, Domain.ValueTypes.PaymentType.Intermediario);
     }
 
+    /// <summary>
+    /// Distribui comissão para cadeia de RecommendationLevel.Level3 (3 níveis - máximo)
+    /// Regra: Vetor 10%, Participante 15%, Intermediários 25% e 50%
+    /// </summary>
     private async Task DistributeLevel3CommissionAsync(Comission commission, List<Partner> chain, decimal totalValue)
     {
-        var you = chain[0];        // Você
-        var level1 = chain[1];     // Nível 1
-        var level2 = chain[2];     // Nível 2
+        var you = chain[0];        // Você (Participante)
+        var level1 = chain[1];     // Nível 1 (Intermediário)
+        var level2 = chain[2];     // Nível 2 (Intermediário)
         var level3 = chain[3];     // Nível 3 (Vetor)
 
         // Vetor (Level 3): 10%, Você: 15%, Level1: 25%, Level2: 50%

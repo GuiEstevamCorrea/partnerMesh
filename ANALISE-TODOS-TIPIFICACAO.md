@@ -168,7 +168,7 @@ public enum SortDirection
 }
 ```
 
-### **5. VALIDAÇÕES E REGRAS DE NEGÓCIO**
+### **5. VALIDAÇÕES E REGRAS DE NEGÓCIO - OK**
 
 #### **Níveis de Recomendação**
 **Arquivo:** Múltiplos (lógica de 3 níveis de parceiros)
