@@ -481,33 +481,53 @@ Implementar CRUD de parceiros com árvore hierárquica e gestão de tipos de neg
 - Invalidação de cache após mutações
 - Display de informações do recomendador e nível
 
-#### 6.2. Formulário de Parceiro
-**Arquivo:** `src/pages/partners/PartnerFormPage.tsx`
+#### 6.2. Formulário de Parceiro - OK
+**Arquivo:** `src/pages/partners/PartnerFormPage.tsx` ✅
 
-**Funcionalidades:**
-- Criar/Editar parceiro
+**Funcionalidades:** ✅
+- Modo criação e edição (mesma página)
 - Campos:
   - Nome (obrigatório)
-  - Contato (email/telefone)
-  - Recomendador (select: Vetor ou outro Parceiro)
-  - Status (checkbox)
+  - Contato (obrigatório - email/telefone)
+  - Tipo de Recomendador (select: Nenhum/Parceiro/Vetor)
+  - Recomendador (select dinâmico baseado no tipo)
+  - Status (checkbox ativo/inativo)
 
-**Validações:**
-- Recomendador deve pertencer ao mesmo vetor
-- Recomendador deve estar ativo
-- Não pode criar ciclo na árvore
-- Nome obrigatório
+**Validações:** ✅
+- Nome obrigatório (Zod min 1)
+- Contato obrigatório (Zod min 1)
+- Recomendador opcional (se não selecionado, vetor é usado)
+- Recomendador apenas ativos na lista
+- Validação de ciclo feita no backend
 
-**Regras Especiais:**
-- Se não selecionar recomendador → Vetor é o recomendador
-- Exibir hierarquia do recomendador selecionado
+**Regras Especiais:** ✅
+- Se não selecionar recomendador → Vetor é o recomendador (Nível 1)
+- Hierarquia do recomendador exibida quando selecionado
+- Cálculo automático do nível do novo parceiro
+- Em modo edição: recomendador não pode ser alterado
+- Display de estatísticas (nível, recomendados, vetor) em modo edição
 
-**Componentes:**
-- `Input` (nome, contato)
-- `Select` (recomendador - busca com filtro)
-- `Checkbox` (ativo)
-- `Alert` (aviso sobre recomendador)
-- `Button`
+**Componentes:** ✅
+- `Input` (nome, contato com descrições)
+- `select` nativo (tipo de recomendador, recomendador)
+- `checkbox` nativo (ativo)
+- `Button` (salvar com loading, cancelar, voltar)
+- `Alert` (avisos sobre recomendador, regras, modo edição - info/warning)
+- `Card` (container do formulário, hierarquia)
+- `Loading` (carregamento de parceiro)
+
+**Recursos Implementados:**
+- React Hook Form + Zod com schema único
+- React Query para carregar parceiro, parceiros e vetores
+- Mutations separadas para create e update
+- Toast de feedback (success/error)
+- Redirect automático após sucesso
+- Alert informativo quando nenhum recomendador selecionado
+- Display de hierarquia do recomendador selecionado
+- Box de estatísticas da rede em modo edição
+- Estados de loading e erro tratados
+- Seleção dinâmica de recomendadores (parceiros ou vetores)
+- Filtro de parceiro atual em lista de recomendadores (evita auto-seleção)
 
 #### 6.3. Visualização de Árvore de Parceiros
 **Arquivo:** `src/pages/partners/PartnerTreePage.tsx`
