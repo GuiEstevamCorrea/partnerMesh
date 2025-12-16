@@ -1,8 +1,12 @@
 import api from '../axios.config';
 import { Vector, CreateVectorRequest, UpdateVectorRequest, PaginatedResponse, FilterParams } from '@/types';
 
+export interface VectorsFilterParams extends FilterParams {
+  isActive?: boolean;
+}
+
 export const vectorsApi = {
-  list: async (params?: FilterParams): Promise<PaginatedResponse<Vector>> => {
+  list: async (params?: VectorsFilterParams): Promise<PaginatedResponse<Vector>> => {
     const response = await api.get('/vectors', { params });
     return response.data;
   },

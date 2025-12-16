@@ -318,23 +318,46 @@ interface ConfirmDialogProps {
 - Processar pagamentos em lote
 - Inativar tipo de negócio
 
-#### 5.5. Lista de Vetores
-**Arquivo:** `src/pages/vectors/VectorsListPage.tsx`
+#### 5.5. Lista de Vetores - OK
+**Arquivo:** `src/pages/vectors/VectorsListPage.tsx` ✅
 
-**Funcionalidades:**
+**Funcionalidades:** ✅
 - Tabela com todos os vetores
-- Colunas: Nome, Email, Status, Qtd Parceiros
-- Filtros: Nome, Status
-- Paginação
-- Botão "Novo Vetor"
-- Ações: Editar, Ativar/Inativar, Ver Árvore
+- Colunas: Nome/Email, Qtd Parceiros, Status, Ações
+- Filtros: Busca (nome/email), Status (ativo/inativo)
+- Paginação (20 por página)
+- Botão "Novo Vetor" (apenas AdminGlobal)
+- Ações por linha:
+  - Ver Árvore de Parceiros (todos)
+  - Editar (apenas AdminGlobal)
+  - Ativar/Inativar (apenas AdminGlobal)
+- ConfirmDialog para ativar/inativar
+- Toast de feedback
+- Estados de loading, erro e vazio
+- Mensagem informativa para AdminVetor
 
-**Componentes:**
-- `Table<Vector>`
-- `Input` (filtros)
-- `Badge` (status)
+**Componentes:** ✅
+- `Table<Vector>` com render customizado
+- `Input` com ícone de busca
+- `select` nativo para filtro de status
+- `Badge` (status ativo/inativo)
 - `Pagination`
-- `Button`
+- `Button` (novo, ações)
+- `ConfirmDialog` (toggle active)
+- `Loading` e `Alert` (estados)
+- `EmptyState` (quando vazio)
+
+**Recursos Implementados:**
+- React Query para listar vetores com cache
+- VectorsFilterParams interface (extends FilterParams + isActive)
+- Mutation para ativar/inativar vetores
+- ConfirmDialog com variante info/warning
+- Link para árvore de parceiros por vetor
+- Controle de permissões: AdminGlobal vê botões de ação, AdminVetor só visualiza
+- Filtros com reset de página ao alterar
+- Toast de feedback em operações
+- Invalidação de cache após mutações
+- Mensagem contextual sobre permissões
 
 #### 5.6. Formulário de Vetor
 **Arquivo:** `src/pages/vectors/VectorFormPage.tsx`

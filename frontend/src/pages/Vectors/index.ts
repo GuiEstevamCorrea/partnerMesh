@@ -1,0 +1,1 @@
+export { VectorsListPage } from './VectorsListPage';
