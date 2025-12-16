@@ -768,38 +768,60 @@ Implementar o core do sistema: cadastro de negócios com cálculo automático de
 
 ### Páginas a Criar
 
-#### 7.1. Lista de Negócios
-**Arquivo:** `src/pages/business/BusinessListPage.tsx`
+#### 7.1. Lista de Negócios - OK
+**Arquivo:** `src/pages/Business/BusinessListPage.tsx` ✅
 
-**Funcionalidades:**
-- Tabela com todos os negócios do vetor
-- Colunas: ID, Parceiro, Tipo, Valor, Data, Comissão Total, Status
-- Filtros:
-  - Parceiro (select com busca)
-  - Tipo de Negócio (select)
-  - Data Início/Fim (date range)
-  - Status (Ativo/Cancelado)
-  - Valor mínimo/máximo
-- Ordenação por data, valor
-- Paginação
-- Botão "Novo Negócio"
+**Funcionalidades:** ✅
+- Tabela com todos os negócios do vetor (8 colunas)
+- Colunas: ID, Parceiro, Tipo, Valor, Data, Comissão Total, Status, Ações
+- Filtros completos:
+  - Busca (parceiro ou tipo)
+  - Parceiro (select com todos ativos)
+  - Tipo de Negócio (select com todos ativos)
+  - Data Início/Fim (date inputs)
+  - Status (Todos/Ativo/Cancelado)
+  - Valor mínimo/máximo (number inputs)
+  - Botão "Limpar Filtros"
+- Paginação (20 por página)
+- Botão "Novo Negócio" (AdminGlobal e AdminVetor)
 - Ações por linha:
-  - Ver Detalhes
-  - Ver Pagamentos
-  - Editar
-  - Cancelar
+  - Ver Detalhes (ícone Eye)
+  - Ver Pagamentos (ícone DollarSign)
+  - Editar (ícone Edit2 - apenas ativos)
+  - Cancelar (ícone XCircle - apenas ativos)
 
-**Componentes:**
-- `Table<Business>`
-- `Input` (filtros de data, valor)
-- `Select` (parceiro, tipo, status)
-- `Badge` (status - ativo em verde, cancelado em vermelho)
+**Componentes:** ✅
+- `Table<Business>` com render customizado
+- `Input` (busca, filtros de data, valor)
+- `select` nativo (parceiro, tipo, status)
+- `Badge` (status: success/error)
 - `Pagination`
-- `Button`
+- `Button` (novo, limpar filtros)
+- `ConfirmDialog` (cancelar negócio)
+- `Loading` e `Alert` (estados)
 
-**Destaque Visual:**
-- Negócios cancelados em cor diferente (texto cinza)
-- Valor e comissão formatados como moeda
+**Destaque Visual:** ✅
+- Negócios cancelados com texto cinza em todas as colunas
+- Valor formatado em verde (ou cinza se cancelado)
+- Comissão Total formatada em azul (ou cinza se cancelado)
+- ID exibido como # com 8 caracteres
+- Empty state com ícone e ações contextuais
+
+**Recursos Implementados:**
+- React Query para listar negócios com cache
+- Queries auxiliares para parceiros e tipos (filtros)
+- Mutation para cancelar negócio
+- ConfirmDialog variant danger com mensagem contextual
+- Controle de permissões: AdminGlobal/AdminVetor veem ações, Operador só visualiza
+- Filtros com reset de página ao alterar
+- Toast de feedback em operações
+- Invalidação de cache após mutações
+- Formatação de moeda com formatCurrency
+- Formatação de data com formatDate
+- Estados de loading, erro e vazio
+- Navegação para detalhes e pagamentos
+- Rota ativada: `/negocios`
+- Export adicionado em pages/Business/index.ts
 
 #### 7.2. Formulário de Negócio
 **Arquivo:** `src/pages/business/BusinessFormPage.tsx`

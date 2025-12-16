@@ -8,6 +8,7 @@ import { UsersListPage, UserFormPage } from '@/pages/Users';
 import { VectorsListPage, VectorFormPage } from '@/pages/Vectors';
 import { PartnersListPage, PartnerFormPage, PartnerTreePage } from '@/pages/Partners';
 import { BusinessTypesListPage, BusinessTypeFormPage } from '@/pages/BusinessTypes';
+import { BusinessListPage } from '@/pages/Business';
 
 export const router = createBrowserRouter([
   // ==================== ROTAS PÚBLICAS ====================
@@ -79,15 +80,16 @@ export const router = createBrowserRouter([
       },
 
       // ========== ENTREGÁVEL 07 - Gestão de Negócios e Comissões ==========
-      // {
-      //   path: 'negocios',
-      //   children: [
-      //     { index: true, element: <BusinessListPage /> },
-      //     { path: 'novo', element: <BusinessFormPage /> },
-      //     { path: ':id', element: <BusinessDetailPage /> },
-      //     { path: ':id/editar', element: <BusinessFormPage /> },
-      //   ],
-      // },
+      {
+        path: 'negocios',
+        children: [
+          { index: true, element: <BusinessListPage /> },
+          // { path: 'novo', element: <BusinessFormPage /> },
+          // { path: ':id', element: <BusinessDetailPage /> },
+          // { path: ':id/editar', element: <BusinessFormPage /> },
+          // { path: ':id/pagamentos', element: <BusinessPaymentsPage /> },
+        ],
+      },
       // {
       //   path: 'pagamentos',
       //   element: <PaymentsListPage />,
