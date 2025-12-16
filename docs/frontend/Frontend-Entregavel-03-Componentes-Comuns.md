@@ -52,7 +52,7 @@ Criar uma biblioteca completa de componentes reutilizáveis com tema preto e bra
 
 ## 🔧 Tarefas Detalhadas
 
-### Tarefa 3.1 - Button Component
+### Tarefa 3.1 - Button Component - OK
 
 **Arquivo: `src/components/common/Button/Button.tsx`**
 
