@@ -444,25 +444,42 @@ Implementar CRUD de parceiros com árvore hierárquica e gestão de tipos de neg
 
 ### Páginas a Criar
 
-#### 6.1. Lista de Parceiros
-**Arquivo:** `src/pages/partners/PartnersListPage.tsx`
+#### 6.1. Lista de Parceiros - OK
+**Arquivo:** `src/pages/partners/PartnersListPage.tsx` ✅
 
-**Funcionalidades:**
+**Funcionalidades:** ✅
 - Tabela com todos os parceiros do vetor
-- Colunas: Nome, Contato, Recomendador, Status, Data Cadastro
-- Filtros: Nome, Status, Recomendador
-- Paginação
-- Botão "Novo Parceiro"
+- Colunas: Nome/Contato, Recomendador, Nível, Recomendados, Status, Data Cadastro, Ações
+- Filtros: Busca (nome/contato), Status (ativo/inativo/todos)
+- Paginação (20 por página)
+- Botão "Novo Parceiro" (AdminGlobal e AdminVetor)
 - Botão "Ver Árvore"
-- Ações: Editar, Ativar/Inativar
+- Ações por linha: Editar, Ativar/Inativar (AdminGlobal e AdminVetor)
+- ConfirmDialog para ativar/inativar
+- Toast de feedback
+- Estados de loading, erro e vazio
+- Mensagem informativa para Operador
 
-**Componentes:**
-- `Table<Partner>`
-- `Input` (filtros)
-- `Select` (status)
-- `Badge` (status)
+**Componentes:** ✅
+- `Table<Partner>` com render customizado
+- `Input` com ícone de busca
+- `select` nativo para filtro de status
+- `Badge` (status ativo/inativo, nível)
 - `Pagination`
-- `Button`
+- `Button` (novo, árvore, ações)
+- `ConfirmDialog` (toggle active)
+- `Loading` e `Alert` (estados)
+
+**Recursos Implementados:**
+- React Query para listar parceiros com cache
+- Mutation para ativar/inativar parceiros
+- ConfirmDialog com variante info/warning
+- Link para árvore de parceiros
+- Controle de permissões: AdminGlobal/AdminVetor veem botões de ação
+- Filtros com reset de página ao alterar
+- Toast de feedback em operações
+- Invalidação de cache após mutações
+- Display de informações do recomendador e nível
 
 #### 6.2. Formulário de Parceiro
 **Arquivo:** `src/pages/partners/PartnerFormPage.tsx`

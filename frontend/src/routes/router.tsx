@@ -6,6 +6,7 @@ import { LoginPage } from '@/pages/auth/LoginPage';
 import { DashboardPage } from '@/pages/DashboardPage';
 import { UsersListPage, UserFormPage } from '@/pages/Users';
 import { VectorsListPage, VectorFormPage } from '@/pages/Vectors';
+import { PartnersListPage } from '@/pages/Partners';
 
 export const router = createBrowserRouter([
   // ==================== ROTAS PÚBLICAS ====================
@@ -58,15 +59,15 @@ export const router = createBrowserRouter([
       },
 
       // ========== ENTREGÁVEL 06 - Gestão de Parceiros e Tipos de Negócio ==========
-      // {
-      //   path: 'parceiros',
-      //   children: [
-      //     { index: true, element: <PartnersListPage /> },
-      //     { path: 'novo', element: <PartnerFormPage /> },
-      //     { path: ':id/editar', element: <PartnerFormPage /> },
-      //     { path: 'arvore', element: <PartnerTreePage /> },
-      //   ],
-      // },
+      {
+        path: 'parceiros',
+        children: [
+          { index: true, element: <PartnersListPage /> },
+          // { path: 'novo', element: <PartnerFormPage /> },
+          // { path: ':id/editar', element: <PartnerFormPage /> },
+          // { path: 'arvore', element: <PartnerTreePage /> },
+        ],
+      },
       // {
       //   path: 'tipos-negocio',
       //   children: [
