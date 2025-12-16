@@ -221,7 +221,7 @@ Input.displayName = 'Input';
 
 ---
 
-### Tarefa 3.3 - Select Component
+### Tarefa 3.3 - Select Component - OK
 
 **Arquivo: `src/components/common/Select/Select.tsx`**
 
