@@ -289,7 +289,7 @@ Select.displayName = 'Select';
 
 ---
 
-### Tarefa 3.4 - Table Component
+### Tarefa 3.4 - Table Component - OK
 
 **Arquivo: `src/components/common/Table/Table.tsx`**
 
