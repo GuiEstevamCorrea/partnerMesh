@@ -623,21 +623,44 @@ Vetor/Parceiro Raiz
 - Rota ativada: `/tipos-negocio`
 - Export adicionado em pages/BusinessTypes/index.ts
 
-#### 6.5. Formulário de Tipo de Negócio
-**Arquivo:** `src/pages/business-types/BusinessTypeFormPage.tsx`
+#### 6.5. Formulário de Tipo de Negócio - OK
+**Arquivo:** `src/pages/BusinessTypes/BusinessTypeFormPage.tsx` ✅
 
-**Funcionalidades:**
-- Criar/Editar tipo de negócio
+**Funcionalidades:** ✅
+- Modo criação e edição (mesma página)
 - Campos:
   - Nome (obrigatório, único)
-  - Descrição (opcional, textarea)
-  - Status (checkbox)
+  - Descrição (opcional, textarea com 4 linhas)
+  - Status (checkbox ativo/inativo - apenas em modo edição)
 
-**Componentes:**
-- `Input` (nome)
-- `Textarea` (descrição)
-- `Checkbox` (ativo)
-- `Button`
+**Validações:** ✅
+- Nome obrigatório (Zod min 1)
+- Descrição opcional (Zod string)
+- Nome único (validação backend)
+
+**Componentes:** ✅
+- `Input` (nome com placeholder e descrição)
+- `textarea` nativo (descrição com placeholder)
+- `checkbox` nativo (ativo - apenas modo edição)
+- `Button` (salvar com loading, cancelar, voltar)
+- `Alert` (informação sobre tipos de negócio)
+- `Card` (container do formulário)
+- `Loading` (carregamento de tipo em edição)
+
+**Recursos Implementados:**
+- React Hook Form + Zod com schema único
+- React Query para carregar tipo de negócio em modo edição
+- Mutations separadas para create e update
+- Toast de feedback (success/error)
+- Redirect automático após sucesso
+- Alert informativo sobre uso de tipos de negócio
+- Box de informações com status e datas em modo edição
+- Estados de loading e erro tratados
+- Campo status visível apenas em modo edição
+- Create envia apenas name e description
+- Update envia name, description e isActive
+- Rotas ativadas: `/tipos-negocio/novo` e `/tipos-negocio/:id/editar`
+- Export adicionado em pages/BusinessTypes/index.ts
 
 ### Controle de Permissões
 
