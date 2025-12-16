@@ -265,13 +265,58 @@ Implementar o CRUD completo de usuários e vetores com controle de permissões e
 - Descrições contextuais por perfil
 - Avisos sobre regras de AdminGlobal e AdminVetor
 
-#### 5.4. Confirmação de Alterações Críticas
-**Componente:** `ConfirmDialog`
+#### 5.4. Confirmação de Alterações Críticas - OK
+**Componente:** `ConfirmDialog` ✅
 
-**Uso:**
-- Inativar usuário
-- Alterar perfil de AdminVetor (validar se é único)
-- Resetar senha
+**Status:** Componente implementado e padrões documentados
+
+**Uso Implementado:** ✅
+- ✅ Inativar usuário (UsersListPage)
+- ⏳ Alterar perfil de AdminVetor (validar se é único) - Padrão documentado
+- ⏳ Resetar senha - Padrão documentado
+
+**Documentação:** ✅
+- Arquivo: `docs/frontend/5.4-confirm-dialog-patterns.md`
+- 5 padrões de implementação completos
+- Checklist de implementação
+- Lista de operações que devem usar ConfirmDialog
+- Boas práticas e testes manuais
+
+**Interface do Componente:**
+```typescript
+interface ConfirmDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  title: string;
+  message: string;
+  confirmText?: string;
+  cancelText?: string;
+  isLoading?: boolean;
+  variant?: 'danger' | 'warning' | 'info';
+}
+```
+
+**Variantes:**
+- `danger`: Operações destrutivas/irreversíveis (cancelar negócio, deletar)
+- `warning`: Operações com consequências reversíveis (inativar entidades)
+- `info`: Operações importantes sem risco (ativar entidades, processar pagamentos)
+
+**Padrões Documentados:**
+1. ✅ Ativar/Inativar com Mutation (em uso no UsersListPage)
+2. ✅ Validação Especial - AdminVetor Único
+3. ✅ Resetar Senha
+4. ✅ Cancelar Negócio
+5. ✅ Pagamento em Lote
+
+**Operações Críticas a Implementar:**
+- Alterar perfil para AdminVetor com validação
+- Resetar senha de usuário
+- Inativar vetor
+- Inativar parceiro
+- Cancelar negócio
+- Processar pagamentos em lote
+- Inativar tipo de negócio
 
 #### 5.5. Lista de Vetores
 **Arquivo:** `src/pages/vectors/VectorsListPage.tsx`
