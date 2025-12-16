@@ -119,29 +119,33 @@ Implementar o fluxo completo de autenticação, permitindo login, renovação de
 - Logo e título centralizado
 - Footer opcional
 
-#### 4.3. Atualização do Router
-**Arquivo:** `src/routes/index.tsx`
+#### 4.3. Atualização do Router - OK
+**Arquivo:** `src/routes/router.tsx`
 
 **Estrutura:**
 ```tsx
 / (público)
   /login → LoginPage
   
-/app (protegido - PrivateRoute)
-  / → redirect to /dashboard
+/ (protegido - PrivateRoute)
   /dashboard → DashboardPage
   /usuarios → (Entregável 05)
   /vetores → (Entregável 05)
-  ...
+  /parceiros → (Entregável 06)
+  /tipos-negocio → (Entregável 06)
+  /negocios → (Entregável 07)
+  /pagamentos → (Entregável 07)
+  /relatorios → (Entregável 08)
+  /auditoria → (Entregável 09)
 ```
 
 ### Critérios de Aceitação
-- [ ] Usuário consegue fazer login com credenciais válidas
-- [ ] Token é armazenado e usado nas requisições
-- [ ] Refresh token renova automaticamente quando expira
-- [ ] Logout limpa o estado e redireciona para login
-- [ ] Erros de autenticação são exibidos claramente
-- [ ] Rotas protegidas redirecionam para login se não autenticado
+- [x] Usuário consegue fazer login com credenciais válidas
+- [x] Token é armazenado e usado nas requisições
+- [x] Refresh token renova automaticamente quando expira
+- [x] Logout limpa o estado e redireciona para login
+- [x] Erros de autenticação são exibidos claramente
+- [x] Rotas protegidas redirecionam para login se não autenticado
 
 ### Arquivos a Criar/Modificar
 ```
