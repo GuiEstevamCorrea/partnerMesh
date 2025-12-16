@@ -160,7 +160,7 @@ export { Button } from './Button';
 
 ---
 
-### Tarefa 3.2 - Input Component
+### Tarefa 3.2 - Input Component - OK
 
 **Arquivo: `src/components/common/Input/Input.tsx`**
 
