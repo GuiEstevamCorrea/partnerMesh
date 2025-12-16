@@ -174,7 +174,7 @@ Implementar o CRUD completo de usuários e vetores com controle de permissões e
 
 ### Páginas a Criar
 
-#### 5.1. Dashboard Principal
+#### 5.1. Dashboard Principal - OK
 **Arquivo:** `src/pages/DashboardPage.tsx`
 
 **Funcionalidades:**
@@ -184,13 +184,20 @@ Implementar o CRUD completo de usuários e vetores com controle de permissões e
   - Total de vetores ativos
   - Total de parceiros
   - Total de negócios no mês
-- Gráficos simples (opcional MVP)
-- Acesso rápido às principais funcionalidades
+  - Comissões pendentes
+  - Comissões pagas no mês
+- Seção de negócios recentes (últimos 10)
+- Seção de pagamentos pendentes
+- Ações rápidas (criar negócio, parceiro, ver árvore, relatórios)
+- Integração com API via React Query
 
 **Componentes:**
 - `Card` (estatísticas)
 - `Badge` (status)
 - `Button` (ações rápidas)
+- `Loading` (carregamento)
+- `Alert` (erros)
+- Ícones do Lucide React
 
 #### 5.2. Lista de Usuários
 **Arquivo:** `src/pages/users/UsersListPage.tsx`

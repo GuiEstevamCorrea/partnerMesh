@@ -6,4 +6,4 @@ export * from './businessTypes.api';
 export * from './business.api';
 export * from './payments.api';
 export * from './reports.api';
-export * from './audit.api';
+export * from './audit.api';export * from './dashboard.api';
