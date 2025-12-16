@@ -529,31 +529,59 @@ Implementar CRUD de parceiros com árvore hierárquica e gestão de tipos de neg
 - Seleção dinâmica de recomendadores (parceiros ou vetores)
 - Filtro de parceiro atual em lista de recomendadores (evita auto-seleção)
 
-#### 6.3. Visualização de Árvore de Parceiros
-**Arquivo:** `src/pages/partners/PartnerTreePage.tsx`
+#### 6.3. Visualização de Árvore de Parceiros - OK
+**Arquivo:** `src/pages/partners/PartnerTreePage.tsx` ✅
 
-**Funcionalidades:**
+**Funcionalidades:** ✅
 - Exibição hierárquica da árvore de parceiros
-- Componente de árvore visual (tree view)
-- Níveis identificados (1, 2, 3, 3+)
+- Componente de árvore visual (tree view) recursivo
+- Níveis identificados (1, 2, 3, 3+) com cores distintas
 - Informações por nó:
-  - Nome
+  - Nome do parceiro
+  - Badge de nível (azul=1, verde=2, roxo=3, cinza=3+)
   - Quantidade de recomendados
-  - Status
+  - Ícone de usuário
 - Filtro por parceiro específico (mostrar apenas sua sub-árvore)
-- Expansão/colapso de nós
+- Expansão/colapso de nós com setas (ChevronDown/ChevronRight)
+- Auto-expansão dos 2 primeiros níveis
+- Busca de parceiros com dropdown de seleção
+- Display de parceiro selecionado com opção de limpar filtro
+- Legenda visual dos níveis
+- Alert informativo sobre filtro ativo
 
-**Componente Especial:**
-- `PartnerTreeView` (novo componente de árvore)
+**Componente Especial:** ✅
+- `PartnerTreeView` (componente recursivo de árvore)
+  - Props: node (PartnerTree), depth (número)
+  - Estados: isExpanded (colapso/expansão)
+  - Recursos: badges coloridos por nível, indentação visual, borda esquerda para hierarquia
 
-**Layout:**
+**Componentes Utilizados:** ✅
+- `Card` (container principal e legenda)
+- `Input` (busca de parceiro)
+- `Button` (voltar, limpar filtro)
+- `Alert` (informações e erros)
+- `Loading` (carregamento)
+- `PartnerTreeView` (árvore recursiva)
+- Ícones: Network, ArrowLeft, Search, User, Users, ChevronDown, ChevronRight
+
+**Recursos Implementados:**
+- React Query para carregar árvore e lista de parceiros
+- Endpoint: `GET /partners/{id}/tree` ou `GET /partners/{vectorId}/tree`
+- URL search params para persistir filtro (partnerId)
+- Filtro em tempo real de parceiros na busca
+- Display condicional: árvore completa vs sub-árvore
+- Estados de loading, erro e vazio tratados
+- Rota ativada: `/parceiros/arvore`
+- Export adicionado em pages/Partners/index.ts
+
+**Layout Visual:**
 ```
-Vetor
-  ├── Parceiro A (Nível 1)
-  │   ├── Parceiro B (Nível 2)
-  │   │   └── Parceiro C (Nível 3)
-  │   └── Parceiro D (Nível 2)
-  └── Parceiro E (Nível 1)
+Vetor/Parceiro Raiz
+  ├── Parceiro A (Nível 1) [Azul]
+  │   ├── Parceiro B (Nível 2) [Verde]
+  │   │   └── Parceiro C (Nível 3) [Roxo]
+  │   └── Parceiro D (Nível 2) [Verde]
+  └── Parceiro E (Nível 1) [Azul]
 ```
 
 #### 6.4. Lista de Tipos de Negócio

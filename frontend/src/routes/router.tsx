@@ -6,7 +6,7 @@ import { LoginPage } from '@/pages/auth/LoginPage';
 import { DashboardPage } from '@/pages/DashboardPage';
 import { UsersListPage, UserFormPage } from '@/pages/Users';
 import { VectorsListPage, VectorFormPage } from '@/pages/Vectors';
-import { PartnersListPage, PartnerFormPage } from '@/pages/Partners';
+import { PartnersListPage, PartnerFormPage, PartnerTreePage } from '@/pages/Partners';
 
 export const router = createBrowserRouter([
   // ==================== ROTAS PÚBLICAS ====================
@@ -65,7 +65,7 @@ export const router = createBrowserRouter([
           { index: true, element: <PartnersListPage /> },
           { path: 'novo', element: <PartnerFormPage /> },
           { path: ':id/editar', element: <PartnerFormPage /> },
-          // { path: 'arvore', element: <PartnerTreePage /> },
+          { path: 'arvore', element: <PartnerTreePage /> },
         ],
       },
       // {
