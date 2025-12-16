@@ -1,3 +1,5 @@
+<!-- Baseado no MVP-Plano-Entregãveis, Implemente o -->
+
 # 📋 MVP - Plano de Entregáveis Frontend
 ## Sistema de Rede de Credenciamento / Vetores
 
@@ -74,7 +76,7 @@ Implementar o fluxo completo de autenticação, permitindo login, renovação de
 
 ### Páginas a Criar
 
-#### 4.1. Login Page (`/login`)
+#### 4.1. Login Page (`/login`)  - OK
 **Arquivo:** `src/pages/auth/LoginPage.tsx`
 
 **Funcionalidades:**

@@ -1,5 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { RouterProvider } from 'react-router-dom';
 import { ErrorBoundary, ToastProvider } from './components';
+import { router } from './routes';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -16,13 +18,7 @@ function App() {
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <ToastProvider>
-          <div className="min-h-screen bg-gray-50">
-            <div className="flex items-center justify-center h-screen">
-              <h1 className="text-3xl font-bold text-black">
-                Componentes Comuns Completos ✓
-              </h1>
-            </div>
-          </div>
+          <RouterProvider router={router} />
         </ToastProvider>
       </QueryClientProvider>
     </ErrorBoundary>

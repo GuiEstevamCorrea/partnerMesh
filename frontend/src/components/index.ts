@@ -22,3 +22,4 @@ export { Header } from './layout/Header';
 export { Sidebar } from './layout/Sidebar';
 export { Footer } from './layout/Footer';
 export { Layout } from './layout/Layout';
+export { PublicLayout } from './layout/PublicLayout';

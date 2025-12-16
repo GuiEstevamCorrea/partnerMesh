@@ -11,7 +11,7 @@ import {
   BarChart3,
   FileSearch,
 } from 'lucide-react';
-import { authStore } from '@/store/auth.store';
+import { useAuthStore } from '@/store/auth.store';
 import { Permission } from '@/types';
 
 interface MenuItem {
@@ -79,7 +79,7 @@ const menuItems: MenuItem[] = [
 ];
 
 export const Sidebar: React.FC = () => {
-  const { hasPermission } = authStore();
+  const hasPermission = useAuthStore((state) => state.hasPermission);
 
   const filteredMenuItems = menuItems.filter((item) =>
     hasPermission(item.permissions)

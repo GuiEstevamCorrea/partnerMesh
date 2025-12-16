@@ -8,6 +8,7 @@ interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
   
+  setAuth: (token: string, refreshToken: string, user: User) => void;
   setTokens: (token: string, refreshToken: string) => void;
   setUser: (user: User) => void;
   logout: () => void;
@@ -15,13 +16,17 @@ interface AuthState {
   hasVectorAccess: (vectorId: string) => boolean;
 }
 
-export const authStore = create<AuthState>()(
+export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
       token: null,
       refreshToken: null,
       user: null,
       isAuthenticated: false,
+
+      setAuth: (token, refreshToken, user) => {
+        set({ token, refreshToken, user, isAuthenticated: true });
+      },
 
       setTokens: (token, refreshToken) => {
         set({ token, refreshToken, isAuthenticated: true });

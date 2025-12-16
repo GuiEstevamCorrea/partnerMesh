@@ -1,6 +1,6 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { authStore } from '@/store/auth.store';
+import { useAuthStore } from '@/store/auth.store';
 import { Permission } from '@/types';
 
 interface PermissionRouteProps {
@@ -12,7 +12,7 @@ export const PermissionRoute: React.FC<PermissionRouteProps> = ({
   children,
   requiredPermissions,
 }) => {
-  const { hasPermission } = authStore();
+  const hasPermission = useAuthStore((state) => state.hasPermission);
 
   if (!hasPermission(requiredPermissions)) {
     return <Navigate to="/dashboard" replace />;

@@ -1,11 +1,12 @@
 import React from 'react';
 import { LogOut, User } from 'lucide-react';
-import { authStore } from '@/store/auth.store';
+import { useAuthStore } from '@/store/auth.store';
 import { Button } from '@/components/common/Button';
 import { authApi } from '@/api/endpoints/auth.api';
 
 export const Header: React.FC = () => {
-  const { user, logout } = authStore();
+  const user = useAuthStore((state) => state.user);
+  const logout = useAuthStore((state) => state.logout);
 
   const handleLogout = async () => {
     try {
