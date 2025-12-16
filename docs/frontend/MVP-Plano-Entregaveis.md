@@ -224,31 +224,46 @@ Implementar o CRUD completo de usuários e vetores com controle de permissões e
 - `ConfirmDialog`
 - `Loading` e `Alert`
 
-#### 5.3. Formulário de Usuário (Create/Edit)
+#### 5.3. Formulário de Usuário (Create/Edit) - OK
 **Arquivo:** `src/pages/users/UserFormPage.tsx`
 
-**Funcionalidades:**
+**Funcionalidades:** ✅
 - Modo criação e edição (mesma página)
 - Campos:
   - Nome (obrigatório)
   - Email (obrigatório, único)
-  - Senha (obrigatório apenas em criação)
+  - Senha (obrigatório apenas em criação, opcional em edição)
   - Perfil (select: AdminGlobal, AdminVetor, Operador)
   - Vetor (select, obrigatório exceto AdminGlobal)
   - Status (checkbox ativo/inativo)
 
-**Validações:**
+**Validações:** ✅
 - Email único
-- AdminGlobal não pode ter vetor
-- Outros perfis devem ter vetor
-- Senha mínimo 6 caracteres
+- AdminGlobal não pode ter vetor (validação Zod refine)
+- Outros perfis devem ter vetor (validação Zod refine)
+- Senha mínimo 6 caracteres (validação Zod refine)
+- Senha obrigatória apenas em criação (schemas diferentes)
 
-**Componentes:**
-- `Input` (nome, email, senha)
-- `Select` (perfil, vetor)
-- `Checkbox` (ativo)
-- `Button` (salvar, cancelar)
-- `Alert` (erros)
+**Componentes:** ✅
+- `Input` (nome, email, senha com label condicional)
+- `select` nativo (perfil com Permission enum, vetor com loading)
+- `checkbox` nativo (ativo)
+- `Button` (salvar com loading, cancelar, voltar)
+- `Alert` (erros, avisos sobre permissões - info/warning)
+- `Card` (container do formulário)
+- `Loading` (carregamento de usuário/vetores)
+
+**Recursos Implementados:**
+- React Hook Form + Zod com schemas separados (create/edit)
+- React Query para carregar usuário e vetores
+- Mutations separadas para create e update
+- Toast de feedback (success/error)
+- Redirect automático após sucesso
+- Campo vetor oculto para AdminGlobal
+- Campo vetor readonly para AdminVetor/Operador (mostra vetor atual)
+- Limpeza automática de vectorId ao selecionar AdminGlobal
+- Descrições contextuais por perfil
+- Avisos sobre regras de AdminGlobal e AdminVetor
 
 #### 5.4. Confirmação de Alterações Críticas
 **Componente:** `ConfirmDialog`

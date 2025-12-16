@@ -4,7 +4,7 @@ import { Layout } from '@/components/layout/Layout';
 import { PrivateRoute } from './PrivateRoute';
 import { LoginPage } from '@/pages/auth/LoginPage';
 import { DashboardPage } from '@/pages/DashboardPage';
-import { UsersListPage } from '@/pages/Users';
+import { UsersListPage, UserFormPage } from '@/pages/Users';
 
 export const router = createBrowserRouter([
   // ==================== ROTAS PÚBLICAS ====================
@@ -43,8 +43,8 @@ export const router = createBrowserRouter([
         path: 'usuarios',
         children: [
           { index: true, element: <UsersListPage /> },
-          // { path: 'novo', element: <UserFormPage /> },
-          // { path: ':id/editar', element: <UserFormPage /> },
+          { path: 'novo', element: <UserFormPage /> },
+          { path: ':id/editar', element: <UserFormPage /> },
         ],
       },
       // {
