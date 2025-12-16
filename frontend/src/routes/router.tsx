@@ -5,7 +5,7 @@ import { PrivateRoute } from './PrivateRoute';
 import { LoginPage } from '@/pages/auth/LoginPage';
 import { DashboardPage } from '@/pages/DashboardPage';
 import { UsersListPage, UserFormPage } from '@/pages/Users';
-import { VectorsListPage } from '@/pages/Vectors';
+import { VectorsListPage, VectorFormPage } from '@/pages/Vectors';
 
 export const router = createBrowserRouter([
   // ==================== ROTAS PÚBLICAS ====================
@@ -52,8 +52,8 @@ export const router = createBrowserRouter([
         path: 'vetores',
         children: [
           { index: true, element: <VectorsListPage /> },
-          // { path: 'novo', element: <VectorFormPage /> },
-          // { path: ':id/editar', element: <VectorFormPage /> },
+          { path: 'novo', element: <VectorFormPage /> },
+          { path: ':id/editar', element: <VectorFormPage /> },
         ],
       },
 

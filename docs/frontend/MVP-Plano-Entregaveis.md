@@ -359,25 +359,41 @@ interface ConfirmDialogProps {
 - Invalidação de cache após mutações
 - Mensagem contextual sobre permissões
 
-#### 5.6. Formulário de Vetor
-**Arquivo:** `src/pages/vectors/VectorFormPage.tsx`
+#### 5.6. Formulário de Vetor - OK
+**Arquivo:** `src/pages/vectors/VectorFormPage.tsx` ✅
 
-**Funcionalidades:**
-- Criar/Editar vetor
+**Funcionalidades:** ✅
+- Modo criação e edição (mesma página)
 - Campos:
   - Nome (obrigatório, único)
   - Email (obrigatório, único)
-  - Status (checkbox)
-- Ao criar: associar ou criar admin do vetor
+  - Login (obrigatório, único)
+  - Status (checkbox ativo/inativo)
 
-**Validações:**
-- Nome e email únicos
-- Deve ter ao menos 1 admin ativo
+**Validações:** ✅
+- Nome obrigatório (Zod min 1)
+- Email obrigatório e formato válido (Zod email)
+- Login obrigatório (Zod min 1)
+- Email e login únicos (validação backend)
 
-**Componentes:**
-- `Input` (nome, email)
-- `Checkbox` (ativo)
-- `Button`
+**Componentes:** ✅
+- `Input` (nome, email, login com descrições)
+- `checkbox` nativo (ativo)
+- `Button` (salvar com loading, cancelar, voltar)
+- `Alert` (avisos sobre AdminVetor, erros)
+- `Card` (container do formulário)
+- `Loading` (carregamento de vetor)
+
+**Recursos Implementados:**
+- React Hook Form + Zod com schema único
+- React Query para carregar vetor em modo edição
+- Mutations separadas para create e update
+- Toast de feedback (success/error)
+- Redirect automático após sucesso
+- Alert informativo sobre necessidade de AdminVetor
+- Box de informações com login e status em modo edição
+- Estados de loading e erro tratados
+- Grid responsivo (2 colunas em desktop)
 
 ### Controle de Permissões
 
