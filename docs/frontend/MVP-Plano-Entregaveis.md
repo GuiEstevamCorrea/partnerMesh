@@ -410,13 +410,13 @@ interface ConfirmDialogProps {
 - Não tem acesso a usuários e vetores
 
 ### Critérios de Aceitação
-- [ ] Lista de usuários exibe apenas usuários permitidos conforme perfil
-- [ ] Formulário de usuário valida todas as regras de negócio
-- [ ] AdminGlobal consegue criar e gerenciar vetores
-- [ ] AdminVetor não vê outros vetores
-- [ ] Inativação de usuário/vetor exige confirmação
-- [ ] Filtros e paginação funcionam corretamente
-- [ ] Toast exibe sucesso/erro em todas as operações
+- [x] Lista de usuários exibe apenas usuários permitidos conforme perfil
+- [x] Formulário de usuário valida todas as regras de negócio
+- [x] AdminGlobal consegue criar e gerenciar vetores
+- [x] AdminVetor não vê outros vetores
+- [x] Inativação de usuário/vetor exige confirmação
+- [x] Filtros e paginação funcionam corretamente
+- [x] Toast exibe sucesso/erro em todas as operações
 
 ### Arquivos a Criar
 ```
