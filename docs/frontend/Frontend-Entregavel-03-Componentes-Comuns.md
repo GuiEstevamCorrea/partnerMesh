@@ -390,7 +390,7 @@ export function Table<T>({
 
 ---
 
-### Tarefa 3.5 - Modal Component
+### Tarefa 3.5 - Modal Component - OK
 
 **Arquivo: `src/components/common/Modal/Modal.tsx`**
 
