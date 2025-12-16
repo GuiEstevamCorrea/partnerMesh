@@ -60,76 +60,65 @@ export const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-      <div className="w-full max-w-md">
-        {/* Logo e Título */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-black mb-2">
-            Sistema de Rede
-          </h1>
-          <p className="text-gray-600">
-            Gestão de Credenciamento e Vetores
-          </p>
-        </div>
+    <div className="w-full max-w-md">
+      {/* Card com Formulário */}
+      <Card>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <div>
+            <h2 className="text-2xl font-semibold text-gray-900 mb-6">
+              Entrar
+            </h2>
 
-        {/* Card com Formulário */}
-        <Card>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-semibold text-gray-900 mb-6">
-                Entrar
-              </h2>
-
-              {/* Alerta de Erro */}
-              {error && (
-                <div className="mb-4">
-                  <Alert type="error" onClose={() => setError('')}>
-                    {error}
-                  </Alert>
-                </div>
-              )}
-
-              {/* Campo Email */}
+            {/* Alerta de Erro */}
+            {error && (
               <div className="mb-4">
-                <Input
-                  label="Email"
-                  type="email"
-                  placeholder="seu@email.com"
-                  error={errors.email?.message}
-                  {...register('email')}
-                  disabled={isLoading}
-                />
+                <Alert type="error" onClose={() => setError('')}>
+                  {error}
+                </Alert>
               </div>
+            )}
 
-              {/* Campo Senha */}
-              <div className="mb-6">
-                <Input
-                  label="Senha"
-                  type="password"
-                  placeholder="••••••"
-                  error={errors.password?.message}
-                  {...register('password')}
-                  disabled={isLoading}
-                />
-              </div>
-
-              {/* Botão Submit */}
-              <Button
-                type="submit"
-                fullWidth
-                isLoading={isLoading}
-              >
-                Entrar
-              </Button>
+            {/* Campo Email */}
+            <div className="mb-4">
+              <Input
+                label="Email"
+                type="email"
+                placeholder="seu@email.com"
+                error={errors.email?.message}
+                {...register('email')}
+                disabled={isLoading}
+              />
             </div>
-          </form>
-        </Card>
 
-        {/* Footer */}
-        <div className="text-center mt-6 text-sm text-gray-600">
-          <p>© {new Date().getFullYear()} Sistema de Rede de Credenciamento</p>
-          <p className="mt-1">Versão 1.0.0</p>
-        </div>
+            {/* Campo Senha */}
+            <div className="mb-6">
+              <Input
+                label="Senha"
+                type="password"
+                placeholder="••••••"
+                error={errors.password?.message}
+                {...register('password')}
+                disabled={isLoading}
+              />
+            </div>
+
+            {/* Botão Submit */}
+            <Button
+              type="submit"
+              fullWidth
+              isLoading={isLoading}
+            >
+              Entrar
+            </Button>
+          </div>
+        </form>
+      </Card>
+
+      {/* Link de Ajuda (Opcional) */}
+      <div className="text-center mt-4">
+        <p className="text-sm text-gray-600">
+          Problemas para acessar? Entre em contato com o administrador.
+        </p>
       </div>
     </div>
   );

@@ -110,7 +110,7 @@ Implementar o fluxo completo de autenticação, permitindo login, renovação de
    - Exibir Alert com mensagem
 ```
 
-#### 4.2. Layout Público
+#### 4.2. Layout Público - OK
 **Arquivo:** `src/components/layout/PublicLayout.tsx`
 
 **Funcionalidades:**
