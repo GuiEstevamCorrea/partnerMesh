@@ -481,7 +481,7 @@ export const Modal: React.FC<ModalProps> = ({
 
 ---
 
-### Tarefa 3.6 - Layout Components
+### Tarefa 3.6 - Layout Components - OK
 
 **Arquivo: `src/components/layout/Header/Header.tsx`**
 
