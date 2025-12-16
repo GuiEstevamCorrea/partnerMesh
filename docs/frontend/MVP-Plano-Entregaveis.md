@@ -584,21 +584,44 @@ Vetor/Parceiro Raiz
   └── Parceiro E (Nível 1) [Azul]
 ```
 
-#### 6.4. Lista de Tipos de Negócio
-**Arquivo:** `src/pages/business-types/BusinessTypesListPage.tsx`
+#### 6.4. Lista de Tipos de Negócio - OK
+**Arquivo:** `src/pages/BusinessTypes/BusinessTypesListPage.tsx` ✅
 
-**Funcionalidades:**
-- Tabela com todos os tipos
-- Colunas: Nome, Descrição, Status
-- Paginação
-- Botão "Novo Tipo"
-- Ações: Editar, Ativar/Inativar
+**Funcionalidades:** ✅
+- Tabela com todos os tipos de negócio
+- Colunas: Nome/Descrição, Status, Data Cadastro, Ações
+- Filtros: Busca (nome), Status (todos/ativos/inativos)
+- Paginação (20 por página)
+- Botão "Novo Tipo" (AdminGlobal e AdminVetor)
+- Ações por linha:
+  - Editar (AdminGlobal e AdminVetor)
+  - Ativar/Inativar (AdminGlobal e AdminVetor)
+- ConfirmDialog para ativar/inativar
+- Toast de feedback
+- Estados de loading, erro e vazio
+- Mensagem informativa para Operador
 
-**Componentes:**
-- `Table<BusinessType>`
-- `Badge` (status)
-- `Button`
+**Componentes:** ✅
+- `Table<BusinessType>` com render customizado
+- `Input` com ícone de busca
+- `select` nativo para filtro de status
+- `Badge` (status ativo/inativo)
+- `Button` (novo, ações)
+- `ConfirmDialog` (toggle active)
 - `Pagination`
+- `Loading` e `Alert` (estados)
+
+**Recursos Implementados:**
+- React Query para listar tipos com cache
+- Mutation para ativar/inativar tipos de negócio
+- ConfirmDialog com variante info/warning
+- Controle de permissões: AdminGlobal/AdminVetor veem botões de ação
+- Filtros com reset de página ao alterar
+- Toast de feedback em operações
+- Invalidação de cache após mutações
+- Display de nome e descrição em linha
+- Rota ativada: `/tipos-negocio`
+- Export adicionado em pages/BusinessTypes/index.ts
 
 #### 6.5. Formulário de Tipo de Negócio
 **Arquivo:** `src/pages/business-types/BusinessTypeFormPage.tsx`
