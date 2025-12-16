@@ -199,24 +199,30 @@ Implementar o CRUD completo de usuários e vetores com controle de permissões e
 - `Alert` (erros)
 - Ícones do Lucide React
 
-#### 5.2. Lista de Usuários
-**Arquivo:** `src/pages/users/UsersListPage.tsx`
+#### 5.2. Lista de Usuários - OK
+**Arquivo:** `src/pages/Users/UsersListPage.tsx`
 
 **Funcionalidades:**
 - Tabela com todos os usuários
 - Colunas: Nome, Email, Perfil, Vetor, Status
-- Filtros: Nome, Perfil, Vetor, Status
-- Paginação
+- Filtros: Nome (busca), Perfil, Vetor (AdminGlobal), Status
+- Paginação (20 por página)
 - Botão "Novo Usuário"
 - Ações por linha: Editar, Ativar/Inativar
+- ConfirmDialog para ativar/inativar
+- Toast de feedback
+- Estados de loading e erro
+- Estado vazio
 
 **Componentes:**
-- `Table<User>`
-- `Input` (filtros)
-- `Select` (filtro perfil/vetor)
+- `Table<User>` (com render customizado)
+- `Input` (busca com ícone)
+- `select` nativo (filtros)
 - `Button` (novo, ações)
-- `Badge` (status)
+- `Badge` (status, perfil)
 - `Pagination`
+- `ConfirmDialog`
+- `Loading` e `Alert`
 
 #### 5.3. Formulário de Usuário (Create/Edit)
 **Arquivo:** `src/pages/users/UserFormPage.tsx`

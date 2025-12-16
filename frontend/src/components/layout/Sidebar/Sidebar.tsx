@@ -29,13 +29,13 @@ const menuItems: MenuItem[] = [
     permissions: [Permission.AdminGlobal, Permission.AdminVetor, Permission.Operador],
   },
   {
-    path: '/users',
+    path: '/usuarios',
     label: 'Usuários',
     icon: <Users className="h-5 w-5" />,
     permissions: [Permission.AdminGlobal, Permission.AdminVetor],
   },
   {
-    path: '/vectors',
+    path: '/vetores',
     label: 'Vetores',
     icon: <GitBranch className="h-5 w-5" />,
     permissions: [Permission.AdminGlobal],

@@ -1,8 +1,14 @@
 import api from '../axios.config';
-import { User, CreateUserRequest, UpdateUserRequest, PaginatedResponse, FilterParams } from '@/types';
+import { User, CreateUserRequest, UpdateUserRequest, PaginatedResponse, FilterParams, Permission } from '@/types';
+
+interface UsersFilterParams extends FilterParams {
+  permission?: Permission;
+  vectorId?: string;
+  isActive?: boolean;
+}
 
 export const usersApi = {
-  list: async (params?: FilterParams): Promise<PaginatedResponse<User>> => {
+  list: async (params?: UsersFilterParams): Promise<PaginatedResponse<User>> => {
     const response = await api.get('/users', { params });
     return response.data;
   },

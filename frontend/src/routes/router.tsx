@@ -4,6 +4,7 @@ import { Layout } from '@/components/layout/Layout';
 import { PrivateRoute } from './PrivateRoute';
 import { LoginPage } from '@/pages/auth/LoginPage';
 import { DashboardPage } from '@/pages/DashboardPage';
+import { UsersListPage } from '@/pages/Users';
 
 export const router = createBrowserRouter([
   // ==================== ROTAS PÚBLICAS ====================
@@ -38,14 +39,14 @@ export const router = createBrowserRouter([
       },
 
       // ========== ENTREGÁVEL 05 - Gestão de Usuários e Vetores ==========
-      // {
-      //   path: 'usuarios',
-      //   children: [
-      //     { index: true, element: <UsersListPage /> },
-      //     { path: 'novo', element: <UserFormPage /> },
-      //     { path: ':id/editar', element: <UserFormPage /> },
-      //   ],
-      // },
+      {
+        path: 'usuarios',
+        children: [
+          { index: true, element: <UsersListPage /> },
+          // { path: 'novo', element: <UserFormPage /> },
+          // { path: ':id/editar', element: <UserFormPage /> },
+        ],
+      },
       // {
       //   path: 'vetores',
       //   children: [
