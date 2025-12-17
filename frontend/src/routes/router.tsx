@@ -10,7 +10,7 @@ import { PartnersListPage, PartnerFormPage, PartnerTreePage } from '@/pages/Part
 import { BusinessTypesListPage, BusinessTypeFormPage } from '@/pages/BusinessTypes';
 import { BusinessListPage, BusinessFormPage, BusinessDetailPage } from '@/pages/Business';
 import { PaymentsListPage } from '@/pages/Payments';
-import { PartnersReportPage, FinancialReportPage } from '@/pages/Reports';
+import { PartnersReportPage, FinancialReportPage, BusinessReportPage } from '@/pages/Reports';
 
 export const router = createBrowserRouter([
   // ==================== ROTAS PÚBLICAS ====================
@@ -103,7 +103,7 @@ export const router = createBrowserRouter([
         children: [
           { path: 'parceiros', element: <PartnersReportPage /> },
           { path: 'financeiro', element: <FinancialReportPage /> },
-          // { path: 'negocios', element: <BusinessReportPage /> },
+          { path: 'negocios', element: <BusinessReportPage /> },
         ],
       },
 
