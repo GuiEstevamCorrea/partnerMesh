@@ -896,32 +896,94 @@ Implementar o core do sistema: cadastro de negócios com cálculo automático de
 - Rotas ativadas: `/negocios/novo` e `/negocios/:id/editar`
 - Export adicionado em pages/Business/index.ts
 
-#### 7.3. Detalhes do Negócio
-**Arquivo:** `src/pages/business/BusinessDetailPage.tsx`
+#### 7.3. Detalhes do Negócio - OK
+**Arquivo:** `src/pages/Business/BusinessDetailPage.tsx` ✅
 
-**Funcionalidades:**
-- Exibir todos os dados do negócio
-- Seção: Dados do Negócio
-  - ID, Data, Parceiro, Tipo, Valor, Status
-- Seção: Comissões Geradas
-  - Tabela com todos os pagamentos
-  - Colunas: Destinatário, Nível, Valor, Status, Data Pagamento
-  - Total Pago / Total Pendente
-- Botões:
-  - Editar (se ativo)
-  - Cancelar (se ativo)
-  - Voltar
+**Funcionalidades:** ✅
+- Exibir todos os dados completos do negócio
+- **Seção 1: Dados do Negócio** (Card principal)
+  - ID do Negócio (completo em fonte monospace)
+  - Status (Badge success/error)
+  - Parceiro (nome)
+  - Tipo de Negócio (nome)
+  - Valor (formatado em verde se ativo, cinza se cancelado)
+  - Comissão Total 10% (formatado em azul se ativo, cinza se cancelado)
+  - Data do Negócio (formatada)
+  - Data de Criação (formatada)
+  - Observações (se existirem, whitespace preservado)
+- **Seção 2: Comissões Geradas** (Card com tabela)
+  - Tabela de pagamentos com 5 colunas:
+    - Destinatário (nome + tipo: Partner/Vector)
+    - Nível (Badge colorido: 1=azul, 2=verde, 3=cinza)
+    - Valor (colorido por status: verde=pago, amarelo=pendente, cinza=cancelado)
+    - Status (Badge: success=pago, warning=pendente, error=cancelado)
+    - Data Pagamento (formatada ou "-")
+  - Resumo Financeiro (2 cards destacados):
+    - Total Pago (fundo verde, texto verde)
+    - Total Pendente (fundo amarelo, texto amarelo)
+  - Contador de pagamentos no título da seção
+- **Ações (Header)**:
+  - Voltar (sempre visível)
+  - Editar (apenas se ativo e canManage)
+  - Cancelar (apenas se ativo e canManage)
 
-**Destaque:**
-- Card separado para cada seção
-- Resumo financeiro destacado
+**Recursos Implementados:** ✅
+- React Query para carregar negócio e pagamentos (queries separadas)
+- Mutation para cancelar negócio
+- ConfirmDialog variant danger com mensagem contextual sobre pagamentos
+- Controle de permissões: AdminGlobal/AdminVetor veem ações
+- Toast de feedback em operações
+- Invalidação de cache após cancelamento (3 queries)
+- Formatação de moeda com formatCurrency
+- Formatação de data com formatDate
+- Estados de loading, erro (Alert type error) e não encontrado
+- Alert de warning se negócio cancelado
+- Alert de info se nenhum pagamento gerado
+- Navegação: redirect para editar ou voltar para lista
+- Grid responsivo (2 colunas em desktop)
+- Rota ativada: `/negocios/:id`
+- Export adicionado em pages/Business/index.ts
+- Ícones: ArrowLeft, Edit2, XCircle, DollarSign, Calendar, User, FileText, TrendingUp
 
-**Componentes:**
-- `Card` (seções)
-- `Table<Payment>` (pagamentos)
-- `Badge` (status)
-- `Button`
-- `ConfirmDialog` (cancelar)
+**Componentes Utilizados:** ✅
+- `Card` (2 seções com headers)
+- `Table<Payment>` (tabela de comissões)
+- `Badge` (status, nível)
+- `Button` (voltar, editar, cancelar)
+- `ConfirmDialog` (cancelar negócio)
+- `Loading` (estados de carregamento)
+- `Alert` (erros, avisos, info - type ao invés de variant, children ao invés de message)
+
+**Cálculos:** ✅
+- Total Pago: soma de payments com status 'Paid'
+- Total Pendente: soma de payments com status 'Pending'
+- Formatação de valores com formatCurrency
+
+**Validações:** ✅
+- Verifica se negócio existe
+- Verifica se é ativo para exibir botões de ação
+- Verifica permissões para exibir/ocultar ações
+- ConfirmDialog explica que pagamentos pendentes serão cancelados
+
+**Fluxo de Cancelamento:** ✅
+1. Usuário clica em "Cancelar" (botão danger)
+2. ConfirmDialog abre com mensagem contextual
+3. Usuário confirma
+4. Mutation executa com loading
+5. Toast de sucesso
+6. Queries invalidadas (negócio, pagamentos, lista)
+7. Dialog fecha
+8. Status atualizado automaticamente
+
+**Destaque Visual:** ✅
+- Card principal com grid de 2 colunas
+- Labels com ícones contextuais
+- Valores coloridos conforme status
+- Badges coloridos por nível (azul=1, verde=2, cinza=3)
+- Resumo financeiro com cards coloridos (verde/amarelo)
+- Alert de warning destacado para negócios cancelados
+- Fonte monospace para ID do negócio
+- Whitespace preservado em observações
 
 #### 7.4. Lista de Pagamentos
 **Arquivo:** `src/pages/payments/PaymentsListPage.tsx`

@@ -8,7 +8,7 @@ import { UsersListPage, UserFormPage } from '@/pages/Users';
 import { VectorsListPage, VectorFormPage } from '@/pages/Vectors';
 import { PartnersListPage, PartnerFormPage, PartnerTreePage } from '@/pages/Partners';
 import { BusinessTypesListPage, BusinessTypeFormPage } from '@/pages/BusinessTypes';
-import { BusinessListPage, BusinessFormPage } from '@/pages/Business';
+import { BusinessListPage, BusinessFormPage, BusinessDetailPage } from '@/pages/Business';
 
 export const router = createBrowserRouter([
   // ==================== ROTAS PÚBLICAS ====================
@@ -85,7 +85,7 @@ export const router = createBrowserRouter([
         children: [
           { index: true, element: <BusinessListPage /> },
           { path: 'novo', element: <BusinessFormPage /> },
-          // { path: ':id', element: <BusinessDetailPage /> },
+          { path: ':id', element: <BusinessDetailPage /> },
           { path: ':id/editar', element: <BusinessFormPage /> },
           // { path: ':id/pagamentos', element: <BusinessPaymentsPage /> },
         ],
