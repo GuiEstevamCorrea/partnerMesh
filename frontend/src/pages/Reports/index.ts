@@ -1,0 +1,1 @@
+export { PartnersReportPage } from './PartnersReportPage';
