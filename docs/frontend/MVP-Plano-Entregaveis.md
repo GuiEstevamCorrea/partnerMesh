@@ -823,50 +823,78 @@ Implementar o core do sistema: cadastro de negócios com cálculo automático de
 - Rota ativada: `/negocios`
 - Export adicionado em pages/Business/index.ts
 
-#### 7.2. Formulário de Negócio
-**Arquivo:** `src/pages/business/BusinessFormPage.tsx`
+#### 7.2. Formulário de Negócio - OK
+**Arquivo:** `src/pages/Business/BusinessFormPage.tsx` ✅
 
-**Funcionalidades:**
-- Criar/Editar negócio
+**Funcionalidades:** ✅
+- Criar/Editar negócio (mesma página)
 - **Modo Criação:**
-  - Parceiro (select obrigatório)
-  - Tipo de Negócio (select obrigatório)
-  - Valor (input number, obrigatório, > 0)
-  - Data (date picker, default hoje)
-  - Observações (textarea opcional)
+  - Parceiro (select obrigatório com todos ativos)
+  - Tipo de Negócio (select obrigatório com todos ativos)
+  - Valor (input number, obrigatório, > 0, step 0.01)
+  - Data (date input, default hoje)
+  - Observações (textarea opcional, 4 linhas)
+  - Preview de comissão em tempo real
 
 - **Modo Edição:**
   - Apenas Observações editável
-  - Demais campos readonly
-  - Exibir aviso: "Comissão já calculada, não pode alterar valores críticos"
+  - Demais campos exibidos como readonly em Card informativo
+  - Alert de aviso: "Edição Limitada - Comissões já calculadas"
+  - Exibição de dados completos: ID, Status, Parceiro, Tipo, Valor, Comissão, Data, Data de Criação
+  - Botão salvar desabilitado se negócio cancelado
 
-**Cálculo Automático:**
-- Exibir preview da comissão (10% do valor)
-- Após criar: sistema calcula e cria pagamentos automaticamente
+**Cálculo Automático:** ✅
+- Preview da comissão em Card destacado (azul)
+- Cálculo em tempo real: 10% do valor digitado
+- Formatação em moeda (R$)
+- Mensagem explicativa sobre distribuição automática
+- Ícone Calculator
 
-**Validações:**
-- Parceiro ativo e do mesmo vetor
-- Tipo de negócio ativo
-- Valor > 0
+**Validações:** ✅
+- Parceiro obrigatório (Zod min 1)
+- Tipo de negócio obrigatório (Zod min 1)
+- Valor obrigatório e > 0.01 (Zod number min 0.01)
+- Data obrigatória (Zod min 1)
+- Observações opcional (Zod optional)
+- Schemas separados: createBusinessSchema e updateBusinessSchema
 
-**Fluxo de Criação:**
-```
-1. Preencher formulário
-2. Exibir preview: "Comissão Total: R$ XXX"
-3. Submit
+**Fluxo de Criação:** ✅
+1. Preencher formulário com validações em tempo real
+2. Preview atualiza automaticamente: "Comissão Total (10%): R$ XXX"
+3. Submit com loading state
 4. Backend cria negócio
-5. Backend calcula e cria pagamentos
-6. Redirecionar para lista de pagamentos do negócio
-7. Toast de sucesso
-```
+5. Backend calcula e cria pagamentos automaticamente
+6. Redirecionar para detalhes do negócio (`/negocios/${id}`)
+7. Toast de sucesso: "Negócio criado! Comissões calculadas automaticamente"
 
-**Componentes:**
-- `Input` (valor, data)
-- `Select` (parceiro, tipo)
-- `Textarea` (observações)
-- `Card` (preview da comissão)
-- `Alert` (avisos)
-- `Button`
+**Componentes:** ✅
+- `Input` (valor com step, data com default hoje)
+- `select` nativo (parceiro com nível, tipo)
+- `textarea` nativo (observações, 4 linhas)
+- `Card` (formulário, preview comissão, dados readonly)
+- `Alert` (info sobre cálculo, warning sobre edição)
+- `Button` (voltar, salvar com loading)
+- `Loading` (carregamento de dados)
+
+**Recursos Implementados:**
+- React Hook Form + Zod com schemas condicionais
+- React Query para carregar negócio (edit), parceiros e tipos (create)
+- Mutations separadas para create e update
+- Toast de feedback (success/error)
+- Redirect automático após sucesso
+- Preview de comissão com useMemo (performance)
+- watch no campo value para preview em tempo real
+- Default value hoje para data em modo criação
+- Info box completo em modo edição
+- Alert informativo sobre cálculo automático
+- Alert de warning sobre limitações de edição
+- Validação de negócio cancelado (botão desabilitado)
+- Formatação de moeda e data
+- Estados de loading para queries múltiplas
+- Filtro de parceiros/tipos apenas ativos
+- Grid responsivo (2 colunas em desktop)
+- Rotas ativadas: `/negocios/novo` e `/negocios/:id/editar`
+- Export adicionado em pages/Business/index.ts
 
 #### 7.3. Detalhes do Negócio
 **Arquivo:** `src/pages/business/BusinessDetailPage.tsx`
