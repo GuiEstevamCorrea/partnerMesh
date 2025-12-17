@@ -14,6 +14,7 @@ import { PartnersReportPage } from '@/pages/Reports/PartnersReportPage';
 import { FinancialReportPage } from '@/pages/Reports/FinancialReportPage';
 import { BusinessReportPage } from '@/pages/Reports/BusinessReportPage';
 import { AuditLogsPage } from '@/pages/Audit/AuditLogsPage';
+import { AuditTimelinePage } from '@/pages/Audit/AuditTimelinePage';
 
 export const router = createBrowserRouter([
   // ==================== ROTAS PÚBLICAS ====================
@@ -113,7 +114,10 @@ export const router = createBrowserRouter([
       // ========== ENTREGÁVEL 09 - Auditoria e Logs ==========
       {
         path: 'auditoria',
-        element: <AuditLogsPage />,
+        children: [
+          { index: true, element: <AuditLogsPage /> },
+          { path: 'timeline/:entityType/:entityId', element: <AuditTimelinePage /> },
+        ],
       },
     ],
   },

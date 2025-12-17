@@ -2027,10 +2027,10 @@ Implementar visualização de logs de auditoria para rastreamento de ações cr�
 - `Pagination`
 - `Button` (ver detalhes)
 
-#### 9.2. Timeline de Auditoria por Entidade
-**Arquivo:** `src/pages/audit/AuditTimelinePage.tsx`
+#### 9.2. Timeline de Auditoria por Entidade - OK
+**Arquivo:** `src/pages/audit/AuditTimelinePage.tsx` ✅
 
-**Funcionalidades:**
+**Funcionalidades:** ✅
 - Recebe ID de entidade na URL: `/audit/timeline/:entityType/:entityId`
 - Exibe linha do tempo de todas as ações naquela entidade
 - Layout vertical com cards
