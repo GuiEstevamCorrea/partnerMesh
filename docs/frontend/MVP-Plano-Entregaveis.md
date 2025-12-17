@@ -1390,34 +1390,80 @@ Implementar relatórios analíticos e dashboard com indicadores principais do si
 
 ### Páginas a Criar
 
-#### 8.1. Dashboard Aprimorado
-**Arquivo:** `src/pages/DashboardPage.tsx` (ATUALIZAR)
+#### 8.1. Dashboard Aprimorado ✅ IMPLEMENTADO
+**Arquivo:** `src/pages/DashboardPage.tsx` (ATUALIZADO - 435 linhas)
 
-**Funcionalidades:**
-- **Seção: Visão Geral**
-  - Cards com métricas principais:
-    - Total de Parceiros Ativos
-    - Total de Negócios (mês atual)
-    - Total em Comissões Pendentes
-    - Total em Comissões Pagas (mês atual)
+**Status:** ✅ 100% COMPLETO - 0 Erros TypeScript
 
-- **Seção: Negócios Recentes**
-  - Tabela com últimos 10 negócios
-  - Link para "Ver Todos"
+**Funcionalidades Implementadas:**
 
-- **Seção: Pagamentos Pendentes**
-  - Tabela com próximos pagamentos
-  - Ação rápida de pagar
+- ✅ **Seção: Visão Geral**
+  - ✅ Card "Parceiros Ativos" (azul) - count filtrado por isActive
+  - ✅ Card "Negócios Mês Atual" (roxo) - count filtrado por data >= startOfMonth
+  - ✅ Card "Comissões Pendentes" (amarelo) - sum de payments status Pending
+  - ✅ Card "Comissões Pagas Mês" (verde) - sum de payments status Paid + data mês atual
+  - ✅ Cada card com ícone, valor formatado, link para página de detalhes
 
-- **Seção: Árvore de Parceiros** (se AdminVetor/Operador)
-  - Indicador de níveis
-  - Link para árvore completa
+- ✅ **Seção: Negócios Recentes**
+  - ✅ Tabela com últimos 10 negócios (Table component)
+  - ✅ Colunas: ID, Parceiro, Tipo, Valor, Data, Status, Ações
+  - ✅ Badge para status (success/error)
+  - ✅ Botão "Ver Todos" → /negocios
+  - ✅ Ação visualizar (Eye icon) → /negocios/:id
 
-**Componentes:**
-- `Card` (métricas)
-- `Table` (negócios, pagamentos)
-- `Badge`
-- `Button`
+- ✅ **Seção: Pagamentos Pendentes**
+  - ✅ Tabela com pagamentos status=Pending (10 primeiros)
+  - ✅ Colunas: ID, Destinatário, Nível, Valor, Criado em
+  - ✅ Badge para níveis (info/success/default)
+  - ✅ Botão "Ver Todos" → /pagamentos
+  - ✅ Loading state com componente Loading
+
+- ✅ **Seção: Árvore de Parceiros** (AdminVetor/Operador)
+  - ✅ Card condicional (isAdminVetorOrOperator)
+  - ✅ Indicadores visuais de níveis (3 badges coloridos)
+  - ✅ Botão "Ver Árvore Completa" → /parceiros/arvore
+  - ✅ Ícone Network
+
+**Queries React Query:**
+- ✅ `dashboard-partners`: partnersApi.list filtrado por isActive
+- ✅ `dashboard-business-month`: businessApi.list filtrado por data >= startOfMonth
+- ✅ `dashboard-recent-business`: businessApi.list (page 1, size 10)
+- ✅ `dashboard-pending-payments`: paymentsApi.list status=Pending (page 1, size 10)
+- ✅ `dashboard-paid-payments-month`: paymentsApi.list status=Paid (filtro de data)
+
+**Cálculos:**
+- ✅ totalActivePartners: partnersData.items.length (filtrado)
+- ✅ totalBusinessThisMonth: businessThisMonthData.items.length (filtrado)
+- ✅ totalPendingCommissions: reduce sum de pendingPaymentsData.items.value
+- ✅ totalPaidCommissionsThisMonth: reduce sum de paidPaymentsData.items.value
+
+**Componentes Usados:**
+- ✅ Card (todas as seções)
+- ✅ Table (negócios e pagamentos)
+- ✅ Badge (status, níveis)
+- ✅ Button (ações, links)
+- ✅ Loading (estados de carregamento)
+- ✅ Alert (estados vazios)
+
+**Formatadores:**
+- ✅ formatCurrency (valores)
+- ✅ formatDate (datas)
+
+**Permissões:**
+- ✅ isAdminVetorOrOperator: controla visibilidade da seção Árvore de Parceiros
+
+**Rotas:**
+- ✅ /dashboard (existente, atualizada)
+
+**Critérios de Aceitação:**
+- ✅ 4 cards de métricas exibem valores corretos
+- ✅ Negócios recentes carregam e exibem últimos 10
+- ✅ Pagamentos pendentes carregam e exibem 10 primeiro
+- ✅ Seção Árvore visível apenas para AdminVetor/Operador
+- ✅ Todos os links funcionam corretamente
+- ✅ Loading states em todas as queries
+- ✅ Valores formatados corretamente (moeda e data)
+- ✅ 0 erros TypeScript
 
 #### 8.2. Relatório de Parceiros
 **Arquivo:** `src/pages/reports/PartnersReportPage.tsx`
