@@ -1107,18 +1107,90 @@ Implementar o core do sistema: cadastro de negócios com cálculo automático de
 - ConfirmDialog message não aceita JSX, apenas string (useMemo com string formatada)
 - Checkboxes desabilitados para pagamentos não pendentes
 
-#### 7.5. Confirmação de Pagamento
-**Componente:** `ConfirmDialog`
+#### 7.5. Confirmação de Pagamento - OK
+**Status:** ✅ **IMPLEMENTADO como parte do 7.4 - Lista de Pagamentos**
 
-**Uso:**
-- Ao clicar em "Pagar Selecionados"
-- Exibir:
-  - Quantidade de pagamentos
-  - Valor total
-  - Lista de destinatários
-- Confirmar para processar
-- Loading durante processamento
-- Toast de sucesso/erro
+**Componente Utilizado:** `ConfirmDialog` (já existente)
+
+**Implementação:** ✅
+A confirmação de pagamento foi **completamente integrada ao PaymentsListPage** (item 7.4), proporcionando uma experiência de usuário fluida e coesa. Não requer componente ou página separada.
+
+**Funcionalidades Implementadas:** ✅
+- **Trigger:** Botão "Pagar Selecionados (X)" aparece dinamicamente quando há pagamentos selecionados
+- **ConfirmDialog abre automaticamente** ao clicar no botão
+- **Informações Exibidas:**
+  - Quantidade exata de pagamentos a processar
+  - Valor total formatado em destaque
+  - Lista completa de destinatários com valores individuais
+- **Confirmação:** Botão "Sim, processar" executa mutation
+- **Loading State:** Dialog desabilita ações durante processamento
+- **Feedback:**
+  - Toast de sucesso após processar
+  - Toast de erro se falhar
+  - Toast de warning se tentar processar sem seleções
+
+**Recursos Técnicos:** ✅
+- useMemo para calcular mensagem do ConfirmDialog (performance)
+- Mensagem em formato string com quebras de linha (\n)
+- Lista formatada: "• Nome - R$ valor"
+- Valor total em destaque no topo da mensagem
+- Variant "info" (azul) para ação positiva
+- isLoading sincronizado com mutation.isPending
+- Reset automático de seleções após sucesso
+- Invalidação de queries para atualizar lista
+
+**Fluxo Completo:** ✅
+```
+1. Usuário seleciona pagamentos pendentes (checkboxes)
+2. Botão "Pagar Selecionados (X)" aparece
+3. Clique abre ConfirmDialog com:
+   - "Tem certeza que deseja processar X pagamento(s)?"
+   - Valor Total: R$ XXX,XX
+   - Destinatários:
+     • Nome 1 - R$ XX,XX
+     • Nome 2 - R$ XX,XX
+4. Usuário confirma → Mutation executa
+5. Loading state ativa no dialog
+6. Sucesso:
+   - Toast verde: "Pagamentos processados com sucesso"
+   - Queries invalidadas (lista atualiza)
+   - Seleções resetadas
+   - Dialog fecha
+7. Erro:
+   - Toast vermelho com mensagem de erro
+   - Dialog permanece aberto
+```
+
+**Validações:** ✅
+- Verifica se há seleções antes de abrir dialog
+- Apenas pagamentos com status "Pending" podem ser selecionados
+- Botão desabilitado durante processamento
+- Mensagem contextual e clara
+
+**Código Relevante:**
+- **Handler:** `handleProcessPayments()` - valida e abre dialog
+- **Handler:** `handleConfirmProcess()` - executa mutation
+- **useMemo:** `confirmMessage` - formata mensagem string
+- **Mutation:** `processPaymentsMutation` - chama paymentsApi.process
+- **Estado:** `confirmDialog` - controla abertura e pagamentos selecionados
+
+**Observações:** ✅
+- Implementação segue exatamente o padrão 5 documentado em `5.4-confirm-dialog-patterns.md`
+- ConfirmDialog é componente reutilizável já existente
+- Não requer nova página ou componente específico
+- Integração perfeita com fluxo de seleção múltipla
+- UX otimizada: usuário não sai da página de pagamentos
+
+**Conclusão:**
+Item 7.5 está **100% completo** através da implementação no PaymentsListPage. A separação conceitual no plano era apenas didática - a implementação real integra ambos os itens (7.4 e 7.5) em uma única página coesa, seguindo as melhores práticas de UX.
+
+### Status Final - Entregável 07
+✅ **ENTREGÁVEL 07 - COMPLETO (100%)**
+- ✅ 7.1 - Lista de Negócios
+- ✅ 7.2 - Formulário de Negócio
+- ✅ 7.3 - Detalhes do Negócio
+- ✅ 7.4 - Lista de Pagamentos
+- ✅ 7.5 - Confirmação de Pagamento (integrado ao 7.4)
 
 ### Controle de Permissões
 
