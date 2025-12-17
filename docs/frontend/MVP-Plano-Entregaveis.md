@@ -985,39 +985,127 @@ Implementar o core do sistema: cadastro de negócios com cálculo automático de
 - Fonte monospace para ID do negócio
 - Whitespace preservado em observações
 
-#### 7.4. Lista de Pagamentos
-**Arquivo:** `src/pages/payments/PaymentsListPage.tsx`
+#### 7.4. Lista de Pagamentos - OK
+**Arquivo:** `src/pages/Payments/PaymentsListPage.tsx` ✅
 
-**Funcionalidades:**
-- Tabela com todos os pagamentos
-- Colunas: ID, Destinatário, Negócio ID, Valor, Nível, Status, Data Pagamento
-- Filtros:
-  - Destinatário (input busca)
-  - Status (Pendente/Pago)
-  - Nível (1/2/3)
-  - Vetor (apenas AdminGlobal)
-  - Data Início/Fim
-  - Valor mínimo/máximo
-- Seleção múltipla de pagamentos pendentes
-- Botão "Pagar Selecionados"
-- Paginação
-- Ordenação por data, valor
+**Funcionalidades:** ✅
+- **Cards de Resumo** (grid 4 colunas):
+  - Card Total Pago (verde): valor total + quantidade
+  - Card Total Pendente (amarelo): valor total + quantidade
+  - Card Total Geral (azul): soma de pago + pendente
+  - Card Selecionados (cinza): quantidade selecionada + valor total
+  - Ícones DollarSign e CheckSquare
+- **Filtros Avançados** (Card com grid):
+  - Status (select: Todos/Pendente/Pago)
+  - Nível (select: Todos/1/2/3)
+  - Vetor (select - apenas AdminGlobal): todos os vetores
+  - Data Início (date input)
+  - Data Fim (date input)
+  - Botão "Limpar Filtros"
+- **Tabela de Pagamentos** (8 colunas):
+  - Select (checkbox - apenas para pendentes)
+  - ID (truncado 8 chars, fonte mono)
+  - Destinatário (nome + tipo: Partner/Vector)
+  - Negócio (ID truncado 8 chars, fonte mono)
+  - Nível (Badge colorido: 1=azul, 2=verde, 3=cinza)
+  - Valor (colorido por status: verde=pago, amarelo=pendente)
+  - Status (Badge: success=pago, warning=pendente, error=cancelado)
+  - Data Pagamento (formatada ou "-")
+- **Seleção Múltipla:**
+  - Checkbox individual em cada linha (apenas pendentes)
+  - Estado local com Set<string>
+  - Contador visual no card "Selecionados"
+- **Botão "Pagar Selecionados":**
+  - Visível apenas se houver seleções
+  - Exibe quantidade selecionada
+  - Ícone DollarSign
+  - Desabilitado durante processamento
+- **Paginação:** 20 por página
+- **ConfirmDialog de Pagamento:**
+  - Variant info
+  - Mensagem com quantidade, valor total e lista de destinatários
+  - Formato string (não JSX) com quebras de linha
+  - Loading durante processamento
 
-**Resumo no Topo:**
-- Total Pendente: R$ XXX
-- Total Pago: R$ XXX
-- Qtd Pendente: XX
-- Qtd Pago: XX
+**Recursos Implementados:** ✅
+- React Query para listar pagamentos com cache
+- Query auxiliar: vetores (apenas AdminGlobal)
+- Mutation para processar pagamentos em lote (paymentsApi.process)
+- Toast de feedback em operações
+- Invalidação de cache após processamento
+- Reset de seleções após sucesso
+- Formatação de moeda com formatCurrency
+- Formatação de data com formatDate
+- Estados de loading, erro e vazio tratados
+- Filtros com reset de página ao alterar
+- useMemo para cálculo de resumo (performance)
+- useMemo para mensagem do ConfirmDialog
+- Controle de permissões: isAdminGlobal para filtro de vetor
+- Rota ativada: `/pagamentos`
+- Export adicionado em pages/Payments/index.ts
 
-**Componentes:**
-- `Card` (resumo financeiro)
-- `Table<Payment>` (com checkbox de seleção)
-- `Input` (filtros)
-- `Select` (status, nível)
-- `Badge` (status, nível)
-- `Pagination`
-- `Button` (pagar selecionados)
-- `ConfirmDialog` (confirmação de pagamento)
+**Componentes Utilizados:** ✅
+- `Card` (4 resumos + filtros + tabela)
+- `Table<Payment>` (8 colunas com checkboxes)
+- `Input` (filtros de data)
+- `select` nativo (status, nível, vetor)
+- `Badge` (status, nível - coloridos)
+- `Button` (pagar selecionados, limpar filtros)
+- `Pagination` (navegação de páginas)
+- `ConfirmDialog` (confirmar pagamento)
+- `Loading` (estado de carregamento)
+- `Alert` (erros e vazio - type ao invés de variant)
+
+**Cálculos:** ✅
+- Total Pago: soma de payments com status 'Paid'
+- Total Pendente: soma de payments com status 'Pending'
+- Total Geral: soma de pago + pendente
+- Qtd Pago: contagem de payments 'Paid'
+- Qtd Pendente: contagem de payments 'Pending'
+- Valor Selecionado: soma dos pagamentos selecionados
+
+**Validações:** ✅
+- Apenas pagamentos pendentes podem ser selecionados
+- Verifica se há seleções antes de processar
+- ConfirmDialog lista todos os destinatários
+- Exibe valor total a ser processado
+- Toast de warning se tentar processar sem seleções
+
+**Fluxo de Pagamento:** ✅
+1. Usuário seleciona pagamentos pendentes (checkboxes)
+2. Clica em "Pagar Selecionados (X)"
+3. ConfirmDialog abre com detalhes (quantidade, total, lista)
+4. Usuário confirma
+5. Mutation executa com loading
+6. Toast de sucesso
+7. Query invalidada (atualiza lista)
+8. Seleções resetadas
+9. Dialog fecha
+
+**Filtros Implementados:** ✅
+- Status: Todos/Pendente/Pago (cast para tipo correto)
+- Nível: Todos/1/2/3
+- Vetor: Todos/[lista de vetores] (apenas AdminGlobal)
+- Data Início: date input
+- Data Fim: date input
+- Reset de página ao alterar filtros
+- Botão para limpar todos os filtros
+
+**Destaque Visual:** ✅
+- Cards de resumo coloridos (verde, amarelo, azul, cinza)
+- Ícones grandes com opacidade nos cards
+- Checkboxes apenas para pagamentos pendentes
+- Valores coloridos por status na tabela
+- Badges coloridos por nível (azul=1, verde=2, cinza=3)
+- ID e Negócio em fonte monospace
+- Botão "Pagar Selecionados" destacado quando há seleções
+
+**Observações:** ✅
+- PaymentFilter não suporta busca por nome de destinatário (removido)
+- PaymentFilter não suporta minValue/maxValue (removidos)
+- Table header não aceita JSX, apenas string (corrigido)
+- ConfirmDialog message não aceita JSX, apenas string (useMemo com string formatada)
+- Checkboxes desabilitados para pagamentos não pendentes
 
 #### 7.5. Confirmação de Pagamento
 **Componente:** `ConfirmDialog`

@@ -9,6 +9,7 @@ import { VectorsListPage, VectorFormPage } from '@/pages/Vectors';
 import { PartnersListPage, PartnerFormPage, PartnerTreePage } from '@/pages/Partners';
 import { BusinessTypesListPage, BusinessTypeFormPage } from '@/pages/BusinessTypes';
 import { BusinessListPage, BusinessFormPage, BusinessDetailPage } from '@/pages/Business';
+import { PaymentsListPage } from '@/pages/Payments';
 
 export const router = createBrowserRouter([
   // ==================== ROTAS PÚBLICAS ====================
@@ -90,10 +91,10 @@ export const router = createBrowserRouter([
           // { path: ':id/pagamentos', element: <BusinessPaymentsPage /> },
         ],
       },
-      // {
-      //   path: 'pagamentos',
-      //   element: <PaymentsListPage />,
-      // },
+      {
+        path: 'pagamentos',
+        element: <PaymentsListPage />,
+      },
 
       // ========== ENTREGÁVEL 08 - Relatórios e Dashboard ==========
       // {
