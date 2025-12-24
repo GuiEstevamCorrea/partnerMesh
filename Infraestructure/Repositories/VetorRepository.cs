@@ -1,77 +1,72 @@
 using Application.Interfaces.Repositories;
 using Domain.Entities;
+using Infraestructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infraestructure.Repositories;
 
-/// <summary>
-/// Implementação temporária em memória do repositório de vetores.
-/// Esta implementação será substituída por Entity Framework + PostgreSQL.
-/// </summary>
 public sealed class VetorRepository : IVetorRepository
 {
-    private static readonly List<Vetor> _vetores = new();
+    private readonly PartnerMeshDbContext _context;
 
-    static VetorRepository()
+    public VetorRepository(PartnerMeshDbContext context)
     {
-        // Criar um vetor padrão para testes
-        var vetorPadrao = new Vetor("Vetor Principal", "vetor@partnermesh.com");
-        _vetores.Add(vetorPadrao);
-        
-        // Criar mais um vetor para testes
-        var vetorSecundario = new Vetor("Vetor Secundário", "vetor2@partnermesh.com");
-        _vetores.Add(vetorSecundario);
+        _context = context;
     }
 
-    public Task<Vetor?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<Vetor?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var vetor = _vetores.FirstOrDefault(v => v.Id == id);
-        return Task.FromResult(vetor);
+        return await _context.Vetores
+            .Include(v => v.UserVetores.Where(uv => uv.Active))
+            .Include(v => v.Partners)
+            .FirstOrDefaultAsync(v => v.Id == id, cancellationToken);
     }
 
-    public Task<IEnumerable<Vetor>> GetAllAsync(CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<Vetor>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        return Task.FromResult(_vetores.AsEnumerable());
+        return await _context.Vetores
+            .Include(v => v.UserVetores.Where(uv => uv.Active))
+            .Include(v => v.Partners)
+            .ToListAsync(cancellationToken);
     }
 
-    public Task SaveAsync(Vetor vetor, CancellationToken cancellationToken = default)
+    public async Task SaveAsync(Vetor vetor, CancellationToken cancellationToken = default)
     {
-        var existingVetor = _vetores.FirstOrDefault(v => v.Id == vetor.Id);
+        var existingVetor = await _context.Vetores.FindAsync(new object[] { vetor.Id }, cancellationToken);
+
         if (existingVetor != null)
         {
-            _vetores.Remove(existingVetor);
+            _context.Entry(existingVetor).CurrentValues.SetValues(vetor);
         }
-        
-        _vetores.Add(vetor);
-        return Task.CompletedTask;
+        else
+        {
+            await _context.Vetores.AddAsync(vetor, cancellationToken);
+        }
+
+        await _context.SaveChangesAsync(cancellationToken);
     }
 
-    public Task<bool> NameExistsAsync(string name, CancellationToken cancellationToken = default)
+    public async Task<bool> NameExistsAsync(string name, CancellationToken cancellationToken = default)
     {
-        var exists = _vetores.Any(v => v.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
-        return Task.FromResult(exists);
+        return await _context.Vetores
+            .AnyAsync(v => v.Name == name, cancellationToken);
     }
 
-    public Task<bool> EmailExistsAsync(string email, CancellationToken cancellationToken = default)
+    public async Task<bool> EmailExistsAsync(string email, CancellationToken cancellationToken = default)
     {
-        var exists = _vetores.Any(v => v.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
-        return Task.FromResult(exists);
+        return await _context.Vetores
+            .AnyAsync(v => v.Email == email, cancellationToken);
     }
 
-    public Task<bool> NameExistsExcludingVetorAsync(string name, Guid excludeVetorId, CancellationToken cancellationToken = default)
+    public async Task<bool> NameExistsExcludingVetorAsync(string name, Guid excludeVetorId, CancellationToken cancellationToken = default)
     {
-        var exists = _vetores.Any(v => v.Name.Equals(name, StringComparison.OrdinalIgnoreCase) && v.Id != excludeVetorId);
-        return Task.FromResult(exists);
+        return await _context.Vetores
+            .AnyAsync(v => v.Name == name && v.Id != excludeVetorId, cancellationToken);
     }
 
-    public Task<bool> EmailExistsExcludingVetorAsync(string email, Guid excludeVetorId, CancellationToken cancellationToken = default)
+    public async Task<bool> EmailExistsExcludingVetorAsync(string email, Guid excludeVetorId, CancellationToken cancellationToken = default)
     {
-        var exists = _vetores.Any(v => v.Email.Equals(email, StringComparison.OrdinalIgnoreCase) && v.Id != excludeVetorId);
-        return Task.FromResult(exists);
-    }
-
-    // Método auxiliar para obter o primeiro vetor (para testes)
-    public static Guid GetDefaultVetorId()
-    {
-        return _vetores.First().Id;
+        return await _context.Vetores
+            .AnyAsync(v => v.Email == email && v.Id != excludeVetorId, cancellationToken);
     }
 }

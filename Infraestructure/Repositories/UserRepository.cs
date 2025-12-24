@@ -1,90 +1,95 @@
 using Application.Interfaces.Repositories;
 using Domain.Entities;
-using Domain.ValueTypes;
+using Infraestructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infraestructure.Repositories;
 
-/// <summary>
-/// Implementação temporária em memória do repositório de usuários.
-/// Esta implementação será substituída por Entity Framework + PostgreSQL.
-/// </summary>
 public sealed class UserRepository : IUserRepository
 {
-    private static readonly List<User> _users = new();
+    private readonly PartnerMeshDbContext _context;
 
-    static UserRepository()
+    public UserRepository(PartnerMeshDbContext context)
     {
-        // Dados de teste - Admin Global
-        var adminGlobal = new User(
-            "Admin Global",
-            "admin@partnermesh.com",
-            BCrypt.Net.BCrypt.HashPassword("123456"),
-            PermissionEnum.AdminGlobal);
-
-        _users.Add(adminGlobal);
-
-        // Obter ID do vetor padrão
-        var defaultVetorId = VetorRepository.GetDefaultVetorId();
-
-        // Dados de teste - Admin Vetor
-        var adminVetor = new User(
-            "Admin Vetor",
-            "adminvetor@partnermesh.com", 
-            BCrypt.Net.BCrypt.HashPassword("123456"),
-            PermissionEnum.AdminVetor);
-        
-        adminVetor.AddVetor(defaultVetorId);
-        _users.Add(adminVetor);
-
-        // Dados de teste - Operador
-        var operador = new User(
-            "Operador Sistema",
-            "operador@partnermesh.com",
-            BCrypt.Net.BCrypt.HashPassword("123456"),
-            PermissionEnum.Operador);
-        
-        operador.AddVetor(defaultVetorId);
-        _users.Add(operador);
+        _context = context;
     }
 
-    public Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
+    public async Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
     {
-        var user = _users.FirstOrDefault(u => u.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
-        return Task.FromResult(user);
+        return await _context.Users
+            .Include(u => u.UserVetores.Where(uv => uv.Active))
+            .FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
     }
 
-    public Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var user = _users.FirstOrDefault(u => u.Id == id);
-        return Task.FromResult(user);
+        return await _context.Users
+            .Include(u => u.UserVetores.Where(uv => uv.Active))
+            .FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
     }
 
-    public Task<bool> EmailExistsAsync(string email, CancellationToken cancellationToken = default)
+    public async Task<bool> EmailExistsAsync(string email, CancellationToken cancellationToken = default)
     {
-        var exists = _users.Any(u => u.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
-        return Task.FromResult(exists);
+        return await _context.Users
+            .AnyAsync(u => u.Email == email, cancellationToken);
     }
 
-    public Task<bool> EmailExistsExcludingUserAsync(string email, Guid excludeUserId, CancellationToken cancellationToken = default)
+    public async Task<bool> EmailExistsExcludingUserAsync(string email, Guid excludeUserId, CancellationToken cancellationToken = default)
     {
-        var exists = _users.Any(u => u.Email.Equals(email, StringComparison.OrdinalIgnoreCase) && u.Id != excludeUserId);
-        return Task.FromResult(exists);
+        return await _context.Users
+            .AnyAsync(u => u.Email == email && u.Id != excludeUserId, cancellationToken);
     }
 
-    public Task SaveAsync(User user, CancellationToken cancellationToken = default)
+    public async Task SaveAsync(User user, CancellationToken cancellationToken = default)
     {
-        var existingUser = _users.FirstOrDefault(u => u.Id == user.Id);
+        var existingUser = await _context.Users
+            .Include(u => u.UserVetores)
+            .FirstOrDefaultAsync(u => u.Id == user.Id, cancellationToken);
+
         if (existingUser != null)
         {
-            _users.Remove(existingUser);
+            _context.Entry(existingUser).CurrentValues.SetValues(user);
+            
+            // Atualizar UserVetores
+            var existingVetores = existingUser.UserVetores.ToList();
+            var newVetores = user.UserVetores.ToList();
+            
+            // Remover os que não existem mais
+            foreach (var existingVetor in existingVetores)
+            {
+                if (!newVetores.Any(nv => nv.UserId == existingVetor.UserId && nv.VetorId == existingVetor.VetorId))
+                {
+                    _context.Entry(existingVetor).State = EntityState.Deleted;
+                }
+            }
+            
+            // Adicionar ou atualizar os novos
+            foreach (var newVetor in newVetores)
+            {
+                var existing = existingVetores.FirstOrDefault(ev => ev.UserId == newVetor.UserId && ev.VetorId == newVetor.VetorId);
+                if (existing != null)
+                {
+                    _context.Entry(existing).CurrentValues.SetValues(newVetor);
+                }
+                else
+                {
+                    _context.Entry(newVetor).State = EntityState.Added;
+                }
+            }
         }
-        
-        _users.Add(user);
-        return Task.CompletedTask;
+        else
+        {
+            await _context.Users.AddAsync(user, cancellationToken);
+        }
+
+        await _context.SaveChangesAsync(cancellationToken);
     }
 
-    public Task<IEnumerable<User>> GetAllAsync(CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<User>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        return Task.FromResult(_users.AsEnumerable());
+        return await _context.Users
+            .Include(u => u.UserVetores.Where(uv => uv.Active))
+                .ThenInclude(uv => uv.Vetor)
+            .ToListAsync(cancellationToken);
     }
 }

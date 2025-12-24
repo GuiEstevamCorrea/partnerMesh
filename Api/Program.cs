@@ -41,7 +41,9 @@ using Application.UseCases.LogAudit;
 using Application.UseCases.AuditLogQuery;
 using Infraestructure.Repositories;
 using Infraestructure.Services;
+using Infraestructure.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
@@ -50,6 +52,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
+
+// Configuração do Entity Framework Core com SQL Server
+builder.Services.AddDbContext<PartnerMeshDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Configuração do Swagger com JWT
 builder.Services.AddEndpointsApiExplorer();
@@ -173,6 +179,12 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 #endregion
 
 var app = builder.Build();
+
+// Executar seeding do banco de dados
+using (var scope = app.Services.CreateScope())
+{
+    await DatabaseSeeder.SeedAsync(scope.ServiceProvider);
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
