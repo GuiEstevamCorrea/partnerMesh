@@ -8,6 +8,30 @@ export interface VectorsFilterParams extends FilterParams {
 export const vectorsApi = {
   list: async (params?: VectorsFilterParams): Promise<PaginatedResponse<Vector>> => {
     const response = await api.get('/vectors', { params });
+    
+    // Transformar resposta da API para o formato esperado pelo frontend
+    if (response.data?.data) {
+      const apiData = response.data.data;
+      const transformedItems = (apiData.vetores || []).map((vetor: any) => ({
+        id: vetor.id,
+        name: vetor.name,
+        email: vetor.email,
+        login: vetor.email, // Usar email como login por enquanto
+        isActive: vetor.active,
+        partnersCount: vetor.totalParceiros || 0,
+        createdAt: vetor.createdAt,
+        updatedAt: vetor.createdAt, // Usar createdAt como updatedAt por enquanto
+      }));
+      
+      return {
+        items: transformedItems,
+        currentPage: apiData.currentPage,
+        pageSize: apiData.pageSize,
+        totalItems: apiData.totalVetores,
+        totalPages: apiData.totalPages,
+      };
+    }
+    
     return response.data;
   },
 

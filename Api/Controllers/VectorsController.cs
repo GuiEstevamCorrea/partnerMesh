@@ -148,6 +148,54 @@ public class VectorsController : ControllerBase
     }
 
     /// <summary>
+    /// Alterna o estado ativo/inativo de um vetor
+    /// </summary>
+    /// <param name="id">ID do vetor</param>
+    /// <param name="cancellationToken">Token de cancelamento</param>
+    /// <returns>Resultado da operação</returns>
+    [HttpPatch("{id}/toggle-active")]
+    [AuthorizePermission("AdminGlobal")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> ToggleActiveVector(Guid id, CancellationToken cancellationToken = default)
+    {
+        // Obter ID do usuário atual do token JWT
+        var currentUserIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(currentUserIdClaim) || !Guid.TryParse(currentUserIdClaim, out var currentUserId))
+        {
+            return BadRequest(new { message = "Usuário atual não identificado." });
+        }
+
+        // Buscar o vetor atual para verificar seu estado
+        var vetor = await _vetorRepository.GetByIdAsync(id, cancellationToken);
+        if (vetor is null)
+        {
+            return NotFound(new { message = "Vetor não encontrado." });
+        }
+
+        // Se está ativo, desativa; se está inativo, ativa
+        if (vetor.Active)
+        {
+            var result = await _deactivateVetorUseCase.DeactivateAsync(id, currentUserId, cancellationToken);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(new { message = "Vetor desativado com sucesso." });
+        }
+        else
+        {
+            // Reativar o vetor
+            vetor.Activate();
+            await _vetorRepository.SaveAsync(vetor, cancellationToken);
+            return Ok(new { message = "Vetor ativado com sucesso." });
+        }
+    }
+
+    /// <summary>
     /// Obtém um vetor por ID com detalhes e estatísticas
     /// </summary>
     /// <param name="id">ID do vetor</param>
