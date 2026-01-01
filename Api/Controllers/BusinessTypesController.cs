@@ -188,6 +188,51 @@ public class BusinessTypesController : ControllerBase
     }
 
     /// <summary>
+    /// Ativar ou Inativar Tipo de Negócio
+    /// </summary>
+    /// <param name="id">ID do tipo de negócio</param>
+    /// <returns>Tipo de negócio atualizado</returns>
+    [HttpPatch("{id:guid}/toggle-active")]
+    [AuthorizePermission("AdminGlobal", "AdminVetor")]
+    [ProducesResponseType(typeof(DeactivateBusinessTypeResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> ToggleActive(Guid id)
+    {
+        // Obter ID do usuário atual do token JWT
+        var currentUserIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(currentUserIdClaim) || !Guid.TryParse(currentUserIdClaim, out var currentUserId))
+        {
+            return BadRequest(new { message = "Usuário atual não identificado." });
+        }
+
+        try
+        {
+            var result = await _deactivateBusinessTypeUseCase.ExecuteAsync(id, currentUserId);
+
+            if (!result.IsSuccess)
+            {
+                if (result.Message.Contains("não encontrado"))
+                {
+                    return NotFound(result);
+                }
+                return BadRequest(result);
+            }
+
+            return Ok(result);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Forbid(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "Erro interno do servidor", details = ex.Message });
+        }
+    }
+
+    /// <summary>
     /// UC-44: Obter Tipo de Negócio por ID
     /// </summary>
     /// <param name="id">ID do tipo de negócio</param>

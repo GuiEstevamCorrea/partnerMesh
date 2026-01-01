@@ -1,61 +1,69 @@
 using Application.Interfaces.Repositories;
 using Application.UseCases.ListBusinessTypes.DTO;
 using Domain.Entities;
+using Infraestructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infraestructure.Repositories;
 
 public class BusinessTypeRepository : IBusinessTypeRepository
 {
-    private readonly List<BusinessType> _businessTypes = new();
+    private readonly PartnerMeshDbContext _context;
 
-    public Task<BusinessType?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    public BusinessTypeRepository(PartnerMeshDbContext context)
     {
-        var businessType = _businessTypes.FirstOrDefault(bt => bt.Id == id);
-        return Task.FromResult(businessType);
+        _context = context;
     }
 
-    public Task<IEnumerable<BusinessType>> GetAllAsync(CancellationToken cancellationToken = default)
+    public async Task<BusinessType?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        return Task.FromResult<IEnumerable<BusinessType>>(_businessTypes.ToList());
+        return await _context.BusinessTypes
+            .FirstOrDefaultAsync(bt => bt.Id == id, cancellationToken);
     }
 
-    public Task<IEnumerable<BusinessType>> GetActiveAsync(CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<BusinessType>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        var activeTypes = _businessTypes.Where(bt => bt.Active).ToList();
-        return Task.FromResult<IEnumerable<BusinessType>>(activeTypes);
+        return await _context.BusinessTypes.ToListAsync(cancellationToken);
     }
 
-    public Task<BusinessType?> GetByNameAsync(string name, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<BusinessType>> GetActiveAsync(CancellationToken cancellationToken = default)
     {
-        var businessType = _businessTypes.FirstOrDefault(bt => bt.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
-        return Task.FromResult(businessType);
+        return await _context.BusinessTypes
+            .Where(bt => bt.Active)
+            .ToListAsync(cancellationToken);
     }
 
-    public Task<bool> NameExistsAsync(string name, CancellationToken cancellationToken = default)
+    public async Task<BusinessType?> GetByNameAsync(string name, CancellationToken cancellationToken = default)
     {
-        var exists = _businessTypes.Any(bt => bt.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
-        return Task.FromResult(exists);
+        return await _context.BusinessTypes
+            .FirstOrDefaultAsync(bt => bt.Name == name, cancellationToken);
     }
 
-    public Task<bool> NameExistsAsync(string name, Guid excludeId, CancellationToken cancellationToken = default)
+    public async Task<bool> NameExistsAsync(string name, CancellationToken cancellationToken = default)
     {
-        var exists = _businessTypes.Any(bt => bt.Name.Equals(name, StringComparison.OrdinalIgnoreCase) && bt.Id != excludeId);
-        return Task.FromResult(exists);
+        return await _context.BusinessTypes
+            .AnyAsync(bt => bt.Name == name, cancellationToken);
     }
 
-    public Task<(IEnumerable<BusinessType> BusinessTypes, int TotalCount)> GetFilteredAsync(ListBusinessTypesRequest request, CancellationToken cancellationToken = default)
+    public async Task<bool> NameExistsAsync(string name, Guid excludeId, CancellationToken cancellationToken = default)
     {
-        var query = _businessTypes.AsEnumerable();
+        return await _context.BusinessTypes
+            .AnyAsync(bt => bt.Name == name && bt.Id != excludeId, cancellationToken);
+    }
+
+    public async Task<(IEnumerable<BusinessType> BusinessTypes, int TotalCount)> GetFilteredAsync(ListBusinessTypesRequest request, CancellationToken cancellationToken = default)
+    {
+        var query = _context.BusinessTypes.AsQueryable();
 
         // Aplicar filtros
         if (!string.IsNullOrWhiteSpace(request.Name))
         {
-            query = query.Where(bt => bt.Name.Contains(request.Name, StringComparison.OrdinalIgnoreCase));
+            query = query.Where(bt => bt.Name.Contains(request.Name));
         }
 
         if (!string.IsNullOrWhiteSpace(request.Description))
         {
-            query = query.Where(bt => bt.Description.Contains(request.Description, StringComparison.OrdinalIgnoreCase));
+            query = query.Where(bt => bt.Description.Contains(request.Description));
         }
 
         if (request.IsActive.HasValue)
@@ -66,18 +74,18 @@ public class BusinessTypeRepository : IBusinessTypeRepository
         // Aplicar ordenação
         query = ApplyOrdering(query, request.OrderBy, request.OrderDirection);
 
-        var totalCount = query.Count();
+        var totalCount = await query.CountAsync(cancellationToken);
 
         // Aplicar paginação
-        var pagedResults = query
+        var pagedResults = await query
             .Skip((request.Page - 1) * request.PageSize)
             .Take(request.PageSize)
-            .ToList();
+            .ToListAsync(cancellationToken);
 
-        return Task.FromResult<(IEnumerable<BusinessType>, int)>((pagedResults, totalCount));
+        return (pagedResults, totalCount);
     }
 
-    private static IEnumerable<BusinessType> ApplyOrdering(IEnumerable<BusinessType> query, string? orderBy, string? orderDirection)
+    private static IQueryable<BusinessType> ApplyOrdering(IQueryable<BusinessType> query, string? orderBy, string? orderDirection)
     {
         var isDescending = string.Equals(orderDirection, "desc", StringComparison.OrdinalIgnoreCase);
 
@@ -92,26 +100,21 @@ public class BusinessTypeRepository : IBusinessTypeRepository
         };
     }
 
-    public Task AddAsync(BusinessType businessType, CancellationToken cancellationToken = default)
+    public async Task AddAsync(BusinessType businessType, CancellationToken cancellationToken = default)
     {
-        _businessTypes.Add(businessType);
-        return Task.CompletedTask;
+        await _context.BusinessTypes.AddAsync(businessType, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
     }
 
-    public Task UpdateAsync(BusinessType businessType, CancellationToken cancellationToken = default)
+    public async Task UpdateAsync(BusinessType businessType, CancellationToken cancellationToken = default)
     {
-        var existing = _businessTypes.FirstOrDefault(bt => bt.Id == businessType.Id);
-        if (existing != null)
-        {
-            _businessTypes.Remove(existing);
-            _businessTypes.Add(businessType);
-        }
-        return Task.CompletedTask;
+        _context.BusinessTypes.Update(businessType);
+        await _context.SaveChangesAsync(cancellationToken);
     }
 
-    public Task DeleteAsync(BusinessType businessType, CancellationToken cancellationToken = default)
+    public async Task DeleteAsync(BusinessType businessType, CancellationToken cancellationToken = default)
     {
-        _businessTypes.Remove(businessType);
-        return Task.CompletedTask;
+        _context.BusinessTypes.Remove(businessType);
+        await _context.SaveChangesAsync(cancellationToken);
     }
 }

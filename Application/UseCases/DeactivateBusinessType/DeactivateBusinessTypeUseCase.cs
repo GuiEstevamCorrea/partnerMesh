@@ -46,25 +46,28 @@ public class DeactivateBusinessTypeUseCase : IDeactivateBusinessTypeUseCase
             throw new ArgumentException("Tipo de negócio não encontrado.");
         }
 
-        // Verificar se já está inativo
-        if (!businessType.Active)
+        // Se está ativo, verificar se pode desativar
+        if (businessType.Active)
         {
-            throw new ArgumentException("Tipo de negócio já está inativo.");
-        }
+            // Verificar se existem negócios ativos vinculados a este tipo
+            var allBusinesses = await _businessRepository.GetAllAsync();
+            var activeBusinessesForType = allBusinesses.Where(b => 
+                b.BussinessTypeId == businessTypeId && 
+                b.Status != Domain.ValueTypes.BusinessStatus.Cancelado).ToList();
+            
+            if (activeBusinessesForType.Any())
+            {
+                throw new ArgumentException($"Não é possível inativar este tipo de negócio. Existem {activeBusinessesForType.Count} negócio(s) ativo(s) vinculado(s) a ele.");
+            }
 
-        // Verificar se existem negócios ativos vinculados a este tipo
-        var allBusinesses = await _businessRepository.GetAllAsync();
-        var activeBusinessesForType = allBusinesses.Where(b => 
-            b.BussinessTypeId == businessTypeId && 
-            b.Status != Domain.ValueTypes.BusinessStatus.Cancelado).ToList();
-        
-        if (activeBusinessesForType.Any())
+            // Inativar o tipo de negócio
+            businessType.Deactivate(userId);
+        }
+        else
         {
-            throw new ArgumentException($"Não é possível inativar este tipo de negócio. Existem {activeBusinessesForType.Count} negócio(s) ativo(s) vinculado(s) a ele.");
+            // Reativar o tipo de negócio
+            businessType.Activate(userId);
         }
-
-        // Inativar o tipo de negócio
-        businessType.Deactivate(userId);
 
         // Salvar alterações
         await _businessTypeRepository.UpdateAsync(businessType);
