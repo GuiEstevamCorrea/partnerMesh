@@ -39,6 +39,13 @@ export const businessTypesApi = {
 
   getById: async (id: string): Promise<BusinessType> => {
     const response = await api.get(`/business-types/${id}`);
+    console.log('businessTypesApi.getById - Resposta completa:', response.data);
+    
+    // A API retorna: { isSuccess, message, businessType: {...} }
+    if (response.data?.businessType) {
+      return adaptBusinessTypeFromApi(response.data.businessType);
+    }
+    
     return response.data;
   },
 
