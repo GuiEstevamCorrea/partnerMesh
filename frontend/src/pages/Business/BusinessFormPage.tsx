@@ -60,10 +60,21 @@ export function BusinessFormPage() {
   });
 
   // Query para carregar tipos de negócio (apenas em modo criação)
-  const { data: typesData, isLoading: isLoadingTypes } = useQuery({
+  const { data: typesData, isLoading: isLoadingTypes, error: typesError } = useQuery({
     queryKey: ['business-types-for-business'],
-    queryFn: () => businessTypesApi.list({ pageSize: 1000 }),
+    queryFn: () => businessTypesApi.list({ pageSize: 100 }),
     enabled: !isEditMode,
+  });
+  
+  console.log('📋 BusinessFormPage - Query state:', {
+    isEditMode,
+    queryEnabled: !isEditMode,
+    isLoadingTypes,
+    hasError: !!typesError,
+    typesError,
+    typesData,
+    hasItems: !!typesData?.items,
+    itemsCount: typesData?.items?.length || 0
   });
 
   // Form setup com schema condicional

@@ -21,20 +21,31 @@ export const businessTypesApi = {
   list: async (params?: FilterParams): Promise<PaginatedResponse<BusinessType>> => {
     const response = await api.get('/business-types', { params });
     
-    console.log('businessTypesApi.list - Resposta completa:', response.data);
+    console.log('🔍 businessTypesApi.list - Resposta completa:', response.data);
     
-    // A API retorna: { isSuccess, message, businessTypes: [...], pagination: {...} }
-    if (response.data?.businessTypes && response.data?.pagination) {
+    // A API retorna: { isSuccess, message, BusinessTypes: [...], Pagination: {...} }
+    // ou { isSuccess, message, businessTypes: [...], pagination: {...} }
+    const businessTypes = response.data?.BusinessTypes || response.data?.businessTypes;
+    const pagination = response.data?.Pagination || response.data?.pagination;
+    
+    console.log('🔍 businessTypes array:', businessTypes);
+    console.log('🔍 pagination:', pagination);
+    
+    if (businessTypes && pagination) {
+      const items = businessTypes.map(adaptBusinessTypeFromApi);
+      console.log('✅ Items adaptados:', items);
+      
       return {
-        items: response.data.businessTypes.map(adaptBusinessTypeFromApi),
-        currentPage: response.data.pagination.page,
-        pageSize: response.data.pagination.pageSize,
-        totalItems: response.data.pagination.totalItems,
-        totalPages: response.data.pagination.totalPages,
+        items,
+        currentPage: pagination.page || pagination.Page,
+        pageSize: pagination.pageSize || pagination.PageSize,
+        totalItems: pagination.totalItems || pagination.TotalItems,
+        totalPages: pagination.totalPages || pagination.TotalPages,
       };
     }
     
-    return response.data;
+    console.error('❌ Formato inesperado da resposta');
+    return { items: [], currentPage: 1, pageSize: 10, totalItems: 0, totalPages: 0 };
   },
 
   getById: async (id: string): Promise<BusinessType> => {
