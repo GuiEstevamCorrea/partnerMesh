@@ -56,7 +56,7 @@ export function PartnersListPage() {
       };
 
       if (search) {
-        params.search = search;
+        params.name = search; // API espera 'name' ao invés de 'search'
       }
 
       if (statusFilter === 'active') {
@@ -65,6 +65,7 @@ export function PartnersListPage() {
         params.isActive = false;
       }
 
+      console.log('PartnersListPage - Parâmetros da requisição:', params);
       return partnersApi.list(params);
     },
   });

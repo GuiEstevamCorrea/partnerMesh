@@ -12,21 +12,32 @@ const api = axios.create({
 // Interceptor para adicionar token
 api.interceptors.request.use(
   (config) => {
+    console.log('🔵 Interceptor - URL:', config.url, 'Method:', config.method);
     const token = useAuthStore.getState().token;
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+      console.log('🔵 Token adicionado ao header');
+    } else {
+      console.log('⚠️ Nenhum token encontrado!');
     }
+    console.log('🔵 Request config:', config);
     return config;
   },
   (error) => {
+    console.error('❌ Erro no interceptor request:', error);
     return Promise.reject(error);
   }
 );
 
 // Interceptor para tratar erros e refresh token
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    console.log('✅ Response recebida:', response.status, response.config.url);
+    return response;
+  },
   async (error: AxiosError) => {
+    console.error('❌ Erro na resposta:', error.response?.status, error.message);
+    console.error('❌ Response data:', error.response?.data);
     const originalRequest = error.config as any;
 
     // Token expirado

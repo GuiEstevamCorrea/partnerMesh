@@ -4,6 +4,8 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Search, Network } from 'lucide-react';
 
 import { partnersApi } from '@/api/endpoints/partners.api';
+import { vectorsApi } from '@/api/endpoints/vectors.api';
+import api from '@/api/axios.config';
 import { Partner } from '@/types/partner.types';
 import { useAuthStore } from '@/store/auth.store';
 
@@ -22,11 +24,21 @@ export function PartnerTreePage() {
   // Estado dos filtros
   const [search, setSearch] = useState('');
   const selectedPartnerId = searchParams.get('partnerId');
+  const selectedVectorIdFromUrl = searchParams.get('vectorId');
+  
+  const isAdminGlobal = user?.permission === 'AdminGlobal';
 
   // Query: Lista de parceiros para o filtro
   const { data: partnersData, isLoading: isLoadingPartners } = useQuery({
     queryKey: ['partners', 'all'],
     queryFn: () => partnersApi.list({ pageSize: 1000 }),
+  });
+
+  // Query: Lista de vetores (para AdminGlobal selecionar)
+  const { data: vectorsData, isLoading: isLoadingVectors } = useQuery({
+    queryKey: ['vectors', 'all'],
+    queryFn: () => vectorsApi.list({ pageSize: 1000 }),
+    enabled: isAdminGlobal,
   });
 
   // Query: Árvore de parceiros
@@ -35,19 +47,55 @@ export function PartnerTreePage() {
     isLoading: isLoadingTree,
     error: treeError,
   } = useQuery({
-    queryKey: ['partner-tree', selectedPartnerId || user?.vectorId],
-    queryFn: () => {
+    queryKey: ['partner-tree', selectedPartnerId, user?.vectorId, selectedVectorIdFromUrl],
+    queryFn: async () => {
+      const params: any = {};
+      
       if (selectedPartnerId) {
-        return partnersApi.getTree(selectedPartnerId);
+        params.rootPartnerId = selectedPartnerId;
+      } else if (selectedVectorIdFromUrl) {
+        // AdminGlobal selecionou um vetor
+        params.vetorId = selectedVectorIdFromUrl;
+      } else if (user?.vectorId) {
+        // AdminVetor/Operador tem vectorId
+        params.vetorId = user.vectorId;
+      } else if (isAdminGlobal && vectorsData?.items?.[0]) {
+        // AdminGlobal sem seleção, usar primeiro vetor disponível
+        params.vetorId = vectorsData.items[0].id;
       }
-      // Se não houver parceiro selecionado, busca a árvore do vetor
-      // O backend deve retornar a árvore completa do vetor
-      return partnersApi.getTree(user!.vectorId as string);
+      
+      console.log('Buscando árvore com parâmetros:', params);
+      
+      // Se não tem nenhum parâmetro, não faz a busca
+      if (!params.rootPartnerId && !params.vetorId) {
+        console.log('Nenhum parâmetro válido, retornando null');
+        return null;
+      }
+      
+      const response = await api.get('/partners/tree', { params });
+      console.log('Resposta da árvore (RAW):', response.data);
+      
+      // A API retorna: { isSuccess, message, tree: {...} }
+      if (response.data?.tree) {
+        console.log('Tree encontrada:', response.data.tree);
+        // Mapear campos com maiúscula para minúscula
+        const tree = {
+          vetor: response.data.tree.vetor || response.data.tree.Vetor,
+          rootPartners: response.data.tree.rootPartners || response.data.tree.RootPartners || [],
+          orphanPartners: response.data.tree.orphanPartners || response.data.tree.OrphanPartners || []
+        };
+        console.log('Tree mapeada:', tree);
+        return tree;
+      }
+      
+      console.log('Retornando data direto:', response.data);
+      return response.data;
     },
-    enabled: !!user?.vectorId,
+    enabled: true, // Sempre habilitado, mas só faz request se tiver parâmetros válidos
   });
 
   const partners = partnersData?.items || [];
+  const vectors = vectorsData?.items || [];
   
   // Filtrar parceiros para o select
   const filteredPartners = partners.filter((p: Partner) =>
@@ -56,18 +104,33 @@ export function PartnerTreePage() {
 
   const handlePartnerSelect = (partnerId: string | null) => {
     if (partnerId) {
-      setSearchParams({ partnerId });
+      const currentVectorId = searchParams.get('vectorId');
+      if (currentVectorId) {
+        setSearchParams({ partnerId, vectorId: currentVectorId });
+      } else {
+        setSearchParams({ partnerId });
+      }
     } else {
-      setSearchParams({});
+      const currentVectorId = searchParams.get('vectorId');
+      if (currentVectorId) {
+        setSearchParams({ vectorId: currentVectorId });
+      } else {
+        setSearchParams({});
+      }
     }
   };
 
   const handleClearFilter = () => {
-    setSearchParams({});
+    const currentVectorId = searchParams.get('vectorId');
+    if (currentVectorId) {
+      setSearchParams({ vectorId: currentVectorId });
+    } else {
+      setSearchParams({});
+    }
     setSearch('');
   };
 
-  const isLoading = isLoadingPartners || isLoadingTree;
+  const isLoading = isLoadingPartners || isLoadingTree || (isAdminGlobal && isLoadingVectors);
 
   // Informações do parceiro selecionado
   const selectedPartner = selectedPartnerId
@@ -104,26 +167,61 @@ export function PartnerTreePage() {
         <div className="space-y-4">
           <div className="flex items-center gap-3">
             <Search className="w-5 h-5 text-gray-400" />
-            <h2 className="text-lg font-semibold text-gray-900">Filtrar por Parceiro</h2>
+            <h2 className="text-lg font-semibold text-gray-900">Filtros</h2>
           </div>
+
+          {/* Seletor de Vetor (apenas para AdminGlobal) */}
+          {isAdminGlobal && (
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Selecione um Vetor
+              </label>
+              <select
+                value={selectedVectorIdFromUrl || ''}
+                onChange={(e) => {
+                  const vectorId = e.target.value;
+                  if (vectorId) {
+                    setSearchParams({ vectorId });
+                  } else {
+                    setSearchParams({});
+                  }
+                }}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+              >
+                <option value="">Selecione um vetor...</option>
+                {vectors.map((vector: any) => (
+                  <option key={vector.id} value={vector.id}>
+                    {vector.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           <Alert type="info">
             <p>
               {selectedPartnerId
                 ? 'Exibindo sub-árvore do parceiro selecionado. Limpe o filtro para ver a árvore completa do vetor.'
+                : isAdminGlobal && !selectedVectorIdFromUrl
+                ? 'Selecione um vetor acima para visualizar sua árvore de parceiros.'
                 : 'Exibindo árvore completa do vetor. Selecione um parceiro para ver apenas sua sub-árvore.'}
             </p>
           </Alert>
 
-          <div className="flex gap-3">
-            <div className="flex-1">
-              <Input
-                type="text"
-                placeholder="Buscar parceiro..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                disabled={isLoadingPartners}
-              />
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Filtrar por Parceiro
+            </label>
+            <div className="flex gap-3">
+              <div className="flex-1">
+                <Input
+                  type="text"
+                  placeholder="Buscar parceiro..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  disabled={isLoadingPartners}
+                />
+              </div>
             </div>
           </div>
 
@@ -190,7 +288,7 @@ export function PartnerTreePage() {
                 {selectedPartner ? `Sub-árvore de ${selectedPartner.name}` : 'Árvore Completa'}
               </h2>
               <div className="text-sm text-gray-600">
-                Total de parceiros: {treeData.totalRecommended || 0}
+                Total de parceiros raiz: {treeData.rootPartners?.length || 0}
               </div>
             </div>
 
@@ -202,7 +300,7 @@ export function PartnerTreePage() {
             </Alert>
 
             <div className="space-y-2">
-              <PartnerTreeView node={treeData} />
+              <PartnerTreeView tree={treeData} />
             </div>
           </div>
         )}

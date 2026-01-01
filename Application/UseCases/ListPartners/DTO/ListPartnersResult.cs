@@ -27,9 +27,10 @@ public sealed record PartnerDto
     public string VetorName { get; init; } = string.Empty;
     public Guid? RecommenderId { get; init; }
     public string? RecommenderName { get; init; }
+    public int Level { get; init; }
     public DateTime CreatedAt { get; init; }
 
-    public static PartnerDto FromEntity(Partner partner, string vetorName = "", string? recommenderName = null)
+    public static PartnerDto FromEntity(Partner partner, string vetorName = "", string? recommenderName = null, int level = 0)
     {
         return new PartnerDto
         {
@@ -42,6 +43,7 @@ public sealed record PartnerDto
             VetorName = vetorName,
             RecommenderId = partner.RecommenderId,
             RecommenderName = recommenderName,
+            Level = level,
             CreatedAt = partner.CreatedAt
         };
     }

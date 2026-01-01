@@ -77,8 +77,11 @@ public class GetPartnerByIdUseCase : IGetPartnerByIdUseCase
             // Buscar parceiros recomendados por este parceiro
             var recommendedPartners = await _partnerRepository.GetRecommendedByPartnerAsync(partnerId, cancellationToken);
 
+            // Calcular nível do parceiro
+            int level = await CalculatePartnerLevelAsync(partnerId, cancellationToken);
+
             // Criar DTO detalhado
-            var partnerDetail = PartnerDetailDto.FromEntity(partner, vetor, recommender, recommendedPartners);
+            var partnerDetail = PartnerDetailDto.FromEntity(partner, vetor, recommender, recommendedPartners, level);
 
             return GetPartnerByIdResult.Success(partnerDetail);
         }
@@ -86,5 +89,24 @@ public class GetPartnerByIdUseCase : IGetPartnerByIdUseCase
         {
             return GetPartnerByIdResult.Failure($"Erro interno: {ex.Message}");
         }
+    }
+
+    /// <summary>
+    /// Calcula o nível do parceiro baseado na cadeia de recomendação
+    /// </summary>
+    private async Task<int> CalculatePartnerLevelAsync(Guid partnerId, CancellationToken cancellationToken)
+    {
+        var partner = await _partnerRepository.GetByIdAsync(partnerId, cancellationToken);
+        if (partner == null) return 0;
+
+        // Se não tem recomendador, foi recomendado diretamente por um vetor = nível 1
+        if (!partner.RecommenderId.HasValue)
+        {
+            return 1;
+        }
+
+        // Se tem recomendador, o nível é: nível do recomendador + 1
+        var recommenderLevel = await CalculatePartnerLevelAsync(partner.RecommenderId.Value, cancellationToken);
+        return recommenderLevel + 1;
     }
 }

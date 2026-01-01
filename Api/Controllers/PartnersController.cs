@@ -119,15 +119,22 @@ public class PartnersController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> CreatePartner([FromBody] CreatePartnerRequest request, CancellationToken cancellationToken = default)
     {
+        Console.WriteLine($"CreatePartner - Request recebido: Name={request.Name}, Email={request.Email}, PhoneNumber={request.PhoneNumber}, VetorId={request.VetorId}");
+        
         // Obter ID do usuário atual do token JWT
         var currentUserIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(currentUserIdClaim) || !Guid.TryParse(currentUserIdClaim, out var currentUserId))
         {
+            Console.WriteLine("CreatePartner - Erro: Usuário atual não identificado");
             return BadRequest(CreatePartnerResult.Failure("Usuário atual não identificado."));
         }
 
+        Console.WriteLine($"CreatePartner - CurrentUserId: {currentUserId}");
+        
         var result = await _createPartnerUseCase.CreateAsync(request, currentUserId, cancellationToken);
 
+        Console.WriteLine($"CreatePartner - Result: IsSuccess={result.IsSuccess}, Message={result.Message}");
+        
         if (!result.IsSuccess)
         {
             return BadRequest(result);

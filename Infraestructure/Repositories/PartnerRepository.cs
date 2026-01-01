@@ -3,46 +3,59 @@ using Application.UseCases.ListPartners.DTO;
 using Domain.Entities;
 using Domain.ValueTypes;
 using Domain.Extensions;
+using Infraestructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infraestructure.Repositories;
 
 public class PartnerRepository : IPartnerRepository
 {
-    private readonly List<Partner> _partners = new();
+    private readonly PartnerMeshDbContext _context;
 
-    public Task<Partner?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    public PartnerRepository(PartnerMeshDbContext context)
     {
-        var partner = _partners.FirstOrDefault(p => p.Id == id);
-        return Task.FromResult(partner);
+        _context = context;
     }
 
-    public Task<IEnumerable<Partner>> GetAllAsync(CancellationToken cancellationToken = default)
+    public async Task<Partner?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        return Task.FromResult<IEnumerable<Partner>>(_partners.ToList());
+        return await _context.Partners
+            .Include(p => p.Vetor)
+            .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
     }
 
-    public Task<IEnumerable<Partner>> GetByVetorIdAsync(Guid vetorId, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<Partner>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        var partners = _partners.Where(p => p.VetorId == vetorId).ToList();
-        return Task.FromResult<IEnumerable<Partner>>(partners);
+        return await _context.Partners
+            .Include(p => p.Vetor)
+            .ToListAsync(cancellationToken);
     }
 
-    public Task<Partner?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<Partner>> GetByVetorIdAsync(Guid vetorId, CancellationToken cancellationToken = default)
     {
-        var partner = _partners.FirstOrDefault(p => p.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
-        return Task.FromResult(partner);
+        return await _context.Partners
+            .Include(p => p.Vetor)
+            .Where(p => p.VetorId == vetorId)
+            .ToListAsync(cancellationToken);
     }
 
-    public Task<bool> EmailExistsAsync(string email, CancellationToken cancellationToken = default)
+    public async Task<Partner?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
     {
-        var exists = _partners.Any(p => p.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
-        return Task.FromResult(exists);
+        return await _context.Partners
+            .Include(p => p.Vetor)
+            .FirstOrDefaultAsync(p => p.Email == email, cancellationToken);
     }
 
-    public Task<bool> EmailExistsAsync(string email, Guid excludeId, CancellationToken cancellationToken = default)
+    public async Task<bool> EmailExistsAsync(string email, CancellationToken cancellationToken = default)
     {
-        var exists = _partners.Any(p => p.Email.Equals(email, StringComparison.OrdinalIgnoreCase) && p.Id != excludeId);
-        return Task.FromResult(exists);
+        return await _context.Partners
+            .AnyAsync(p => p.Email == email, cancellationToken);
+    }
+
+    public async Task<bool> EmailExistsAsync(string email, Guid excludeId, CancellationToken cancellationToken = default)
+    {
+        return await _context.Partners
+            .AnyAsync(p => p.Email == email && p.Id != excludeId, cancellationToken);
     }
 
     public async Task<IEnumerable<Partner>> GetRecommendationChainAsync(Guid partnerId, CancellationToken cancellationToken = default)
@@ -62,10 +75,12 @@ public class PartnerRepository : IPartnerRepository
         return chain;
     }
 
-    public Task<IEnumerable<Partner>> GetRecommendedByPartnerAsync(Guid recommenderId, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<Partner>> GetRecommendedByPartnerAsync(Guid recommenderId, CancellationToken cancellationToken = default)
     {
-        var recommended = _partners.Where(p => p.RecommenderId == recommenderId).ToList();
-        return Task.FromResult<IEnumerable<Partner>>(recommended);
+        return await _context.Partners
+            .Include(p => p.Vetor)
+            .Where(p => p.RecommenderId == recommenderId)
+            .ToListAsync(cancellationToken);
     }
 
     public async Task<bool> WouldCreateCycleAsync(Guid partnerId, Guid recommenderId, CancellationToken cancellationToken = default)
@@ -75,9 +90,11 @@ public class PartnerRepository : IPartnerRepository
         return chain.Any(p => p.Id == partnerId);
     }
 
-    public Task<(IEnumerable<Partner> Partners, int TotalCount)> GetFilteredAsync(ListPartnersRequest request, CancellationToken cancellationToken = default)
+    public async Task<(IEnumerable<Partner> Partners, int TotalCount)> GetFilteredAsync(ListPartnersRequest request, CancellationToken cancellationToken = default)
     {
-        var query = _partners.AsQueryable();
+        var query = _context.Partners
+            .Include(p => p.Vetor)
+            .AsQueryable();
 
         // Aplicar filtros
         if (!string.IsNullOrWhiteSpace(request.Name))
@@ -135,37 +152,32 @@ public class PartnerRepository : IPartnerRepository
             _ => query.OrderBy(p => p.Name)
         };
 
-        var totalCount = query.Count();
+        var totalCount = await query.CountAsync(cancellationToken);
 
         // Paginação
         var pageSize = Math.Min(request.PageSize, 100); // Máximo 100 itens por página
         var skip = (request.Page - 1) * pageSize;
 
-        var partners = query.Skip(skip).Take(pageSize).ToList();
+        var partners = await query.Skip(skip).Take(pageSize).ToListAsync(cancellationToken);
 
-        return Task.FromResult<(IEnumerable<Partner>, int)>((partners, totalCount));
+        return (partners, totalCount);
     }
 
-    public Task AddAsync(Partner partner, CancellationToken cancellationToken = default)
+    public async Task AddAsync(Partner partner, CancellationToken cancellationToken = default)
     {
-        _partners.Add(partner);
-        return Task.CompletedTask;
+        await _context.Partners.AddAsync(partner, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
     }
 
-    public Task UpdateAsync(Partner partner, CancellationToken cancellationToken = default)
+    public async Task UpdateAsync(Partner partner, CancellationToken cancellationToken = default)
     {
-        var existing = _partners.FirstOrDefault(p => p.Id == partner.Id);
-        if (existing != null)
-        {
-            _partners.Remove(existing);
-            _partners.Add(partner);
-        }
-        return Task.CompletedTask;
+        _context.Partners.Update(partner);
+        await _context.SaveChangesAsync(cancellationToken);
     }
 
-    public Task DeleteAsync(Partner partner, CancellationToken cancellationToken = default)
+    public async Task DeleteAsync(Partner partner, CancellationToken cancellationToken = default)
     {
-        _partners.Remove(partner);
-        return Task.CompletedTask;
+        _context.Partners.Remove(partner);
+        await _context.SaveChangesAsync(cancellationToken);
     }
 }

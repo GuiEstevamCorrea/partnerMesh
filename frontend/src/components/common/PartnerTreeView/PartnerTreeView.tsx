@@ -1,13 +1,17 @@
 import { useState } from 'react';
-import { ChevronDown, ChevronRight, User, Users } from 'lucide-react';
-import { PartnerTree } from '@/types';
+import { ChevronDown, ChevronRight, User, Users, Building2 } from 'lucide-react';
+import { PartnerTree, PartnerTreeNode } from '@/types';
 
 interface PartnerTreeViewProps {
-  node: PartnerTree;
+  tree: PartnerTree;
+}
+
+interface PartnerNodeViewProps {
+  node: PartnerTreeNode;
   depth?: number;
 }
 
-export function PartnerTreeView({ node, depth = 0 }: PartnerTreeViewProps) {
+function PartnerNodeView({ node, depth = 0 }: PartnerNodeViewProps) {
   const [isExpanded, setIsExpanded] = useState(depth < 2); // Auto-expand first 2 levels
 
   const hasChildren = node.children && node.children.length > 0;
@@ -64,14 +68,17 @@ export function PartnerTreeView({ node, depth = 0 }: PartnerTreeViewProps) {
 
         {/* Info */}
         <div className="flex-1 flex items-center gap-3">
-          <span className="font-medium text-gray-900">{node.name}</span>
+          <div>
+            <span className="font-medium text-gray-900">{node.name}</span>
+            <span className="text-sm text-gray-500 ml-2">{node.email || node.phoneNumber}</span>
+          </div>
           
           {getLevelBadge(node.level)}
 
-          {node.totalRecommended > 0 && (
+          {node.stats.totalDescendants > 0 && (
             <div className="flex items-center gap-1.5 text-sm text-gray-600">
               <Users className="w-4 h-4" />
-              <span>{node.totalRecommended} recomendado{node.totalRecommended !== 1 ? 's' : ''}</span>
+              <span>{node.stats.totalDescendants} recomendado{node.stats.totalDescendants !== 1 ? 's' : ''}</span>
             </div>
           )}
         </div>
@@ -81,8 +88,50 @@ export function PartnerTreeView({ node, depth = 0 }: PartnerTreeViewProps) {
       {hasChildren && isExpanded && (
         <div className="mt-2 ml-6 space-y-2 border-l-2 border-gray-200 pl-4">
           {node.children.map((child) => (
-            <PartnerTreeView key={child.id} node={child} depth={depth + 1} />
+            <PartnerNodeView key={child.id} node={child} depth={depth + 1} />
           ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function PartnerTreeView({ tree }: PartnerTreeViewProps) {
+  return (
+    <div className="space-y-4">
+      {/* Vetor Info */}
+      <div className="flex items-center gap-3 p-4 rounded-lg border-2 border-blue-300 bg-blue-50">
+        <div className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-200">
+          <Building2 className="w-5 h-5 text-blue-700" />
+        </div>
+        <div>
+          <h3 className="font-semibold text-lg text-gray-900">{tree.vetor.name}</h3>
+          <p className="text-sm text-gray-600">{tree.vetor.email}</p>
+        </div>
+      </div>
+
+      {/* Root Partners */}
+      {tree.rootPartners.length > 0 ? (
+        <div className="space-y-2">
+          {tree.rootPartners.map((partner) => (
+            <PartnerNodeView key={partner.id} node={partner} depth={0} />
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-8 text-gray-500">
+          Nenhum parceiro encontrado
+        </div>
+      )}
+
+      {/* Orphan Partners */}
+      {tree.orphanPartners.length > 0 && (
+        <div className="mt-6">
+          <h4 className="text-sm font-semibold text-gray-700 mb-2">Parceiros Órfãos</h4>
+          <div className="space-y-2">
+            {tree.orphanPartners.map((partner) => (
+              <PartnerNodeView key={partner.id} node={partner} depth={0} />
+            ))}
+          </div>
         </div>
       )}
     </div>

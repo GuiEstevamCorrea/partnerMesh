@@ -21,6 +21,7 @@ import { Loading } from '@/components/common/Loading';
 const partnerFormSchema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),
   contact: z.string().min(1, 'Contato é obrigatório'),
+  vectorId: z.string().optional(),
   recommenderId: z.string().optional(),
   recommenderType: z.enum(['Partner', 'Vector']).optional(),
   isActive: z.boolean().default(true),
@@ -35,6 +36,7 @@ export function PartnerFormPage() {
   const { user } = useAuthStore();
 
   const isEditMode = !!id;
+  const isAdminGlobal = user?.permission === 'AdminGlobal';
   const [showRecommenderWarning, setShowRecommenderWarning] = useState(false);
 
   // Query para carregar parceiro em modo de edição
@@ -68,6 +70,7 @@ export function PartnerFormPage() {
     defaultValues: {
       name: '',
       contact: '',
+      vectorId: user?.vectorId || '',
       recommenderId: '',
       recommenderType: undefined,
       isActive: true,
@@ -76,19 +79,22 @@ export function PartnerFormPage() {
 
   const watchRecommenderId = watch('recommenderId');
   const watchRecommenderType = watch('recommenderType');
+  const watchVectorId = watch('vectorId');
 
   // Preencher form quando carregar parceiro (modo edição)
   useEffect(() => {
     if (partner && isEditMode) {
+      console.log('Preenchendo formulário com dados do parceiro:', partner);
       reset({
         name: partner.name,
         contact: partner.contact,
+        vectorId: partner.vectorId || user?.vectorId || '',
         recommenderId: partner.recommenderId || '',
         recommenderType: partner.recommenderType,
         isActive: partner.isActive,
       });
     }
-  }, [partner, isEditMode, reset]);
+  }, [partner, isEditMode, reset, user]);
 
   // Mostrar aviso quando não selecionar recomendador
   useEffect(() => {
@@ -103,7 +109,9 @@ export function PartnerFormPage() {
       navigate('/parceiros');
     },
     onError: (error: any) => {
-      const message = error.response?.data?.message || 'Erro ao criar parceiro';
+      console.error('Erro ao criar parceiro:', error);
+      console.error('Response data:', error.response?.data);
+      const message = error.response?.data?.message || error.response?.data?.Message || 'Erro ao criar parceiro';
       showToast('error', message);
     },
   });
@@ -123,28 +131,53 @@ export function PartnerFormPage() {
 
   // Submit handler
   const onSubmit = (data: PartnerFormData) => {
+    console.log('🟢 onSubmit chamado!');
+    console.log('Form data:', data);
+    console.log('isEditMode:', isEditMode);
+    
+    // Determinar se o contato é email ou telefone
+    const isEmail = data.contact.includes('@');
+    
+    // Determinar o vetorId
+    const vetorId = data.vectorId || user?.vectorId;
+    
+    console.log('VetorId:', vetorId, 'User:', user);
+    
+    if (!vetorId) {
+      console.log('❌ Erro: Nenhum vetorId encontrado!');
+      showToast('error', 'Selecione um vetor para o parceiro');
+      return;
+    }
+    
     // Preparar payload
     const payload: any = {
       name: data.name,
-      contact: data.contact,
+      phoneNumber: isEmail ? '00000000000' : data.contact, // Telefone dummy quando for email
+      email: isEmail ? data.contact : `${data.contact.replace(/\D/g, '')}@temp.partnermesh.com`,
       isActive: data.isActive,
     };
 
     // Modo criação
     if (!isEditMode) {
-      payload.vectorId = user?.vectorId || '';
+      payload.vetorId = vetorId;
       
-      // Se tiver recomendador selecionado
-      if (data.recommenderId) {
+      // Se tiver recomendador selecionado E for do tipo Partner
+      // Quando for Vector, não enviar recommenderId (backend usará o vetor automaticamente)
+      if (data.recommenderId && data.recommenderType === 'Partner') {
         payload.recommenderId = data.recommenderId;
-        payload.recommenderType = data.recommenderType;
       }
-      // Se não tiver recomendador, o backend irá usar o vetor como recomendador
 
+      console.log('🚀 Payload a ser enviado:', payload);
+      console.log('🚀 Chamando createMutation.mutate...');
       createMutation.mutate(payload);
     } else {
       // Modo edição (apenas nome, contato e status)
-      updateMutation.mutate({ id: id!, data: payload });
+      const updatePayload = {
+        name: data.name,
+        contact: data.contact,
+        isActive: data.isActive,
+      };
+      updateMutation.mutate({ id: id!, data: updatePayload });
     }
   };
 
@@ -255,6 +288,33 @@ export function PartnerFormPage() {
                 </p>
               </div>
             </div>
+
+            {/* Vetor (apenas para AdminGlobal e modo criação) */}
+            {!isEditMode && isAdminGlobal && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Vetor <span className="text-red-500">*</span>
+                </label>
+                <select
+                  {...register('vectorId')}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                  required
+                >
+                  <option value="">Selecione um vetor...</option>
+                  {vectorsData?.items?.map((vector: any) => (
+                    <option key={vector.id} value={vector.id}>
+                      {vector.name}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs text-gray-500 mt-1">
+                  Vetor ao qual o parceiro será vinculado
+                </p>
+                {errors.vectorId && (
+                  <p className="text-xs text-red-600 mt-1">{errors.vectorId.message}</p>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Recomendador (apenas modo criação) */}

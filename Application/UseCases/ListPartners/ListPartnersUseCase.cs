@@ -90,7 +90,10 @@ public class ListPartnersUseCase : IListPartnersUseCase
                     recommenderName = recommender?.Name;
                 }
 
-                partnerDtos.Add(PartnerDto.FromEntity(partner, vetorName, recommenderName));
+                // Calcular nível do parceiro (cadeia de recomendação)
+                int level = await CalculatePartnerLevelAsync(partner.Id, cancellationToken);
+
+                partnerDtos.Add(PartnerDto.FromEntity(partner, vetorName, recommenderName, level));
             }
 
             // Criar informação de paginação
@@ -109,5 +112,26 @@ public class ListPartnersUseCase : IListPartnersUseCase
         {
             return ListPartnersResult.Failure($"Erro interno: {ex.Message}");
         }
+    }
+
+    /// <summary>
+    /// Calcula o nível do parceiro baseado na cadeia de recomendação
+    /// Nível 1 = recomendado diretamente por um vetor
+    /// Nível 2 = recomendado por um parceiro de nível 1, e assim por diante
+    /// </summary>
+    private async Task<int> CalculatePartnerLevelAsync(Guid partnerId, CancellationToken cancellationToken)
+    {
+        var partner = await _partnerRepository.GetByIdAsync(partnerId, cancellationToken);
+        if (partner == null) return 0;
+
+        // Se não tem recomendador, foi recomendado diretamente por um vetor = nível 1
+        if (!partner.RecommenderId.HasValue)
+        {
+            return 1;
+        }
+
+        // Se tem recomendador, o nível é: nível do recomendador + 1
+        var recommenderLevel = await CalculatePartnerLevelAsync(partner.RecommenderId.Value, cancellationToken);
+        return recommenderLevel + 1;
     }
 }

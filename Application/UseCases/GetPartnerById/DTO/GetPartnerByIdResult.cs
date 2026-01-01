@@ -36,6 +36,7 @@ public sealed record PartnerDetailDto
     public Guid? RecommenderId { get; init; }
     public string? RecommenderName { get; init; }
     public string? RecommenderEmail { get; init; }
+    public int Level { get; init; }
     
     // Estatísticas
     public int TotalRecommended { get; init; }
@@ -49,7 +50,8 @@ public sealed record PartnerDetailDto
         Partner partner, 
         Vetor vetor, 
         Partner? recommender = null,
-        IEnumerable<Partner>? recommendedPartners = null)
+        IEnumerable<Partner>? recommendedPartners = null,
+        int level = 0)
     {
         var recommended = recommendedPartners?.ToList() ?? new List<Partner>();
         
@@ -67,6 +69,7 @@ public sealed record PartnerDetailDto
             RecommenderId = recommender?.Id,
             RecommenderName = recommender?.Name,
             RecommenderEmail = recommender?.Email,
+            Level = level,
             TotalRecommended = recommended.Count,
             ActiveRecommended = recommended.Count(p => p.Active),
             InactiveRecommended = recommended.Count(p => !p.Active),
