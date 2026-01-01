@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft } from 'lucide-react';
 
 import { businessTypesApi } from '@/api/endpoints/businessTypes.api';
@@ -27,6 +27,7 @@ export function BusinessTypeFormPage() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const { showToast } = useToast();
+  const queryClient = useQueryClient();
   const isEditMode = !!id;
 
   // Form setup
@@ -55,6 +56,7 @@ export function BusinessTypeFormPage() {
   const createMutation = useMutation({
     mutationFn: businessTypesApi.create,
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['business-types'] });
       showToast('success', 'Tipo de negócio criado com sucesso!');
       navigate('/tipos-negocio');
     },
@@ -67,6 +69,7 @@ export function BusinessTypeFormPage() {
   const updateMutation = useMutation({
     mutationFn: (data: BusinessTypeFormData) => businessTypesApi.update(id!, data),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['business-types'] });
       showToast('success', 'Tipo de negócio atualizado com sucesso!');
       navigate('/tipos-negocio');
     },
