@@ -11,10 +11,10 @@ public class Vetor
     public DateTime CreatedAt { get; private set; }
 
     public IReadOnlyCollection<UserVetor> UserVetores => _userVetores.AsReadOnly();
-    private readonly List<UserVetor> _userVetores = new();
+    private List<UserVetor> _userVetores = new();
 
     public IReadOnlyCollection<Partner> Partners => _partners.AsReadOnly();
-    private readonly List<Partner> _partners = new();
+    private List<Partner> _partners = new();
 
     protected Vetor() { }
 

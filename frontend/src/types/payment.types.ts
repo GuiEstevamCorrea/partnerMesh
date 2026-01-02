@@ -1,16 +1,21 @@
 export interface Payment {
   id: string;
-  businessId: string;
-  recipientId: string;
-  recipientName: string;
-  recipientType: 'Partner' | 'Vector';
+  partnerId: string;
+  partnerName: string;
+  tipoPagamento: string;
   value: number;
-  level: number;
-  status: 'Pending' | 'Paid';
+  status: string;
+  paidOn?: string;
+  createdAt: string;
+  // Campos legados (manter para compatibilidade)
+  businessId?: string;
+  recipientId?: string;
+  recipientName?: string;
+  recipientType?: 'Partner' | 'Vector';
+  level?: number;
   paidAt?: string;
   paidByUserId?: string;
   paidByUserName?: string;
-  createdAt: string;
 }
 
 export interface ProcessPaymentRequest {

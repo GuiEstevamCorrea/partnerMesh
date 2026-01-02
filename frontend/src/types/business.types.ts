@@ -22,15 +22,44 @@ export interface Business {
   id: string;
   partnerId: string;
   partnerName: string;
+  partnerEmail?: string;
+  partnerPhone?: string;
   businessTypeId: string;
   businessTypeName: string;
+  businessTypeDescription?: string;
   value: number;
   date: string;
   observations?: string;
   status: 'Active' | 'Cancelled';
-  totalCommission: number;
+  totalCommission?: number;
   createdAt: string;
   updatedAt?: string;
+  cancellationReason?: string;
+  cancelledAt?: string;
+  commission?: {
+    commissionId: string;
+    totalValue: number;
+    createdAt: string;
+    totalPayments: number;
+    paidPayments: number;
+    pendingPayments: number;
+    cancelledPayments: number;
+    totalPaidValue: number;
+    totalPendingValue: number;
+    totalCancelledValue: number;
+    commissionStatus: string;
+    payments: Array<{
+      paymentId: string;
+      partnerId: string;
+      partnerName: string;
+      paymentType: string;
+      value: number;
+      status: string;
+      createdAt: string;
+      paidOn?: string;
+      level: string;
+    }>;
+  };
 }
 
 export interface CreateBusinessRequest {

@@ -12,9 +12,9 @@ public static class PaymentStatusExtensions
     {
         return status switch
         {
-            ValueTypes.PaymentStatus.APagar => "a_pagar",
-            ValueTypes.PaymentStatus.Pago => "pago",
-            ValueTypes.PaymentStatus.Cancelado => "cancelado",
+            ValueTypes.PaymentStatus.APagar => "Pending",
+            ValueTypes.PaymentStatus.Pago => "Paid",
+            ValueTypes.PaymentStatus.Cancelado => "Cancelled",
             _ => throw new ArgumentException($"Status inválido: {status}")
         };
     }
@@ -26,8 +26,11 @@ public static class PaymentStatusExtensions
     {
         return status?.ToLower() switch
         {
+            "pending" => ValueTypes.PaymentStatus.APagar,
             "a_pagar" => ValueTypes.PaymentStatus.APagar,
+            "paid" => ValueTypes.PaymentStatus.Pago,
             "pago" => ValueTypes.PaymentStatus.Pago,
+            "cancelled" => ValueTypes.PaymentStatus.Cancelado,
             "cancelado" => ValueTypes.PaymentStatus.Cancelado,
             _ => throw new ArgumentException($"Status inválido: {status}")
         };
@@ -42,12 +45,15 @@ public static class PaymentStatusExtensions
         
         switch (status?.ToLower())
         {
+            case "pending":
             case "a_pagar":
                 result = ValueTypes.PaymentStatus.APagar;
                 return true;
+            case "paid":
             case "pago":
                 result = ValueTypes.PaymentStatus.Pago;
                 return true;
+            case "cancelled":
             case "cancelado":
                 result = ValueTypes.PaymentStatus.Cancelado;
                 return true;

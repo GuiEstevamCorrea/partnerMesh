@@ -174,7 +174,7 @@ export function BusinessListPage() {
       header: 'Comissão Total',
       render: (business) => (
         <span className={`font-medium ${business.status === 'Cancelled' ? 'text-gray-400' : 'text-blue-600'}`}>
-          {formatCurrency(business.totalCommission)}
+          {formatCurrency(business.commission?.totalValue || 0)}
         </span>
       ),
     },

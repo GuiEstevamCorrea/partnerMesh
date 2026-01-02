@@ -2,38 +2,55 @@ using Application.Interfaces.Repositories;
 using Domain.Entities;
 using Domain.ValueTypes;
 using Domain.Extensions;
+using Infraestructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infraestructure.Repositories;
 
 public class BusinessRepository : IBusinessRepository
 {
-    private readonly List<Bussiness> _businesses = new();
+    private readonly PartnerMeshDbContext _context;
 
-    public Task<Bussiness?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    public BusinessRepository(PartnerMeshDbContext context)
     {
-        var business = _businesses.FirstOrDefault(b => b.Id == id);
-        return Task.FromResult(business);
+        _context = context;
     }
 
-    public Task<IEnumerable<Bussiness>> GetAllAsync(CancellationToken cancellationToken = default)
+    public async Task<Bussiness?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        return Task.FromResult<IEnumerable<Bussiness>>(_businesses.ToList());
+        return await _context.Businesses
+            .Include(b => b.Partner)
+            .Include(b => b.BussinessType)
+            .FirstOrDefaultAsync(b => b.Id == id, cancellationToken);
     }
 
-    public Task<IEnumerable<Bussiness>> GetByPartnerIdAsync(Guid partnerId, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<Bussiness>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        var businesses = _businesses.Where(b => b.PartnerId == partnerId).ToList();
-        return Task.FromResult<IEnumerable<Bussiness>>(businesses);
+        return await _context.Businesses
+            .Include(b => b.Partner)
+            .Include(b => b.BussinessType)
+            .ToListAsync(cancellationToken);
     }
 
-    public Task<IEnumerable<Bussiness>> GetByVetorIdAsync(Guid vetorId, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<Bussiness>> GetByPartnerIdAsync(Guid partnerId, CancellationToken cancellationToken = default)
     {
-        // Para implementar isso, precisaria ter acesso ao PartnerRepository para filtrar por vetor
-        // Por agora, retorno lista vazia - implementar quando necessário
-        return Task.FromResult<IEnumerable<Bussiness>>(new List<Bussiness>());
+        return await _context.Businesses
+            .Include(b => b.Partner)
+            .Include(b => b.BussinessType)
+            .Where(b => b.PartnerId == partnerId)
+            .ToListAsync(cancellationToken);
     }
 
-    public Task<(IEnumerable<Bussiness> businesses, int totalCount)> GetWithFiltersAsync(
+    public async Task<IEnumerable<Bussiness>> GetByVetorIdAsync(Guid vetorId, CancellationToken cancellationToken = default)
+    {
+        return await _context.Businesses
+            .Include(b => b.Partner)
+            .Include(b => b.BussinessType)
+            .Where(b => b.Partner.VetorId == vetorId)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<(IEnumerable<Bussiness> businesses, int totalCount)> GetWithFiltersAsync(
         Guid? partnerId = null,
         Guid? businessTypeId = null,
         string? status = null,
@@ -48,7 +65,10 @@ public class BusinessRepository : IBusinessRepository
         int pageSize = 10,
         CancellationToken cancellationToken = default)
     {
-        var query = _businesses.AsQueryable();
+        var query = _context.Businesses
+            .Include(b => b.Partner)
+            .Include(b => b.BussinessType)
+            .AsQueryable();
 
         // Aplicar filtros
         if (partnerId.HasValue)
@@ -81,7 +101,7 @@ public class BusinessRepository : IBusinessRepository
             query = query.Where(b => b.Observations.ToLower().Contains(searchText.ToLower()));
 
         // Contar total antes da paginação
-        var totalCount = query.Count();
+        var totalCount = await query.CountAsync(cancellationToken);
 
         // Aplicar ordenação
         var isAscending = sortDirection == SortDirection.Ascending;
@@ -106,34 +126,29 @@ public class BusinessRepository : IBusinessRepository
         };
 
         // Aplicar paginação
-        var businesses = query
+        var businesses = await query
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
-            .ToList();
+            .ToListAsync(cancellationToken);
 
-        return Task.FromResult<(IEnumerable<Bussiness>, int)>((businesses, totalCount));
+        return (businesses, totalCount);
     }
 
-    public Task AddAsync(Bussiness business, CancellationToken cancellationToken = default)
+    public async Task AddAsync(Bussiness business, CancellationToken cancellationToken = default)
     {
-        _businesses.Add(business);
-        return Task.CompletedTask;
+        await _context.Businesses.AddAsync(business, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
     }
 
-    public Task UpdateAsync(Bussiness business, CancellationToken cancellationToken = default)
+    public async Task UpdateAsync(Bussiness business, CancellationToken cancellationToken = default)
     {
-        var existing = _businesses.FirstOrDefault(b => b.Id == business.Id);
-        if (existing != null)
-        {
-            _businesses.Remove(existing);
-            _businesses.Add(business);
-        }
-        return Task.CompletedTask;
+        _context.Businesses.Update(business);
+        await _context.SaveChangesAsync(cancellationToken);
     }
 
-    public Task DeleteAsync(Bussiness business, CancellationToken cancellationToken = default)
+    public async Task DeleteAsync(Bussiness business, CancellationToken cancellationToken = default)
     {
-        _businesses.Remove(business);
-        return Task.CompletedTask;
+        _context.Businesses.Remove(business);
+        await _context.SaveChangesAsync(cancellationToken);
     }
 }

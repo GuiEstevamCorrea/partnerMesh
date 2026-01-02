@@ -3,54 +3,66 @@ using Domain.Entities;
 using Domain.ValueObjects;
 using Domain.ValueTypes;
 using Domain.Extensions;
+using Infraestructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infraestructure.Repositories;
 
 public class CommissionRepository : ICommissionRepository
 {
-    private readonly List<Comission> _commissions = new();
+    private readonly PartnerMeshDbContext _context;
 
-    public Task<Comission?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    public CommissionRepository(PartnerMeshDbContext context)
     {
-        var commission = _commissions.FirstOrDefault(c => c.Id == id);
-        return Task.FromResult(commission);
+        _context = context;
     }
 
-    public Task<Comission?> GetByBusinessIdAsync(Guid businessId, CancellationToken cancellationToken = default)
+    public async Task<Comission?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var commission = _commissions.FirstOrDefault(c => c.BussinessId == businessId);
-        return Task.FromResult(commission);
+        return await _context.Comissions
+            .Include(c => c.Bussiness)
+                .ThenInclude(b => b.Partner)
+            .Include(c => c.Pagamentos)
+            .FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
     }
 
-    public Task<IEnumerable<Comission>> GetAllAsync(CancellationToken cancellationToken = default)
+    public async Task<Comission?> GetByBusinessIdAsync(Guid businessId, CancellationToken cancellationToken = default)
     {
-        return Task.FromResult<IEnumerable<Comission>>(_commissions.ToList());
+        return await _context.Comissions
+            .Include(c => c.Bussiness)
+                .ThenInclude(b => b.Partner)
+            .Include(c => c.Pagamentos)
+            .FirstOrDefaultAsync(c => c.BussinessId == businessId, cancellationToken);
     }
 
-    public Task AddAsync(Comission commission, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<Comission>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        _commissions.Add(commission);
-        return Task.CompletedTask;
+        return await _context.Comissions
+            .Include(c => c.Bussiness)
+                .ThenInclude(b => b.Partner)
+            .Include(c => c.Pagamentos)
+            .ToListAsync(cancellationToken);
     }
 
-    public Task UpdateAsync(Comission commission, CancellationToken cancellationToken = default)
+    public async Task AddAsync(Comission commission, CancellationToken cancellationToken = default)
     {
-        var existing = _commissions.FirstOrDefault(c => c.Id == commission.Id);
-        if (existing != null)
-        {
-            _commissions.Remove(existing);
-            _commissions.Add(commission);
-        }
-        return Task.CompletedTask;
+        await _context.Comissions.AddAsync(commission, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
     }
 
-    public Task DeleteAsync(Comission commission, CancellationToken cancellationToken = default)
+    public async Task UpdateAsync(Comission commission, CancellationToken cancellationToken = default)
     {
-        _commissions.Remove(commission);
-        return Task.CompletedTask;
+        _context.Comissions.Update(commission);
+        await _context.SaveChangesAsync(cancellationToken);
     }
 
-    public Task<(IEnumerable<ComissionPayment> payments, int totalCount)> GetPaymentsWithFiltersAsync(
+    public async Task DeleteAsync(Comission commission, CancellationToken cancellationToken = default)
+    {
+        _context.Comissions.Remove(commission);
+        await _context.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task<(IEnumerable<ComissionPayment> payments, int totalCount)> GetPaymentsWithFiltersAsync(
         Guid? vetorId = null,
         Guid? partnerId = null,
         DateTime? startDate = null,
@@ -64,7 +76,11 @@ public class CommissionRepository : ICommissionRepository
         CancellationToken cancellationToken = default)
     {
         // Obter todos os pagamentos de todas as comissões
-        var allPayments = _commissions.SelectMany(c => c.Pagamentos).AsQueryable();
+        var allPayments = _context.Comissions
+            .Include(c => c.Bussiness)
+                .ThenInclude(b => b.Partner)
+            .SelectMany(c => c.Pagamentos)
+            .AsQueryable();
 
         // Aplicar filtros
         if (partnerId.HasValue)
@@ -101,18 +117,14 @@ public class CommissionRepository : ICommissionRepository
         // Filtro por vetorId usando a relação Business -> Partner -> Vetor
         if (vetorId.HasValue)
         {
-            var commissionsForVetor = _commissions
-                .Where(c => c.Bussiness != null && 
-                           c.Bussiness.Partner != null && 
-                           c.Bussiness.Partner.VetorId == vetorId.Value)
-                .Select(c => c.Id)
-                .ToHashSet();
-            
-            allPayments = allPayments.Where(p => commissionsForVetor.Contains(p.ComissionId));
+            allPayments = allPayments.Where(p => 
+                p.Comission.Bussiness != null && 
+                p.Comission.Bussiness.Partner != null && 
+                p.Comission.Bussiness.Partner.VetorId == vetorId.Value);
         }
 
         // Contar total antes da paginação
-        var totalCount = allPayments.Count();
+        var totalCount = await allPayments.CountAsync(cancellationToken);
 
         // Aplicar ordenação
         var isAscending = sortDirection == SortDirection.Ascending;
@@ -134,11 +146,11 @@ public class CommissionRepository : ICommissionRepository
         };
 
         // Aplicar paginação
-        var pagedPayments = allPayments
+        var pagedPayments = await allPayments
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
-            .ToList();
+            .ToListAsync(cancellationToken);
 
-        return Task.FromResult((pagedPayments.AsEnumerable(), totalCount));
+        return (pagedPayments.AsEnumerable(), totalCount);
     }
 }

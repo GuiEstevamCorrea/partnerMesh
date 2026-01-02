@@ -247,7 +247,7 @@ export function BusinessFormPage() {
                 Comissão Total
               </label>
               <p className="text-gray-900 font-semibold text-blue-600">
-                {formatCurrency(business.totalCommission)}
+                {formatCurrency(business.totalCommission || 0)}
               </p>
             </div>
             <div>

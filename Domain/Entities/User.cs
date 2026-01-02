@@ -16,7 +16,7 @@ public class User
     public DateTime CreatedAt { get; private set; }
 
     public IReadOnlyCollection<UserVetor> UserVetores => _userVetores.AsReadOnly();
-    private readonly List<UserVetor> _userVetores = new();
+    private List<UserVetor> _userVetores = new();
 
     protected User() { }
 

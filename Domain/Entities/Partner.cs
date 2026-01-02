@@ -16,7 +16,7 @@ public class Partner
     public Partner? Recommender { get; private set; }
 
     public IReadOnlyCollection<Partner> Recommended => _recommended.AsReadOnly();
-    private readonly List<Partner> _recommended = new();
+    private List<Partner> _recommended = new();
 
     protected Partner() { }
 

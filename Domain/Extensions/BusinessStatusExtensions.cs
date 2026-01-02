@@ -12,8 +12,8 @@ public static class BusinessStatusExtensions
     {
         return status switch
         {
-            ValueTypes.BusinessStatus.Ativo => "ativo",
-            ValueTypes.BusinessStatus.Cancelado => "cancelado",
+            ValueTypes.BusinessStatus.Ativo => "Active",
+            ValueTypes.BusinessStatus.Cancelado => "Cancelled",
             _ => throw new ArgumentException($"Status inválido: {status}")
         };
     }
@@ -25,7 +25,9 @@ public static class BusinessStatusExtensions
     {
         return status?.ToLower() switch
         {
+            "active" => ValueTypes.BusinessStatus.Ativo,
             "ativo" => ValueTypes.BusinessStatus.Ativo,
+            "cancelled" => ValueTypes.BusinessStatus.Cancelado,
             "cancelado" => ValueTypes.BusinessStatus.Cancelado,
             _ => throw new ArgumentException($"Status inválido: {status}")
         };
@@ -41,9 +43,11 @@ public static class BusinessStatusExtensions
         switch (status?.ToLower())
         {
             case "ativo":
+            case "active":
                 result = ValueTypes.BusinessStatus.Ativo;
                 return true;
             case "cancelado":
+            case "cancelled":
                 result = ValueTypes.BusinessStatus.Cancelado;
                 return true;
             default:

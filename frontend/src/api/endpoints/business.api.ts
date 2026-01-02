@@ -11,17 +11,35 @@ import {
 export const businessApi = {
   list: async (params?: FilterParams): Promise<PaginatedResponse<Business>> => {
     const response = await api.get('/business', { params });
-    return response.data;
+    // Backend retorna { isSuccess, message, businesses, pagination, summary }
+    if (response.data.businesses && response.data.pagination) {
+      return {
+        items: response.data.businesses,
+        totalItems: response.data.pagination.totalItems,
+        page: response.data.pagination.currentPage,
+        pageSize: response.data.pagination.pageSize,
+        totalPages: response.data.pagination.totalPages,
+      };
+    }
+    throw new Error(response.data.message || 'Erro ao carregar negócios');
   },
 
   getById: async (id: string): Promise<Business> => {
     const response = await api.get(`/business/${id}`);
-    return response.data;
+    // Backend retorna { isSuccess, message, business }
+    if (response.data.business) {
+      return response.data.business;
+    }
+    throw new Error(response.data.message || 'Erro ao carregar negócio');
   },
 
   getPayments: async (id: string): Promise<Payment[]> => {
     const response = await api.get(`/business/${id}/payments`);
-    return response.data;
+    // Backend retorna { isSuccess, message, businessPayments: { payments: [...] } }
+    if (response.data.businessPayments?.payments) {
+      return response.data.businessPayments.payments;
+    }
+    return [];
   },
 
   create: async (data: CreateBusinessRequest): Promise<Business> => {

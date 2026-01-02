@@ -10,7 +10,7 @@ public class Bussiness
     public Partner Partner { get; private set; }
 
     public Guid BussinessTypeId { get; private set; }
-    public BussinessType BussinessType { get; private set; }
+    public BusinessType BussinessType { get; private set; }
 
     public decimal Value { get; private set; }
     public BusinessStatus Status { get; private set; }

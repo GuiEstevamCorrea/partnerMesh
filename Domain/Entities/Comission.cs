@@ -13,7 +13,7 @@ public class Comission
     public DateTime CreatedAt { get; private set; }
 
     public IReadOnlyCollection<ComissionPayment> Pagamentos => _payments.AsReadOnly();
-    private readonly List<ComissionPayment> _payments = new();
+    private List<ComissionPayment> _payments = new();
 
     protected Comission() { }
 

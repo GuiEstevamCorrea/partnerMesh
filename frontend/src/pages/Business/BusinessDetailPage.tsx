@@ -271,7 +271,7 @@ const BusinessDetailPage = () => {
                 isActive ? 'text-blue-600' : 'text-gray-500'
               }`}
             >
-              {formatCurrency(business.totalCommission)}
+              {formatCurrency(business.totalCommission || 0)}
             </p>
           </div>
 
@@ -355,29 +355,21 @@ const BusinessDetailPage = () => {
                 render: (payment: Payment) => (
                   <div>
                     <p className="font-medium text-gray-900">
-                      {payment.recipientName}
+                      {payment.partnerName}
                     </p>
                     <p className="text-sm text-gray-600">
-                      {payment.recipientType}
+                      {payment.tipoPagamento}
                     </p>
                   </div>
                 ),
               },
               {
-                key: 'level',
-                header: 'Nível',
+                key: 'type',
+                header: 'Tipo',
                 render: (payment: Payment) => (
-                  <Badge
-                    variant={
-                      payment.level === 1
-                        ? 'info'
-                        : payment.level === 2
-                        ? 'success'
-                        : 'default'
-                    }
-                  >
-                    Nível {payment.level}
-                  </Badge>
+                  <span className="text-sm text-gray-700">
+                    {payment.tipoPagamento}
+                  </span>
                 ),
               },
               {
@@ -419,11 +411,11 @@ const BusinessDetailPage = () => {
                 ),
               },
               {
-                key: 'paidAt',
+                key: 'paidOn',
                 header: 'Data Pagamento',
                 render: (payment: Payment) => (
                   <span className="text-gray-900">
-                    {payment.paidAt ? formatDate(payment.paidAt) : '-'}
+                    {payment.paidOn ? formatDate(payment.paidOn) : '-'}
                   </span>
                 ),
               },

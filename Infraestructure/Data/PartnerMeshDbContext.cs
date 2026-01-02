@@ -37,7 +37,10 @@ public class PartnerMeshDbContext : DbContext
             entity.Property(e => e.Active).IsRequired();
             entity.Property(e => e.CreatedAt).IsRequired();
 
-            // Configuração da tabela associativa UserVetor
+            // Configuração da tabela associativa UserVetor - usar backing field
+            entity.Navigation(u => u.UserVetores)
+                .HasField("_userVetores")
+                .UsePropertyAccessMode(PropertyAccessMode.Field);
             entity.HasMany(u => u.UserVetores)
                 .WithOne(uv => uv.User)
                 .HasForeignKey(uv => uv.UserId)
@@ -71,6 +74,14 @@ public class PartnerMeshDbContext : DbContext
             entity.Property(e => e.Active).IsRequired();
             entity.Property(e => e.CreatedAt).IsRequired();
 
+            // Configurar para usar backing fields
+            entity.Navigation(v => v.Partners)
+                .HasField("_partners")
+                .UsePropertyAccessMode(PropertyAccessMode.Field);
+            entity.Navigation(v => v.UserVetores)
+                .HasField("_userVetores")
+                .UsePropertyAccessMode(PropertyAccessMode.Field);
+
             entity.HasMany(v => v.Partners)
                 .WithOne(p => p.Vetor)
                 .HasForeignKey(p => p.VetorId)
@@ -92,6 +103,11 @@ public class PartnerMeshDbContext : DbContext
             entity.Property(e => e.Active).IsRequired();
             entity.Property(e => e.CreatedAt).IsRequired();
 
+            // Configurar para usar backing field
+            entity.Navigation(p => p.Recommended)
+                .HasField("_recommended")
+                .UsePropertyAccessMode(PropertyAccessMode.Field);
+
             // Auto-referência (Recomendador)
             entity.HasOne(p => p.Recommender)
                 .WithMany(p => p.Recommended)
@@ -108,6 +124,7 @@ public class PartnerMeshDbContext : DbContext
         // BusinessType Configuration
         modelBuilder.Entity<BusinessType>(entity =>
         {
+            entity.ToTable("BusinessTypes");
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
             entity.Property(e => e.Description).HasMaxLength(500);
@@ -119,6 +136,7 @@ public class PartnerMeshDbContext : DbContext
         // Business Configuration
         modelBuilder.Entity<Bussiness>(entity =>
         {
+            entity.ToTable("Businesses");
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Value).IsRequired().HasPrecision(18, 2);
             entity.Property(e => e.Status).IsRequired();
@@ -148,9 +166,15 @@ public class PartnerMeshDbContext : DbContext
         // Comission Configuration
         modelBuilder.Entity<Comission>(entity =>
         {
+            entity.ToTable("Comissions");
             entity.HasKey(e => e.Id);
             entity.Property(e => e.TotalValue).IsRequired().HasPrecision(18, 2);
             entity.Property(e => e.CreatedAt).IsRequired();
+
+            // Configurar para usar backing field explicitamente
+            entity.Navigation(c => c.Pagamentos)
+                .HasField("_payments")
+                .UsePropertyAccessMode(PropertyAccessMode.Field);
 
             // Relação 1:1 com Business
             entity.HasOne(c => c.Bussiness)
@@ -168,6 +192,7 @@ public class PartnerMeshDbContext : DbContext
         // ComissionPayment Configuration (Owned Type)
         modelBuilder.Entity<ComissionPayment>(entity =>
         {
+            entity.ToTable("ComissionPayments");
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Value).IsRequired().HasPrecision(18, 2);
             entity.Property(e => e.TipoPagamento).IsRequired();
