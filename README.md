@@ -1,130 +1,130 @@
 # PartnerMesh
 
-Sistema de gestão de rede de parceiros com controle de negócios e distribuição automática de comissões.
+Partner network management system with business control and automatic commission distribution.
 
-## 📋 Sobre o Projeto
+## 📋 About the Project
 
-PartnerMesh é uma plataforma completa para gerenciamento de redes multinível de parceiros, permitindo o controle de negócios fechados entre parceiros e a distribuição automática de comissões através de uma estrutura hierárquica de até 3 níveis.
+PartnerMesh is a complete platform for managing multi-level partner networks, allowing control of deals closed between partners and automatic distribution of commissions through a hierarchical structure of up to 3 levels.
 
-### Conceitos Principais
+### Core Concepts
 
-- **Vetor**: Entidade proprietária da rede de parceiros. Cada vetor possui sua própria rede independente.
-- **Parceiro**: Membro da rede que pode fechar negócios e recomendar novos parceiros.
-- **Negócio**: Transação entre dois parceiros da rede, gerando comissões automaticamente.
-- **Comissão**: Valor calculado automaticamente (10% do negócio) e distribuído para até 3 níveis acima dos parceiros envolvidos.
+- **Vector**: Entity that owns the partner network. Each vector has its own independent network.
+- **Partner**: Network member who can close deals and recommend new partners.
+- **Business**: Transaction between two network partners, automatically generating commissions.
+- **Commission**: Value automatically calculated (10% of the business) and distributed up to 3 levels above the involved partners.
 
-## 🏗️ Arquitetura
+## 🏗️ Architecture
 
 ### Backend (.NET 8)
 
 ```
-Api/                      # Adaptador Primário - Controllers e endpoints REST
-Application/              # Camada de Aplicação - Casos de uso (Ports)
-  ├── UseCases/          # Casos de uso implementados
-  ├── Interfaces/        # Portas (Interfaces de Repositórios e Serviços)
-  └── DTOs/              # Objetos de transferência de dados
-Domain/                   # Núcleo do Hexágono - Entidades e regras de negócio
-  ├── Entities/          # Modelos de domínio
-  ├── ValueObjects/      # Objetos de valor
-  ├── ValueTypes/        # Enums e configurações
-  └── Extensions/        # Extensões de domínio
-Infrastructure/           # Adaptador Secundário - Implementações externas
-  ├── Data/              # Contexto EF Core
-  ├── Repositories/      # Implementação das Portas de Repositório
-  └── Services/          # Implementação das Portas de Serviços Externos
+Api/                      # Primary Adapter - REST Controllers and endpoints
+Application/              # Application Layer - Use Cases (Ports)
+  ├── UseCases/          # Implemented use cases
+  ├── Interfaces/        # Ports (Repository and Service Interfaces)
+  └── DTOs/              # Data Transfer Objects
+Domain/                   # Hexagon Core - Entities and business rules
+  ├── Entities/          # Domain models
+  ├── ValueObjects/      # Value objects
+  ├── ValueTypes/        # Enums and configurations
+  └── Extensions/        # Domain extensions
+Infrastructure/           # Secondary Adapter - External implementations
+  ├── Data/              # EF Core Context
+  ├── Repositories/      # Repository Port implementations
+  └── Services/          # External Service Port implementations
 ```
 
-**Arquitetura**: Hexagonal (Ports and Adapters)
-- **Núcleo (Domain)**: Regras de negócio isoladas e independentes
-- **Portas (Application/Interfaces)**: Contratos que definem comunicação
-- **Adaptadores**: 
-  - **Primários (Api)**: Controladores REST que recebem requisições
-  - **Secundários (Infrastructure)**: Implementações de persistência e serviços externos
-- **Princípios**:
-  - Separação clara de responsabilidades
+**Architecture**: Hexagonal (Ports and Adapters)
+- **Core (Domain)**: Isolated and independent business rules
+- **Ports (Application/Interfaces)**: Contracts defining communication
+- **Adapters**: 
+  - **Primary (Api)**: REST controllers receiving requests
+  - **Secondary (Infrastructure)**: Persistence and external service implementations
+- **Principles**:
+  - Clear separation of concerns
   - Domain-Driven Design (DDD)
-  - Inversão de dependência (DIP)
-  - Repository Pattern com Entity Framework Core
-  - CQRS para queries complexas
+  - Dependency Inversion Principle (DIP)
+  - Repository Pattern with Entity Framework Core
+  - CQRS for complex queries
 
 ### Frontend (React + TypeScript)
 
 ```
 src/
-  ├── api/               # Configuração Axios e endpoints
-  ├── components/        # Componentes reutilizáveis
-  ├── pages/             # Páginas da aplicação
+  ├── api/               # Axios configuration and endpoints
+  ├── components/        # Reusable components
+  ├── pages/             # Application pages
   ├── hooks/             # Custom hooks
   ├── types/             # TypeScript types
-  ├── utils/             # Utilitários
-  └── contexts/          # Contexts React
+  ├── utils/             # Utilities
+  └── contexts/          # React contexts
 ```
 
-**Stack Frontend**:
-- React 18 com TypeScript
-- Vite para build
-- React Router para navegação
-- React Query (TanStack Query) para gerenciamento de estado
-- Tailwind CSS para estilização
-- Zod para validação de formulários
+**Frontend Stack**:
+- React 18 with TypeScript
+- Vite for build
+- React Router for navigation
+- React Query (TanStack Query) for state management
+- Tailwind CSS for styling
+- Zod for form validation
 
-## 🚀 Funcionalidades
+## 🚀 Features
 
-### Gestão de Parceiros
-- ✅ Cadastro de parceiros com estrutura hierárquica
-- ✅ Recomendação de novos parceiros (até 3 níveis)
-- ✅ Ativação/desativação de parceiros
-- ✅ Visualização da árvore de recomendações
+### Partner Management
+- ✅ Partner registration with hierarchical structure
+- ✅ New partner recommendations (up to 3 levels)
+- ✅ Partner activation/deactivation
+- ✅ Recommendation tree visualization
 
-### Gestão de Negócios
-- ✅ Registro de negócios entre dois parceiros
-- ✅ Cálculo automático de comissões (10% do valor)
-- ✅ Distribuição inteligente para até 3 níveis acima
-- ✅ Validação para evitar negócios entre parceiros inválidos
-- ✅ Cancelamento de negócios
-- ✅ Histórico completo de transações
+### Business Management
+- ✅ Deal registration between two partners
+- ✅ Automatic commission calculation (10% of value)
+- ✅ Intelligent distribution up to 3 levels above
+- ✅ Validation to prevent deals between invalid partners
+- ✅ Business cancellation
+- ✅ Complete transaction history
 
-### Distribuição de Comissões
+### Commission Distribution
 
-**Regra de Distribuição:**
-- Parceiros envolvidos no negócio **NÃO recebem comissão**
-- Comissão distribuída apenas para níveis acima (máximo 3 níveis)
-- Percentuais de distribuição:
-  - **Nível 1** (recomendador direto): 50%
-  - **Nível 2** (segundo nível): 30%
-  - **Nível 3** (terceiro nível): 20%
-  - **Vetor**: Recebe o saldo restante (quando há menos de 3 níveis)
+**Distribution Rule:**
+- Partners involved in the deal **DO NOT receive commission**
+- Commission distributed only to levels above (maximum 3 levels)
+- Distribution percentages:
+  - **Level 1** (direct recommender): 50%
+  - **Level 2** (second level): 30%
+  - **Level 3** (third level): 20%
+  - **Vector**: Receives remaining balance (when there are fewer than 3 levels)
 
-**Exemplos:**
+**Examples:**
 
 ```
-Negócio de R$ 1.000,00 → Comissão total: R$ 100,00
+$1,000.00 Deal → Total Commission: $100.00
 
-Cenário 1: Parceiro com 3 níveis acima
-├─ Nível 1: R$ 50,00 (50%)
-├─ Nível 2: R$ 30,00 (30%)
-└─ Nível 3: R$ 20,00 (20%)
+Scenario 1: Partner with 3 levels above
+├─ Level 1: $50.00 (50%)
+├─ Level 2: $30.00 (30%)
+└─ Level 3: $20.00 (20%)
 
-Cenário 2: Parceiro com 1 nível acima
-├─ Nível 1: R$ 50,00 (50%)
-└─ Vetor: R$ 50,00 (50%)
+Scenario 2: Partner with 1 level above
+├─ Level 1: $50.00 (50%)
+└─ Vector: $50.00 (50%)
 
-Cenário 3: Parceiro sem recomendador
-└─ Vetor: R$ 100,00 (100%)
+Scenario 3: Partner without recommender
+└─ Vector: $100.00 (100%)
 ```
 
-### Relatórios e Dashboards
-- ✅ Relatório financeiro com filtros avançados
-- ✅ Relatório de parceiros por nível
-- ✅ Dashboard com métricas em tempo real
-- ✅ Exportação de dados
+### Reports and Dashboards
+- ✅ Financial report with advanced filters
+- ✅ Partners report by level
+- ✅ Real-time metrics dashboard
+- ✅ Data export
 
-### Auditoria
-- ✅ Log completo de todas as operações
-- ✅ Rastreamento de alterações por usuário
-- ✅ Consulta de histórico de ações
+### Audit
+- ✅ Complete log of all operations
+- ✅ User change tracking
+- ✅ Action history query
 
-## 🛠️ Tecnologias
+## 🛠️ Technologies
 
 ### Backend
 - .NET 8.0
@@ -143,130 +143,130 @@ Cenário 3: Parceiro sem recomendador
 - Tailwind CSS
 - Axios
 - Zod
-- Lucide React (ícones)
+- Lucide React (icons)
 
-### Ferramentas
+### Tools
 - Docker & Docker Compose
 - Git
 
-## 📦 Instalação e Execução
+## 📦 Installation and Execution
 
-### Pré-requisitos
+### Prerequisites
 - .NET 8 SDK
-- Node.js 18+ e npm
-- SQL Server (ou Docker)
+- Node.js 18+ and npm
+- SQL Server (or Docker)
 - Git
 
-### 1. Clonar o repositório
+### 1. Clone the repository
 
 ```bash
 git clone <repository-url>
 cd partnerMesh
 ```
 
-### 2. Configurar o Backend
+### 2. Configure Backend
 
 ```bash
 cd Api
 
-# Configurar connection string no appsettings.json
+# Configure connection string in appsettings.json
 # "Server=localhost;Database=PartnerMeshDb;Trusted_Connection=True;TrustServerCertificate=True;"
 
-# Executar migrations
+# Run migrations
 dotnet ef database update --project ../Infraestructure
 
-# Executar a API
+# Run API
 dotnet run
 ```
 
-A API estará disponível em: `http://localhost:5000`
+The API will be available at: `http://localhost:5000`
 
-### 3. Configurar o Frontend
+### 3. Configure Frontend
 
 ```bash
 cd frontend
 
-# Instalar dependências
+# Install dependencies
 npm install
 
-# Executar em modo desenvolvimento
+# Run in development mode
 npm run dev
 ```
 
-O frontend estará disponível em: `http://localhost:5174`
+The frontend will be available at: `http://localhost:5174`
 
-### 4. Usando Docker (Opcional)
+### 4. Using Docker (Optional)
 
 ```bash
-# Na raiz do projeto
+# At project root
 docker-compose up -d
 ```
 
-Isso iniciará:
-- SQL Server na porta 1433
-- API na porta 5000
-- Frontend na porta 5174
+This will start:
+- SQL Server on port 1433
+- API on port 5000
+- Frontend on port 5174
 
-## 🗄️ Estrutura do Banco de Dados
+## 🗄️ Database Structure
 
-### Principais Tabelas
+### Main Tables
 
-- **Users**: Usuários do sistema
-- **Vetores**: Entidades proprietárias de redes
-- **Partners**: Parceiros da rede
-- **BusinessTypes**: Tipos de negócios
-- **Businesses**: Negócios fechados
-- **Comissions**: Comissões geradas
-- **ComissionPayments**: Pagamentos individuais de comissão
-- **AuditLogs**: Logs de auditoria
+- **Users**: System users
+- **Vetores**: Network owner entities
+- **Partners**: Network partners
+- **BusinessTypes**: Business types
+- **Businesses**: Closed deals
+- **Comissions**: Generated commissions
+- **ComissionPayments**: Individual commission payments
+- **AuditLogs**: Audit logs
 
-## 🔐 Autenticação
+## 🔐 Authentication
 
-O sistema utiliza JWT (JSON Web Tokens) para autenticação:
+The system uses JWT (JSON Web Tokens) for authentication:
 
-1. Login com credenciais
-2. Recebimento de token JWT
-3. Token enviado em todas as requisições via header `Authorization: Bearer <token>`
-4. Permissões baseadas em roles (Vetor, Parceiro)
+1. Login with credentials
+2. Receive JWT token
+3. Token sent in all requests via `Authorization: Bearer <token>` header
+4. Role-based permissions (Vector, Partner)
 
-## 📊 Casos de Uso Implementados
+## 📊 Implemented Use Cases
 
-### Autenticação (UC01)
-- Login de usuário
-- Alteração de senha
+### Authentication (UC01)
+- User login
+- Password change
 
-### Gestão de Parceiros (UC02-UC15)
-- Criar parceiro
-- Atualizar parceiro
-- Listar parceiros com filtros
-- Obter detalhes de parceiro
-- Ativar/desativar parceiro
+### Partner Management (UC02-UC15)
+- Create partner
+- Update partner
+- List partners with filters
+- Get partner details
+- Activate/deactivate partner
 
-### Gestão de Negócios (UC20-UC35)
-- Criar negócio
-- Listar negócios
-- Obter detalhes de negócio
-- Cancelar negócio
-- Listar pagamentos de comissão
+### Business Management (UC20-UC35)
+- Create business
+- List businesses
+- Get business details
+- Cancel business
+- List commission payments
 
-### Tipos de Negócio (UC40-UC45)
-- Criar tipo de negócio
-- Listar tipos
-- Desativar tipo
+### Business Types (UC40-UC45)
+- Create business type
+- List types
+- Deactivate type
 
-### Relatórios (UC50-UC60)
-- Relatório financeiro
-- Relatório de parceiros
-- Relatório de negócios
+### Reports (UC50-UC60)
+- Financial report
+- Partners report
+- Business report
 
-### Auditoria (UC70-UC75)
-- Consultar logs de auditoria
-- Filtrar por usuário, entidade, período
+### Audit (UC70-UC75)
+- Query audit logs
+- Filter by user, entity, period
 
-## 🧪 Testes
+## 🧪 Testing
 
 ```bash
-# Backend (se houver testes implementados)
+# Backend (if tests are implemented)
 cd Api
 dotnet test
 
@@ -275,45 +275,45 @@ cd frontend
 npm run test
 ```
 
-## 📝 Convenções de Código
+## 📝 Code Conventions
 
 ### Backend
-- Nomenclatura em inglês para código
-- Português para comentários de documentação
-- Use cases seguem padrão CQRS
-- Entidades seguem DDD
+- English naming for code
+- Portuguese for documentation comments
+- Use cases follow CQRS pattern
+- Entities follow DDD
 
 ### Frontend
-- Componentes em PascalCase
-- Hooks customizados começam com `use`
-- Tipos TypeScript exportados de `types/`
-- CSS com Tailwind (evitar CSS customizado)
+- Components in PascalCase
+- Custom hooks start with `use`
+- TypeScript types exported from `types/`
+- CSS with Tailwind (avoid custom CSS)
 
-## 🤝 Contribuindo
+## 🤝 Contributing
 
-1. Fork o projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
-3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
-4. Push para a branch (`git push origin feature/AmazingFeature`)
-5. Abra um Pull Request
+1. Fork the project
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-## 📄 Licença
+## 📄 License
 
-Este projeto é proprietário e confidencial.
+This project is proprietary and confidential.
 
-## 👥 Equipe
+## 👥 Team
 
-- Desenvolvimento Backend: .NET Team
-- Desenvolvimento Frontend: React Team
-- Arquitetura: Solution Architects
+- Backend Development: .NET Team
+- Frontend Development: React Team
+- Architecture: Solution Architects
 
-## 📞 Suporte
+## 📞 Support
 
-Para suporte e dúvidas:
+For support and questions:
 - Email: support@partnermesh.com
-- Documentação: [Link para docs]
-- Issues: [Link para issues do projeto]
+- Documentation: [Link to docs]
+- Issues: [Link to project issues]
 
 ---
 
-**PartnerMesh** - Sistema de Gestão de Redes de Parceiros © 2026
+**PartnerMesh** - Partner Network Management System © 2026
