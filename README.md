@@ -2,7 +2,54 @@
 
 Partner network management system with business control and automatic commission distribution.
 
-## 📋 About the Project
+## � Quick Start
+
+### Prerequisites
+- .NET 8 SDK
+- Node.js 18+
+- SQL Server (LocalDB or Express)
+
+### 1️⃣ Backend Setup
+
+```bash
+# Navigate to Api folder
+cd Api
+
+# Restore dependencies
+dotnet restore
+
+# Update database (creates schema and migrations)
+dotnet ef database update
+
+# Run the API (port 5000)
+dotnet run
+```
+
+### 2️⃣ Frontend Setup
+
+```bash
+# Navigate to frontend folder
+cd frontend
+
+# Install dependencies
+npm install
+
+# Run development server (port 5173)
+npm run dev
+```
+
+### 3️⃣ Access the Application
+
+- Frontend: http://localhost:5173
+- Backend API: http://localhost:5000/api
+
+**Default Login:**
+- Email: admin@partnermesh.com
+- Password: Admin@123
+
+---
+
+## �📋 About the Project
 
 PartnerMesh is a complete platform for managing multi-level partner networks, allowing control of deals closed between partners and automatic distribution of commissions through a hierarchical structure of up to 3 levels.
 
