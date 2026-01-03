@@ -40,7 +40,14 @@ public sealed record UserListItem(
     string Permission,
     [property: JsonPropertyName("isActive")] bool Active,
     DateTime CreatedAt,
-    IEnumerable<VetorInfo> Vetores);
+    IEnumerable<VetorInfo> Vetores)
+{
+    [JsonPropertyName("vectorId")]
+    public Guid? VectorId => Vetores?.FirstOrDefault()?.Id;
+    
+    [JsonPropertyName("vectorName")]
+    public string? VectorName => Vetores?.FirstOrDefault()?.Name;
+}
 
 public sealed record VetorInfo(
     Guid Id,

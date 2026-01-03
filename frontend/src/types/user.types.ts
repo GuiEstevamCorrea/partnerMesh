@@ -5,13 +5,13 @@ export interface CreateUserRequest {
   email: string;
   password: string;
   permission: Permission;
-  vectorId?: string;
+  vetorId?: string | null;
 }
 
 export interface UpdateUserRequest {
   name?: string;
   email?: string;
   permission?: Permission;
-  vectorId?: string;
+  vetorId?: string | null;
   isActive?: boolean;
 }

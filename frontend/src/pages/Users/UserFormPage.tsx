@@ -183,7 +183,7 @@ export function UserFormPage() {
       name: data.name,
       email: data.email,
       permission: data.permission,
-      vectorId: data.vectorId || null,
+      vetorId: data.vectorId && data.vectorId !== '' ? data.vectorId : null,
       isActive: data.isActive,
     };
 
