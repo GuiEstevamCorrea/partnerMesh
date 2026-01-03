@@ -87,11 +87,19 @@ public class ListPaymentsUseCase : IListPaymentsUseCase
 
             foreach (var payment in payments)
             {
+                // Buscar a comissão primeiro
+                var comission = await _commissionRepository.GetByIdAsync(payment.ComissionId, cancellationToken);
+                if (comission == null)
+                {
+                    Console.WriteLine($"[ListPaymentsUseCase] ERRO: Comissão {payment.ComissionId} não encontrada para pagamento {payment.Id}");
+                    continue;
+                }
+                
                 // Buscar dados do parceiro
                 var partner = await _partnerRepository.GetByIdAsync(payment.PartnerId, cancellationToken);
                 
                 // Buscar dados do negócio através da comissão
-                var business = await _businessRepository.GetByIdAsync(payment.Comission.BussinessId, cancellationToken);
+                var business = await _businessRepository.GetByIdAsync(comission.BussinessId, cancellationToken);
 
                 // Buscar o parceiro do negócio para obter o VetorId
                 Guid vetorId = Guid.Empty;
@@ -118,7 +126,7 @@ public class ListPaymentsUseCase : IListPaymentsUseCase
                     Value = payment.Value,
                     Status = payment.Status.ToLegacyString(),
                     PaidOn = payment.PaidOn,
-                    CreatedAt = payment.Comission.CreatedAt,
+                    CreatedAt = comission.CreatedAt,
                     BusinessId = business?.Id ?? Guid.Empty,
                     BusinessDescription = business?.Observations ?? "",
                     BusinessTotalValue = business?.Value ?? 0,
