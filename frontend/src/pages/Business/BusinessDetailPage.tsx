@@ -218,8 +218,18 @@ const BusinessDetailPage = () => {
               Status
             </label>
             <div>
-              <Badge variant={isActive ? 'success' : 'error'}>
-                {isActive ? 'Ativo' : 'Cancelado'}
+              <Badge 
+                variant={
+                  business.status === 'Active' ? 'info' :
+                  business.status === 'PartiallyPaid' ? 'warning' :
+                  business.status === 'FullyPaid' ? 'success' :
+                  'error'
+                }
+              >
+                {business.status === 'Active' ? 'Ativo' :
+                 business.status === 'PartiallyPaid' ? 'Parcialmente Pago' :
+                 business.status === 'FullyPaid' ? 'Totalmente Pago' :
+                 'Cancelado'}
               </Badge>
             </div>
           </div>

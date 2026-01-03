@@ -12,17 +12,20 @@ public class ProcessPaymentUseCase : IProcessPaymentUseCase
     private readonly IPartnerRepository _partnerRepository;
     private readonly IUserRepository _userRepository;
     private readonly IVetorRepository _vetorRepository;
+    private readonly IBusinessRepository _businessRepository;
 
     public ProcessPaymentUseCase(
         ICommissionRepository commissionRepository,
         IPartnerRepository partnerRepository,
         IUserRepository userRepository,
-        IVetorRepository vetorRepository)
+        IVetorRepository vetorRepository,
+        IBusinessRepository businessRepository)
     {
         _commissionRepository = commissionRepository;
         _partnerRepository = partnerRepository;
         _userRepository = userRepository;
         _vetorRepository = vetorRepository;
+        _businessRepository = businessRepository;
     }
 
     public async Task<ProcessPaymentResult> ExecuteAsync(
@@ -82,6 +85,14 @@ public class ProcessPaymentUseCase : IProcessPaymentUseCase
 
             // Atualizar no repositório
             await _commissionRepository.UpdateAsync(commission, cancellationToken);
+
+            // Atualizar status do negócio baseado nos pagamentos
+            var business = await _businessRepository.GetByIdAsync(commission.BussinessId, cancellationToken);
+            if (business != null)
+            {
+                business.UpdateStatusBasedOnPayments();
+                await _businessRepository.UpdateAsync(business, cancellationToken);
+            }
 
             // Buscar dados do destinatário
             string partnerName;

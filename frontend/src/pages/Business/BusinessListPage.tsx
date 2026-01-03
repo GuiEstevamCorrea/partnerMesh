@@ -182,8 +182,18 @@ export function BusinessListPage() {
       key: 'status',
       header: 'Status',
       render: (business) => (
-        <Badge variant={business.status === 'Active' ? 'success' : 'error'}>
-          {business.status === 'Active' ? 'Ativo' : 'Cancelado'}
+        <Badge 
+          variant={
+            business.status === 'Active' ? 'info' :
+            business.status === 'PartiallyPaid' ? 'warning' :
+            business.status === 'FullyPaid' ? 'success' :
+            'error'
+          }
+        >
+          {business.status === 'Active' ? 'Ativo' :
+           business.status === 'PartiallyPaid' ? 'Parcialmente Pago' :
+           business.status === 'FullyPaid' ? 'Totalmente Pago' :
+           'Cancelado'}
         </Badge>
       ),
     },
@@ -331,6 +341,8 @@ export function BusinessListPage() {
             >
               <option value="all">Todos os status</option>
               <option value="active">Apenas ativos</option>
+              <option value="partiallypaid">Parcialmente pagos</option>
+              <option value="fullypaid">Totalmente pagos</option>
               <option value="cancelled">Apenas cancelados</option>
             </select>
           </div>

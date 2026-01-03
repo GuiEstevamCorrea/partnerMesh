@@ -14,6 +14,8 @@ public static class BusinessStatusExtensions
         {
             ValueTypes.BusinessStatus.Ativo => "Active",
             ValueTypes.BusinessStatus.Cancelado => "Cancelled",
+            ValueTypes.BusinessStatus.ParcialmentePago => "PartiallyPaid",
+            ValueTypes.BusinessStatus.TotalmentePago => "FullyPaid",
             _ => throw new ArgumentException($"Status inválido: {status}")
         };
     }
@@ -29,6 +31,10 @@ public static class BusinessStatusExtensions
             "ativo" => ValueTypes.BusinessStatus.Ativo,
             "cancelled" => ValueTypes.BusinessStatus.Cancelado,
             "cancelado" => ValueTypes.BusinessStatus.Cancelado,
+            "partiallypaid" => ValueTypes.BusinessStatus.ParcialmentePago,
+            "parcialmentepago" => ValueTypes.BusinessStatus.ParcialmentePago,
+            "fullypaid" => ValueTypes.BusinessStatus.TotalmentePago,
+            "totalmentepago" => ValueTypes.BusinessStatus.TotalmentePago,
             _ => throw new ArgumentException($"Status inválido: {status}")
         };
     }
@@ -49,6 +55,14 @@ public static class BusinessStatusExtensions
             case "cancelado":
             case "cancelled":
                 result = ValueTypes.BusinessStatus.Cancelado;
+                return true;
+            case "parcialmentepago":
+            case "partiallypaid":
+                result = ValueTypes.BusinessStatus.ParcialmentePago;
+                return true;
+            case "totalmentepago":
+            case "fullypaid":
+                result = ValueTypes.BusinessStatus.TotalmentePago;
                 return true;
             default:
                 return false;

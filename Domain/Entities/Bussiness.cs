@@ -51,7 +51,46 @@ public class Bussiness
     {
         Status = BusinessStatus.Cancelado;
     }
+
+    /// <summary>
+    /// Atualiza o status do negócio baseado nos pagamentos da comissão
+    /// </summary>
+    public void UpdateStatusBasedOnPayments()
+    {
+        // Se já está cancelado, não muda
+        if (Status == BusinessStatus.Cancelado)
+            return;
+
+        // Se não tem comissão, mantém como ativo
+        if (Comissao == null)
+        {
+            Status = BusinessStatus.Ativo;
+            return;
+        }
+
+        var totalPayments = Comissao.Pagamentos.Count;
+        var paidPayments = Comissao.GetPaidPaymentsCount();
+
+        if (totalPayments == 0)
+        {
+            Status = BusinessStatus.Ativo;
+        }
+        else if (paidPayments == 0)
+        {
+            Status = BusinessStatus.Ativo;
+        }
+        else if (paidPayments == totalPayments)
+        {
+            Status = BusinessStatus.TotalmentePago;
+        }
+        else
+        {
+            Status = BusinessStatus.ParcialmentePago;
+        }
+    }
     
     public bool IsActive() => Status == BusinessStatus.Ativo;
     public bool IsCanceled() => Status == BusinessStatus.Cancelado;
+    public bool IsPartiallyPaid() => Status == BusinessStatus.ParcialmentePago;
+    public bool IsFullyPaid() => Status == BusinessStatus.TotalmentePago;
 }

@@ -262,11 +262,18 @@ export function BusinessFormPage() {
               <span
                 className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                   business.status === 'Active'
+                    ? 'bg-blue-100 text-blue-800'
+                    : business.status === 'PartiallyPaid'
+                    ? 'bg-yellow-100 text-yellow-800'
+                    : business.status === 'FullyPaid'
                     ? 'bg-green-100 text-green-800'
                     : 'bg-red-100 text-red-800'
                 }`}
               >
-                {business.status === 'Active' ? 'Ativo' : 'Cancelado'}
+                {business.status === 'Active' ? 'Ativo' :
+                 business.status === 'PartiallyPaid' ? 'Parcialmente Pago' :
+                 business.status === 'FullyPaid' ? 'Totalmente Pago' :
+                 'Cancelado'}
               </span>
             </div>
             <div>

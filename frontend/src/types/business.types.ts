@@ -30,7 +30,7 @@ export interface Business {
   value: number;
   date: string;
   observations?: string;
-  status: 'Active' | 'Cancelled';
+  status: 'Active' | 'Cancelled' | 'PartiallyPaid' | 'FullyPaid';
   totalCommission?: number;
   createdAt: string;
   updatedAt?: string;
