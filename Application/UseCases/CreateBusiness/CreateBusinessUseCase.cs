@@ -202,11 +202,15 @@ public class CreateBusinessUseCase : ICreateBusinessUseCase
         
         if (vetorPartner != null)
         {
+            // Usar o Partner que representa o Vetor
             commission.AddPagamento(vetorPartner.Id, vetorValue, PaymentType.Vetor);
         }
-        
-        // Se não encontrou o Vetor como Partner, ele não recebe comissão diretamente
-        // Isso pode estar correto dependendo da regra de negócio
+        else
+        {
+            // Se não há Partner representando, criar pagamento direto para o Vetor
+            // Usando o vetorId como PartnerId (será tratado especialmente na exibição)
+            commission.AddPagamento(vetorId, vetorValue, PaymentType.Vetor);
+        }
     }
 
     /// <summary>

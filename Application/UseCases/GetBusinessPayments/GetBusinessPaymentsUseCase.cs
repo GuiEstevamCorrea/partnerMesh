@@ -99,8 +99,20 @@ public class GetBusinessPaymentsUseCase : IGetBusinessPaymentsUseCase
                 // Verificar se é pagamento para vetor ou parceiro
                 if (payment.TipoPagamento == PaymentType.Vetor)
                 {
-                    var vetor = await _vetorRepository.GetByIdAsync(payment.PartnerId, cancellationToken);
-                    partnerName = vetor?.Name ?? "Vetor não encontrado";
+                    // Para pagamentos de Vetor, primeiro tentar como Partner
+                    var paymentPartner = await _partnerRepository.GetByIdAsync(payment.PartnerId, cancellationToken);
+                    if (paymentPartner != null)
+                    {
+                        // É um Partner representando o Vetor
+                        var vetor = await _vetorRepository.GetByIdAsync(paymentPartner.VetorId, cancellationToken);
+                        partnerName = vetor?.Name ?? "Vetor não encontrado";
+                    }
+                    else
+                    {
+                        // É um pagamento direto para o Vetor (payment.PartnerId é na verdade um VetorId)
+                        var vetor = await _vetorRepository.GetByIdAsync(payment.PartnerId, cancellationToken);
+                        partnerName = vetor?.Name ?? "Vetor não encontrado";
+                    }
                 }
                 else
                 {
