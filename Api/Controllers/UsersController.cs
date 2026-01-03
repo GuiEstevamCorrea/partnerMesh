@@ -146,7 +146,14 @@ public class UsersController : ControllerBase
             return BadRequest(result);
         }
 
-        return Ok(result);
+        return Ok(new
+        {
+            items = result.Data?.Users ?? Enumerable.Empty<object>(),
+            totalItems = result.Data?.TotalUsers ?? 0,
+            page = result.Data?.CurrentPage ?? page,
+            pageSize = result.Data?.PageSize ?? pageSize,
+            totalPages = result.Data?.TotalPages ?? 0
+        });
     }
 
     /// <summary>
