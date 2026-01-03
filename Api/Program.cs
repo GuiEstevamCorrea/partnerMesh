@@ -39,6 +39,7 @@ using Application.UseCases.FinancialReport;
 using Application.UseCases.BusinessReport;
 using Application.UseCases.LogAudit;
 using Application.UseCases.AuditLogQuery;
+using Application.UseCases.GetCancelledBusinessSummary;
 using Infraestructure.Repositories;
 using Infraestructure.Services;
 using Infraestructure.Data;
@@ -190,6 +191,7 @@ builder.Services.AddScoped<IFinancialReportUseCase, FinancialReportUseCase>();
 builder.Services.AddScoped<IBusinessReportUseCase, BusinessReportUseCase>();
 builder.Services.AddScoped<ILogAuditUseCase, LogAuditUseCase>();
 builder.Services.AddScoped<IAuditLogQueryUseCase, AuditLogQueryUseCase>();
+builder.Services.AddScoped<ICancelledBusinessSummaryUseCase, CancelledBusinessSummaryUseCase>();
 
 #endregion
 

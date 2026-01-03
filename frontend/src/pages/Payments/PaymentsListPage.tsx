@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { DollarSign, CheckSquare, Square } from 'lucide-react';
+import { DollarSign, CheckSquare, Square, XCircle } from 'lucide-react';
 
 import { paymentsApi } from '@/api/endpoints/payments.api';
 import { vectorsApi } from '@/api/endpoints/vectors.api';
@@ -79,6 +79,12 @@ const PaymentsListPage = () => {
     enabled: isAdminGlobal,
   });
 
+  // Query: Resumo de negócios cancelados
+  const { data: cancelledSummary } = useQuery({
+    queryKey: ['cancelled-business-summary'],
+    queryFn: () => paymentsApi.getCancelledBusinessSummary(),
+  });
+
   // Mutation: Processar pagamentos
   const processPaymentsMutation = useMutation({
     mutationFn: (paymentIds: string[]) =>
@@ -148,7 +154,7 @@ const PaymentsListPage = () => {
     return `Tem certeza que deseja processar ${selectedPayments.size} pagamento(s)?\n\nValor Total: ${formatCurrency(total)}\n\nDestinatários:\n${recipients}`;
   }, [confirmDialog.payments, selectedPayments.size]);
 
-  // Calcular resumo
+  // Calcular resumo - excluindo valores cancelados dos totais
   const summary = useMemo(() => {
     if (!paymentsData?.items) {
       return {
@@ -172,7 +178,6 @@ const PaymentsListPage = () => {
 
   const payments = paymentsData?.items || [];
   const totalPages = paymentsData?.totalPages || 0;
-  const hasData = paymentsData && paymentsData.items.length > 0;
 
   // Reset página se ela for maior que o total de páginas
   useEffect(() => {
@@ -201,7 +206,7 @@ const PaymentsListPage = () => {
       </div>
 
       {/* Cards de Resumo */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
         <Card className="bg-green-50 border-green-200">
           <div className="flex items-center justify-between">
             <div>
@@ -231,6 +236,23 @@ const PaymentsListPage = () => {
               </p>
             </div>
             <DollarSign className="w-10 h-10 text-yellow-600 opacity-50" />
+          </div>
+        </Card>
+
+        <Card className="bg-red-50 border-red-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-red-800">
+                Negócios Cancelados
+              </p>
+              <p className="text-2xl font-bold text-red-600 mt-1">
+                {formatCurrency(cancelledSummary?.totalCancelledValue || 0)}
+              </p>
+              <p className="text-xs text-red-700 mt-1">
+                {cancelledSummary?.totalCancelledBusinesses || 0} negócio(s)
+              </p>
+            </div>
+            <XCircle className="w-10 h-10 text-red-600 opacity-50" />
           </div>
         </Card>
 
@@ -459,7 +481,7 @@ const PaymentsListPage = () => {
                   header: 'Negócio',
                   render: (payment: Payment) => (
                     <span className="text-sm font-mono text-gray-700">
-                      #{payment.businessId.substring(0, 8)}
+                      #{payment.businessId ? payment.businessId.substring(0, 8) : 'N/A'}
                     </span>
                   ),
                 },

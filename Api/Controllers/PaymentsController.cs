@@ -3,6 +3,7 @@ using Api.Models;
 using Application.Interfaces.IUseCases;
 using Application.UseCases.ListPayments.DTO;
 using Application.UseCases.ProcessPayment.DTO;
+using Application.UseCases.GetCancelledBusinessSummary.DTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 namespace Api.Controllers;
@@ -14,13 +15,16 @@ public class PaymentsController : ControllerBase
 {
     private readonly IListPaymentsUseCase _listPaymentsUseCase;
     private readonly IProcessPaymentUseCase _processPaymentUseCase;
+    private readonly ICancelledBusinessSummaryUseCase _cancelledBusinessSummaryUseCase;
 
     public PaymentsController(
         IListPaymentsUseCase listPaymentsUseCase,
-        IProcessPaymentUseCase processPaymentUseCase)
+        IProcessPaymentUseCase processPaymentUseCase,
+        ICancelledBusinessSummaryUseCase cancelledBusinessSummaryUseCase)
     {
         _listPaymentsUseCase = listPaymentsUseCase;
         _processPaymentUseCase = processPaymentUseCase;
+        _cancelledBusinessSummaryUseCase = cancelledBusinessSummaryUseCase;
     }
 
     /// <summary>
@@ -195,6 +199,38 @@ public class PaymentsController : ControllerBase
                 return errorResult;
 
             var result = await _processPaymentUseCase.ExecuteAsync(processRequest, userId, cancellationToken);
+
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { 
+                IsSuccess = false, 
+                Message = "Erro interno do servidor.", 
+                Details = ex.Message 
+            });
+        }
+    }
+
+    /// <summary>
+    /// Obter resumo dos valores de negócios cancelados
+    /// </summary>
+    [HttpGet("cancelled-business-summary")]
+    public async Task<ActionResult<CancelledBusinessSummaryResult>> GetCancelledBusinessSummary(
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var errorResult = this.GetCurrentUserIdOrError(out var userId);
+            if (errorResult != null)
+                return errorResult;
+
+            var result = await _cancelledBusinessSummaryUseCase.ExecuteAsync(userId, cancellationToken);
 
             if (!result.IsSuccess)
             {
