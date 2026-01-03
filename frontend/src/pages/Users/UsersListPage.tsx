@@ -16,15 +16,10 @@ import { usersApi, vectorsApi } from '@/api/endpoints';
 import { User, Permission } from '@/types';
 import { useAuthStore } from '@/store/auth.store';
 import { useToast } from '@/components/common/Toast';
-
-const PERMISSION_LABELS: Record<Permission, string> = {
-  [Permission.AdminGlobal]: 'Admin Global',
-  [Permission.AdminVetor]: 'Admin Vetor',
-  [Permission.Operador]: 'Operador',
-  [Permission.Parceiro]: 'Parceiro',
-};
+import { useI18n } from '@/hooks/useI18n';
 
 export const UsersListPage = () => {
+  const { t } = useI18n();
   const queryClient = useQueryClient();
   const currentUser = useAuthStore((state) => state.user);
   const { showToast } = useToast();
@@ -76,14 +71,12 @@ export const UsersListPage = () => {
       action === 'activate' ? usersApi.activate(userId) : usersApi.deactivate(userId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
-      showToast(
-        'success',
-        `Usuário ${confirmDialog.action === 'activate' ? 'ativado' : 'inativado'} com sucesso!`
-      );
+      const actionText = confirmDialog.action === 'activate' ? t('users.activated') : t('users.deactivated');
+      showToast('success', t('users.userActivatedSuccess', { action: actionText }));
       setConfirmDialog({ isOpen: false, userId: '', userName: '', action: 'activate' });
     },
     onError: () => {
-      showToast('error', 'Erro ao alterar status do usuário. Tente novamente.');
+      showToast('error', t('users.errorChangingStatus'));
     },
   });
 
@@ -123,7 +116,7 @@ export const UsersListPage = () => {
     return (
       <div className="p-6">
         <Alert type="error">
-          Erro ao carregar lista de usuários. Tente novamente mais tarde.
+          {t('users.errorLoadingUsers')}
         </Alert>
       </div>
     );
@@ -136,15 +129,15 @@ export const UsersListPage = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Usuários</h1>
+          <h1 className="text-3xl font-bold text-gray-900">{t('users.title')}</h1>
           <p className="text-gray-600 mt-1">
-            Gerencie os usuários do sistema ({totalItems} {totalItems === 1 ? 'usuário' : 'usuários'})
+            {t('users.manageUsers')} ({totalItems} {totalItems === 1 ? t('users.user') : t('users.users')})
           </p>
         </div>
         <Link to="/usuarios/novo">
           <Button>
             <Plus className="w-4 h-4 mr-2" />
-            Novo Usuário
+            {t('users.newUser')}
           </Button>
         </Link>
       </div>
@@ -155,10 +148,10 @@ export const UsersListPage = () => {
           {/* Busca por nome/email */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Buscar
+              {t('users.searchLabel')}
             </label>
             <Input
-              placeholder="Nome ou email..."
+              placeholder={t('users.searchPlaceholder')}
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
@@ -171,7 +164,7 @@ export const UsersListPage = () => {
           {/* Filtro de perfil */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Perfil
+              {t('users.profileLabel')}
             </label>
             <select
               className="w-full px-3 py-2 border-2 border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-black focus:border-black"
@@ -181,10 +174,10 @@ export const UsersListPage = () => {
                 setPage(1);
               }}
             >
-              <option value="">Todos os perfis</option>
-              <option value={Permission.AdminGlobal}>Admin Global</option>
-              <option value={Permission.AdminVetor}>Admin Vetor</option>
-              <option value={Permission.Operador}>Operador</option>
+              <option value="">{t('users.allProfiles')}</option>
+              <option value={Permission.AdminGlobal}>{t('users.permissions.AdminGlobal')}</option>
+              <option value={Permission.AdminVetor}>{t('users.permissions.AdminVetor')}</option>
+              <option value={Permission.Operador}>{t('users.permissions.Operador')}</option>
             </select>
           </div>
 
@@ -192,7 +185,7 @@ export const UsersListPage = () => {
           {currentUser?.permission === Permission.AdminGlobal && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Vetor
+                {t('users.vectorLabel')}
               </label>
               <select
                 className="w-full px-3 py-2 border-2 border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-black focus:border-black"
@@ -202,7 +195,7 @@ export const UsersListPage = () => {
                   setPage(1);
                 }}
               >
-                <option value="">Todos os vetores</option>
+                <option value="">{t('users.allVectors')}</option>
                 {vectorsData?.items?.map((vector) => (
                   <option key={vector.id} value={vector.id}>
                     {vector.name}
@@ -215,7 +208,7 @@ export const UsersListPage = () => {
           {/* Filtro de status */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Status
+              {t('users.statusLabel')}
             </label>
             <select
               className="w-full px-3 py-2 border-2 border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-black focus:border-black"
@@ -225,9 +218,9 @@ export const UsersListPage = () => {
                 setPage(1);
               }}
             >
-              <option value="">Todos</option>
-              <option value="active">Ativos</option>
-              <option value="inactive">Inativos</option>
+              <option value="">{t('users.all')}</option>
+              <option value="active">{t('common.active')}</option>
+              <option value="inactive">{t('common.inactive')}</option>
             </select>
           </div>
         </div>
@@ -236,7 +229,7 @@ export const UsersListPage = () => {
         {(search || permissionFilter || vectorFilter || statusFilter) && (
           <div className="flex justify-end">
             <Button variant="outline" onClick={handleResetFilters}>
-              Limpar Filtros
+              {t('users.clearFilters')}
             </Button>
           </div>
         )}
@@ -248,13 +241,13 @@ export const UsersListPage = () => {
           <div className="p-12 text-center">
             <p className="text-gray-500 text-lg">
               {search || permissionFilter || vectorFilter || statusFilter
-                ? 'Nenhum usuário encontrado com os filtros aplicados.'
-                : 'Nenhum usuário cadastrado ainda.'}
+                ? t('users.noUsersWithFilters')
+                : t('users.noUsersYet')}
             </p>
             <Link to="/usuarios/novo">
               <Button className="mt-4">
                 <Plus className="w-4 h-4 mr-2" />
-                Cadastrar Primeiro Usuário
+                {t('users.registerFirstUser')}
               </Button>
             </Link>
           </div>
@@ -264,7 +257,7 @@ export const UsersListPage = () => {
               columns={[
                 {
                   key: 'name',
-                  header: 'Nome',
+                  header: t('users.nameHeader'),
                   render: (user: User) => (
                     <div>
                       <p className="font-medium text-gray-900">{user.name}</p>
@@ -274,16 +267,16 @@ export const UsersListPage = () => {
                 },
                 {
                   key: 'permission',
-                  header: 'Perfil',
+                  header: t('users.profileHeader'),
                   render: (user: User) => (
                     <Badge variant="info">
-                      {PERMISSION_LABELS[user.permission]}
+                      {t(`users.permissions.${user.permission}`)}
                     </Badge>
                   ),
                 },
                 {
                   key: 'vectorName',
-                  header: 'Vetor',
+                  header: t('users.vectorHeader'),
                   render: (user: User) => (
                     <span className="text-gray-700">
                       {user.vectorName || '-'}
@@ -292,16 +285,16 @@ export const UsersListPage = () => {
                 },
                 {
                   key: 'isActive',
-                  header: 'Status',
+                  header: t('users.statusHeader'),
                   render: (user: User) => (
                     <Badge variant={user.isActive ? 'success' : 'error'}>
-                      {user.isActive ? 'Ativo' : 'Inativo'}
+                      {user.isActive ? t('common.active') : t('common.inactive')}
                     </Badge>
                   ),
                 },
                 {
                   key: 'actions',
-                  header: 'Ações',
+                  header: t('users.actionsHeader'),
                   render: (user: User) => (
                     <div className="flex items-center gap-2">
                       <Link to={`/usuarios/${user.id}/editar`}>
@@ -316,10 +309,10 @@ export const UsersListPage = () => {
                         disabled={user.id === currentUser?.id}
                         title={
                           user.id === currentUser?.id
-                            ? 'Você não pode alterar seu próprio status'
+                            ? t('users.cannotChangeOwnStatus')
                             : user.isActive
-                            ? 'Inativar usuário'
-                            : 'Ativar usuário'
+                            ? t('users.deactivateUserTitle')
+                            : t('users.activateUserTitle')
                         }
                       >
                         <Power
@@ -353,12 +346,14 @@ export const UsersListPage = () => {
       {/* Dialog de confirmação */}
       <ConfirmDialog
         isOpen={confirmDialog.isOpen}
-        title={`${confirmDialog.action === 'activate' ? 'Ativar' : 'Inativar'} Usuário`}
-        message={`Tem certeza que deseja ${
-          confirmDialog.action === 'activate' ? 'ativar' : 'inativar'
-        } o usuário "${confirmDialog.userName}"?`}
-        confirmText={confirmDialog.action === 'activate' ? 'Ativar' : 'Inativar'}
-        cancelText="Cancelar"
+        title={confirmDialog.action === 'activate' ? t('users.activateUser') : t('users.deactivateUser')}
+        message={
+          confirmDialog.action === 'activate' 
+            ? t('users.confirmActivate', { userName: confirmDialog.userName })
+            : t('users.confirmDeactivate', { userName: confirmDialog.userName })
+        }
+        confirmText={confirmDialog.action === 'activate' ? t('users.activate') : t('users.deactivate')}
+        cancelText={t('common.cancel')}
         onConfirm={handleConfirmToggle}
         onClose={() =>
           setConfirmDialog({ isOpen: false, userId: '', userName: '', action: 'activate' })

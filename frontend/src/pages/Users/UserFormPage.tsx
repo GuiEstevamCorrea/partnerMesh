@@ -10,6 +10,7 @@ import { usersApi } from '@/api/endpoints/users.api';
 import { vectorsApi } from '@/api/endpoints/vectors.api';
 import { useAuthStore } from '@/store/auth.store';
 import { useToast } from '@/components/common/Toast';
+import { useI18n } from '@/hooks/useI18n';
 import { Permission } from '@/types/auth.types';
 
 import { Input } from '@/components/common/Input';
@@ -18,71 +19,75 @@ import { Card } from '@/components/common/Card';
 import { Alert } from '@/components/common/Alert';
 import { Loading } from '@/components/common/Loading';
 
-// Schema de validação com Zod
-const userFormSchema = z.object({
-  name: z.string().min(1, 'Nome é obrigatório'),
-  email: z.string().email('Email inválido').min(1, 'Email é obrigatório'),
-  password: z.string().optional(),
-  permission: z.nativeEnum(Permission, {
-    required_error: 'Perfil é obrigatório',
-  }),
-  vectorId: z.string().optional(),
-  isActive: z.boolean().default(true),
-}).refine(
-  (data) => {
-    // Regra: AdminGlobal não pode ter vetor
-    if (data.permission === 'AdminGlobal' && data.vectorId) {
-      return false;
+// Schema de validação com Zod dinâmico
+const createUserFormSchema = (t: any) => {
+  const baseSchema = z.object({
+    name: z.string().min(1, t('users.validation.nameRequired')),
+    email: z.string().email(t('users.validation.emailInvalid')).min(1, t('users.validation.emailRequired')),
+    password: z.string().optional(),
+    permission: z.nativeEnum(Permission, {
+      required_error: t('users.validation.profileRequired'),
+    }),
+    vectorId: z.string().optional(),
+    isActive: z.boolean().default(true),
+  }).refine(
+    (data) => {
+      // Regra: AdminGlobal não pode ter vetor
+      if (data.permission === 'AdminGlobal' && data.vectorId) {
+        return false;
+      }
+      return true;
+    },
+    {
+      message: t('users.validation.adminGlobalNoVector'),
+      path: ['vectorId'],
     }
-    return true;
-  },
-  {
-    message: 'AdminGlobal não pode ter vetor associado',
-    path: ['vectorId'],
-  }
-).refine(
-  (data) => {
-    // Regra: Outros perfis devem ter vetor
-    if (data.permission !== 'AdminGlobal' && !data.vectorId) {
-      return false;
+  ).refine(
+    (data) => {
+      // Regra: Outros perfis devem ter vetor
+      if (data.permission !== 'AdminGlobal' && !data.vectorId) {
+        return false;
+      }
+      return true;
+    },
+    {
+      message: t('users.validation.vectorRequired'),
+      path: ['vectorId'],
     }
-    return true;
-  },
-  {
-    message: 'AdminVetor e Operador devem ter um vetor associado',
-    path: ['vectorId'],
-  }
-).refine(
-  (data) => {
-    // Regra: Senha deve ter no mínimo 6 caracteres quando fornecida
-    if (data.password && data.password.length < 6) {
-      return false;
+  ).refine(
+    (data) => {
+      // Regra: Senha deve ter no mínimo 6 caracteres quando fornecida
+      if (data.password && data.password.length < 6) {
+        return false;
+      }
+      return true;
+    },
+    {
+      message: t('users.validation.passwordMin'),
+      path: ['password'],
     }
-    return true;
-  },
-  {
-    message: 'Senha deve ter no mínimo 6 caracteres',
-    path: ['password'],
-  }
-);
+  );
+  
+  return baseSchema;
+};
 
-// Schema de criação requer senha
-const createUserSchema = userFormSchema.refine(
-  (data) => {
-    if (!data.password || data.password.length === 0) {
-      return false;
+const createCreateUserSchema = (t: any) => {
+  return createUserFormSchema(t).refine(
+    (data) => {
+      if (!data.password || data.password.length === 0) {
+        return false;
+      }
+      return true;
+    },
+    {
+      message: t('users.validation.passwordRequiredOnCreate'),
+      path: ['password'],
     }
-    return true;
-  },
-  {
-    message: 'Senha é obrigatória na criação',
-    path: ['password'],
-  }
-);
-
-type UserFormData = z.infer<typeof userFormSchema>;
+  );
+};
 
 export function UserFormPage() {
+  const { t } = useI18n();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { showToast } = useToast();
@@ -110,6 +115,9 @@ export function UserFormPage() {
   });
 
   const vectors = vectorsResponse?.items || [];
+  
+  // Define o tipo para o form data
+  type UserFormData = z.infer<ReturnType<typeof createUserFormSchema>>;
 
   // Form setup com React Hook Form + Zod
   const {
@@ -120,7 +128,7 @@ export function UserFormPage() {
     setValue,
     reset,
   } = useForm<UserFormData>({
-    resolver: zodResolver(isEditMode ? userFormSchema : createUserSchema),
+    resolver: zodResolver(isEditMode ? createUserFormSchema(t) : createCreateUserSchema(t)),
     defaultValues: {
       name: '',
       email: '',
@@ -161,11 +169,11 @@ export function UserFormPage() {
     onSuccess: () => {
       // Invalidar cache da listagem de usuários
       queryClient.invalidateQueries({ queryKey: ['users'] });
-      showToast('success', 'Usuário criado com sucesso!');
+      showToast('success', t('users.userCreatedSuccess'));
       navigate('/usuarios');
     },
     onError: (error: any) => {
-      const message = error.response?.data?.message || 'Erro ao criar usuário';
+      const message = error.response?.data?.message || t('users.errorCreatingUser');
       showToast('error', message);
     },
   });
@@ -177,11 +185,11 @@ export function UserFormPage() {
       // Invalidar cache da listagem de usuários e do usuário específico
       queryClient.invalidateQueries({ queryKey: ['users'] });
       queryClient.invalidateQueries({ queryKey: ['user', id] });
-      showToast('success', 'Usuário atualizado com sucesso!');
+      showToast('success', t('users.userUpdatedSuccess'));
       navigate('/usuarios');
     },
     onError: (error: any) => {
-      const message = error.response?.data?.message || 'Erro ao atualizar usuário';
+      const message = error.response?.data?.message || t('users.errorUpdatingUser');
       showToast('error', message);
     },
   });
@@ -222,11 +230,11 @@ export function UserFormPage() {
     return (
       <div className="space-y-4">
         <Alert type="error">
-          Erro ao carregar usuário. Verifique se o ID é válido e tente novamente.
+          {t('users.errorLoadingUser')}
         </Alert>
         <Button variant="outline" onClick={() => navigate('/usuarios')}>
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Voltar para Lista
+          {t('users.backToList')}
         </Button>
       </div>
     );
@@ -242,12 +250,12 @@ export function UserFormPage() {
           </Button>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">
-              {isEditMode ? 'Editar Usuário' : 'Novo Usuário'}
+              {isEditMode ? t('users.editUser') : t('users.newUser')}
             </h1>
             <p className="text-sm text-gray-500 mt-1">
               {isEditMode
-                ? 'Atualize as informações do usuário'
-                : 'Preencha os dados para criar um novo usuário'}
+                ? t('users.updateUserInfo')
+                : t('users.fillDataToCreate')}
             </p>
           </div>
         </div>
@@ -260,15 +268,15 @@ export function UserFormPage() {
           {/* Informações Básicas */}
           <div className="space-y-4">
             <h2 className="text-lg font-semibold text-gray-900 border-b pb-2">
-              Informações Básicas
+              {t('users.form.basicInfo')}
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Nome */}
               <div>
                 <Input
-                  label="Nome"
-                  placeholder="Digite o nome completo"
+                  label={t('users.form.name')}
+                  placeholder={t('users.form.namePlaceholder')}
                   error={errors.name?.message}
                   {...register('name')}
                   required
@@ -278,9 +286,9 @@ export function UserFormPage() {
               {/* Email */}
               <div>
                 <Input
-                  label="Email"
+                  label={t('users.form.email')}
                   type="email"
-                  placeholder="usuario@exemplo.com"
+                  placeholder={t('users.form.emailPlaceholder')}
                   error={errors.email?.message}
                   {...register('email')}
                   required
@@ -292,16 +300,16 @@ export function UserFormPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Input
-                  label={isEditMode ? 'Nova Senha (opcional)' : 'Senha'}
+                  label={isEditMode ? t('users.form.newPassword') : t('users.form.password')}
                   type="password"
-                  placeholder={isEditMode ? 'Deixe em branco para manter a atual' : 'Mínimo 6 caracteres'}
+                  placeholder={isEditMode ? t('users.form.passwordOptionalPlaceholder') : t('users.form.passwordPlaceholder')}
                   error={errors.password?.message}
                   {...register('password')}
                   required={!isEditMode}
                 />
                 {isEditMode && (
                   <p className="text-xs text-gray-500 mt-1">
-                    Preencha apenas se desejar alterar a senha
+                    {t('users.form.leaveBlankToKeep')}
                   </p>
                 )}
               </div>
@@ -311,14 +319,14 @@ export function UserFormPage() {
           {/* Permissões e Acessos */}
           <div className="space-y-4">
             <h2 className="text-lg font-semibold text-gray-900 border-b pb-2">
-              Permissões e Acessos
+              {t('users.form.permissionsAndAccess')}
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Perfil */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Perfil <span className="text-red-500">*</span>
+                  {t('users.form.role')} <span className="text-red-500">*</span>
                 </label>
                 <select
                   className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent ${
@@ -326,18 +334,18 @@ export function UserFormPage() {
                   }`}
                   {...register('permission')}
                 >
-                  <option value="">Selecione um perfil</option>
-                  <option value={Permission.AdminGlobal}>Admin Global</option>
-                  <option value={Permission.AdminVetor}>Admin Vetor</option>
-                  <option value={Permission.Operador}>Operador</option>
+                  <option value="">{t('users.form.selectProfile')}</option>
+                  <option value={Permission.AdminGlobal}>{t('users.permissions.AdminGlobal')}</option>
+                  <option value={Permission.AdminVetor}>{t('users.permissions.AdminVetor')}</option>
+                  <option value={Permission.Operador}>{t('users.permissions.Operador')}</option>
                 </select>
                 {errors.permission && (
                   <p className="text-xs text-red-500 mt-1">{errors.permission.message}</p>
                 )}
                 <p className="text-xs text-gray-500 mt-1">
-                  {selectedPermission === Permission.AdminGlobal && 'Acesso total ao sistema'}
-                  {selectedPermission === Permission.AdminVetor && 'Gerencia apenas seu vetor'}
-                  {selectedPermission === Permission.Operador && 'Acesso operacional limitado'}
+                  {selectedPermission === Permission.AdminGlobal && t('users.form.permissionDescriptions.AdminGlobal')}
+                  {selectedPermission === Permission.AdminVetor && t('users.form.permissionDescriptions.AdminVetor')}
+                  {selectedPermission === Permission.Operador && t('users.form.permissionDescriptions.Operador')}
                 </p>
               </div>
 
@@ -345,7 +353,7 @@ export function UserFormPage() {
               {selectedPermission !== Permission.AdminGlobal && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Vetor <span className="text-red-500">*</span>
+                    {t('users.form.vector')} <span className="text-red-500">*</span>
                   </label>
                   {isLoadingVectors ? (
                     <div className="flex items-center justify-center py-2">
@@ -359,7 +367,7 @@ export function UserFormPage() {
                         }`}
                         {...register('vectorId')}
                       >
-                        <option value="">Selecione um vetor</option>
+                        <option value="">{t('users.form.selectVector')}</option>
                         {vectors
                           .filter((v) => v.isActive)
                           .map((vector) => (
@@ -374,7 +382,7 @@ export function UserFormPage() {
                     </>
                   ) : (
                     <Input
-                      value={currentUser?.vectorName || 'Vetor atual'}
+                      value={currentUser?.vectorName || t('users.form.currentVector')}
                       disabled
                       readOnly
                     />
@@ -386,20 +394,20 @@ export function UserFormPage() {
             {/* Alertas sobre permissões */}
             {selectedPermission === Permission.AdminGlobal && (
               <Alert type="info">
-                <strong>Atenção:</strong> AdminGlobal não pode ser associado a um vetor específico, pois tem acesso a todos os vetores do sistema.
+                <strong>{t('common.attention')}:</strong> {t('users.form.alerts.adminGlobalNoVector')}
               </Alert>
             )}
 
             {selectedPermission === Permission.AdminVetor && (
               <Alert type="warning">
-                <strong>Importante:</strong> Cada vetor deve ter apenas um AdminVetor ativo. Verifique se o vetor selecionado já não possui um administrador.
+                <strong>{t('common.important')}:</strong> {t('users.form.alerts.adminVetorOnePerVector')}
               </Alert>
             )}
           </div>
 
           {/* Status */}
           <div className="space-y-4">
-            <h2 className="text-lg font-semibold text-gray-900 border-b pb-2">Status</h2>
+            <h2 className="text-lg font-semibold text-gray-900 border-b pb-2">{t('users.form.statusSection')}</h2>
 
             <div className="flex items-center gap-3">
               <input
@@ -409,11 +417,11 @@ export function UserFormPage() {
                 {...register('isActive')}
               />
               <label htmlFor="isActive" className="text-sm font-medium text-gray-700">
-                Usuário ativo
+                {t('users.form.userActive')}
               </label>
             </div>
             <p className="text-xs text-gray-500">
-              Usuários inativos não conseguem fazer login no sistema
+              {t('users.form.inactiveUsersCannotLogin')}
             </p>
           </div>
 
@@ -425,7 +433,7 @@ export function UserFormPage() {
               onClick={() => navigate('/usuarios')}
               disabled={isSubmitting}
             >
-              Cancelar
+              {t('common.cancel')}
             </Button>
             <Button
               type="submit"
@@ -433,7 +441,7 @@ export function UserFormPage() {
               isLoading={isSubmitting}
             >
               <Save className="w-4 h-4 mr-2" />
-              {isEditMode ? 'Salvar Alterações' : 'Criar Usuário'}
+              {isEditMode ? t('users.saveChanges') : t('users.createUser')}
             </Button>
           </div>
         </form>
