@@ -53,7 +53,12 @@ export const businessApi = {
   },
 
   cancel: async (id: string): Promise<void> => {
-    await api.patch(`/business/${id}/cancel`);
+    await api.delete(`/business/${id}`, {
+      data: {
+        cancellationReason: "Cancelado pelo usuário",
+        forceCancel: false
+      }
+    });
   },
 
   delete: async (id: string): Promise<void> => {
