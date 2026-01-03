@@ -1,52 +1,64 @@
 using Application.Interfaces.Repositories;
 using Domain.Entities;
 using Domain.Extensions;
+using Infraestructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infraestructure.Repositories;
 
 public class AuditLogRepository : IAuditLogRepository
 {
-    private static readonly List<AuditLog> _auditLogs = new();
+    private readonly PartnerMeshDbContext _context;
 
-    public Task<AuditLog> CreateAsync(AuditLog auditLog, CancellationToken cancellationToken = default)
+    public AuditLogRepository(PartnerMeshDbContext context)
     {
-        _auditLogs.Add(auditLog);
-        return Task.FromResult(auditLog);
+        _context = context;
     }
 
-    public Task<IEnumerable<AuditLog>> GetAllAsync(CancellationToken cancellationToken = default)
+    public async Task<AuditLog> CreateAsync(AuditLog auditLog, CancellationToken cancellationToken = default)
     {
-        return Task.FromResult(_auditLogs.AsEnumerable());
+        await _context.AuditLogs.AddAsync(auditLog, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
+        return auditLog;
     }
 
-    public Task<IEnumerable<AuditLog>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<AuditLog>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        var logs = _auditLogs.Where(log => log.UserId == userId);
-        return Task.FromResult(logs);
+        return await _context.AuditLogs.ToListAsync(cancellationToken);
     }
 
-    public Task<IEnumerable<AuditLog>> GetByEntityAsync(string entity, Guid entityId, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<AuditLog>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        return await _context.AuditLogs
+            .Where(log => log.UserId == userId)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<IEnumerable<AuditLog>> GetByEntityAsync(string entity, Guid entityId, CancellationToken cancellationToken = default)
     {
         var entityEnum = AuditEntityTypeExtensions.FromLegacyString(entity);
-        var logs = _auditLogs.Where(log => log.Entity == entityEnum && log.EntityId == entityId);
-        return Task.FromResult(logs);
+        return await _context.AuditLogs
+            .Where(log => log.Entity == entityEnum && log.EntityId == entityId)
+            .ToListAsync(cancellationToken);
     }
 
-    public Task<IEnumerable<AuditLog>> GetByActionAsync(string action, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<AuditLog>> GetByActionAsync(string action, CancellationToken cancellationToken = default)
     {
         var actionEnum = AuditActionExtensions.FromLegacyString(action);
-        var logs = _auditLogs.Where(log => log.Action == actionEnum);
-        return Task.FromResult(logs);
+        return await _context.AuditLogs
+            .Where(log => log.Action == actionEnum)
+            .ToListAsync(cancellationToken);
     }
 
-    public Task<IEnumerable<AuditLog>> GetByPeriodAsync(DateTime startDate, DateTime endDate, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<AuditLog>> GetByPeriodAsync(DateTime startDate, DateTime endDate, CancellationToken cancellationToken = default)
     {
-        var logs = _auditLogs.Where(log => log.CreatedAt >= startDate && log.CreatedAt <= endDate);
-        return Task.FromResult(logs);
+        return await _context.AuditLogs
+            .Where(log => log.CreatedAt >= startDate && log.CreatedAt <= endDate)
+            .ToListAsync(cancellationToken);
     }
 
     // Implementação UC-81 - Consulta avançada
-    public Task<(IEnumerable<AuditLog> Logs, int TotalCount)> QueryAsync(
+    public async Task<(IEnumerable<AuditLog> Logs, int TotalCount)> QueryAsync(
         Guid? userId = null,
         string? action = null,
         string? entity = null,
@@ -59,7 +71,7 @@ public class AuditLogRepository : IAuditLogRepository
         string orderDirection = "DESC",
         CancellationToken cancellationToken = default)
     {
-        var query = _auditLogs.AsQueryable();
+        var query = _context.AuditLogs.AsQueryable();
 
         // Aplicar filtros
         if (userId.HasValue)
@@ -80,7 +92,7 @@ public class AuditLogRepository : IAuditLogRepository
         if (endDate.HasValue)
             query = query.Where(log => log.CreatedAt <= endDate.Value);
 
-        var totalCount = query.Count();
+        var totalCount = await query.CountAsync(cancellationToken);
 
         // Aplicar ordenação
         query = orderBy.ToLower() switch
@@ -100,15 +112,15 @@ public class AuditLogRepository : IAuditLogRepository
         };
 
         // Aplicar paginação
-        var logs = query
+        var logs = await query
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
-            .ToList();
+            .ToListAsync(cancellationToken);
 
-        return Task.FromResult((logs.AsEnumerable(), totalCount));
+        return (logs.AsEnumerable(), totalCount);
     }
 
-    public Task<int> CountAsync(
+    public async Task<int> CountAsync(
         Guid? userId = null,
         string? action = null,
         string? entity = null,
@@ -117,7 +129,7 @@ public class AuditLogRepository : IAuditLogRepository
         DateTime? endDate = null,
         CancellationToken cancellationToken = default)
     {
-        var query = _auditLogs.AsQueryable();
+        var query = _context.AuditLogs.AsQueryable();
 
         // Aplicar os mesmos filtros do QueryAsync
         if (userId.HasValue)
@@ -138,6 +150,6 @@ public class AuditLogRepository : IAuditLogRepository
         if (endDate.HasValue)
             query = query.Where(log => log.CreatedAt <= endDate.Value);
 
-        return Task.FromResult(query.Count());
+        return await query.CountAsync(cancellationToken);
     }
 }

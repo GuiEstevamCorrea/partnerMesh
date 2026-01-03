@@ -15,27 +15,6 @@ public class CommissionRepository : ICommissionRepository
     public CommissionRepository(PartnerMeshDbContext context)
     {
         _context = context;
-        
-        // Fix one-time: Preencher PaidOn em pagamentos antigos
-        _ = Task.Run(async () =>
-        {
-            try
-            {
-                var sql = @"UPDATE ComissionPayments 
-                           SET PaidOn = (SELECT c.CreatedAt FROM Comissions c WHERE c.Id = ComissionPayments.ComissionId)
-                           WHERE Status = 1 AND PaidOn IS NULL";
-                
-                var count = await _context.Database.ExecuteSqlRawAsync(sql);
-                if (count > 0)
-                {
-                    Console.WriteLine($"[CommissionRepository] {count} pagamento(s) antigo(s) atualizados com PaidOn.");
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[CommissionRepository] Erro ao atualizar PaidOn: {ex.Message}");
-            }
-        });
     }
 
     public async Task<Comission?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
@@ -103,8 +82,6 @@ public class CommissionRepository : ICommissionRepository
             .SelectMany(c => c.Pagamentos)
             .AsQueryable();
 
-        Console.WriteLine($"[CommissionRepository] Filtros: status={status}, startDate={startDate?.ToString("yyyy-MM-dd")}, endDate={endDate?.ToString("yyyy-MM-dd")}");
-
         // Aplicar filtros
         if (partnerId.HasValue)
         {
@@ -116,7 +93,6 @@ public class CommissionRepository : ICommissionRepository
             if (PaymentStatusExtensions.TryParse(status, out var statusEnum))
             {
                 allPayments = allPayments.Where(p => p.Status == statusEnum);
-                Console.WriteLine($"[CommissionRepository] Aplicado filtro de status: {statusEnum}");
             }
         }
 
@@ -138,13 +114,11 @@ public class CommissionRepository : ICommissionRepository
             if (isPaidStatus)
             {
                 // Para pagamentos pagos, filtrar pela data de pagamento
-                Console.WriteLine($"[CommissionRepository] Aplicando filtro PaidOn >= {startDate.Value.Date:yyyy-MM-dd}");
                 allPayments = allPayments.Where(p => p.PaidOn.HasValue && p.PaidOn.Value.Date >= startDate.Value.Date);
             }
             else
             {
                 // Para outros casos, filtrar pela data de criação da comissão
-                Console.WriteLine($"[CommissionRepository] Aplicando filtro CreatedAt >= {startDate.Value.Date:yyyy-MM-dd}");
                 allPayments = allPayments.Where(p => p.Comission.CreatedAt >= startDate.Value);
             }
         }
