@@ -1,4 +1,5 @@
 using Application.UseCases.ListPartners.DTO;
+using System.Text.Json.Serialization;
 
 namespace Application.UseCases.ListPayments.DTO;
 
@@ -32,7 +33,13 @@ public sealed record PaymentListDto
     public int Level { get; init; }
     public decimal Value { get; init; }
     public string Status { get; init; } = string.Empty;
+    
+    [JsonPropertyName("paidOn")]
     public DateTime? PaidOn { get; init; }
+    
+    [JsonPropertyName("paidAt")]
+    public DateTime? PaidAt => PaidOn;
+    
     public DateTime CreatedAt { get; init; }
     
     // Dados do negócio associado
