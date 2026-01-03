@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Save, User as UserIcon } from 'lucide-react';
 
 import { usersApi } from '@/api/endpoints/users.api';
@@ -87,6 +87,7 @@ export function UserFormPage() {
   const navigate = useNavigate();
   const { showToast } = useToast();
   const { user: currentUser } = useAuthStore();
+  const queryClient = useQueryClient();
 
   const isEditMode = !!id;
   const isAdminGlobal = currentUser?.permission === Permission.AdminGlobal;
@@ -174,6 +175,8 @@ export function UserFormPage() {
   const createMutation = useMutation({
     mutationFn: usersApi.create,
     onSuccess: () => {
+      // Invalidar cache da listagem de usuários
+      queryClient.invalidateQueries({ queryKey: ['users'] });
       showToast('success', 'Usuário criado com sucesso!');
       navigate('/usuarios');
     },
@@ -187,6 +190,9 @@ export function UserFormPage() {
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: any }) => usersApi.update(id, data),
     onSuccess: () => {
+      // Invalidar cache da listagem de usuários e do usuário específico
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.invalidateQueries({ queryKey: ['user', id] });
       showToast('success', 'Usuário atualizado com sucesso!');
       navigate('/usuarios');
     },
