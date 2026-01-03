@@ -257,83 +257,83 @@ const PaymentsListPage = () => {
       </div>
 
       {/* Cards de Resumo */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
         <Card className="bg-green-50 border-green-200">
           <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-green-800">Total Pago</p>
-              <p className="text-2xl font-bold text-green-600 mt-1">
+            <div className="flex-1">
+              <p className="text-sm font-medium text-green-800 mb-2">Total Pago</p>
+              <p className="text-xl font-bold text-green-600 break-words">
                 {formatCurrency(summary.totalPaid)}
               </p>
-              <p className="text-xs text-green-700 mt-1">
+              <p className="text-xs text-green-700 mt-2">
                 {summary.countPaid} pagamento(s)
               </p>
             </div>
-            <DollarSign className="w-10 h-10 text-green-600 opacity-50" />
+            <DollarSign className="w-10 h-10 text-green-600 opacity-50 flex-shrink-0" />
           </div>
         </Card>
 
         <Card className="bg-yellow-50 border-yellow-200">
           <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-yellow-800">
+            <div className="flex-1">
+              <p className="text-sm font-medium text-yellow-800 mb-2">
                 Total Pendente
               </p>
-              <p className="text-2xl font-bold text-yellow-600 mt-1">
+              <p className="text-xl font-bold text-yellow-600 break-words">
                 {formatCurrency(summary.totalPending)}
               </p>
-              <p className="text-xs text-yellow-700 mt-1">
+              <p className="text-xs text-yellow-700 mt-2">
                 {summary.countPending} pagamento(s)
               </p>
             </div>
-            <DollarSign className="w-10 h-10 text-yellow-600 opacity-50" />
+            <DollarSign className="w-10 h-10 text-yellow-600 opacity-50 flex-shrink-0" />
           </div>
         </Card>
 
         <Card className="bg-red-50 border-red-200">
           <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-red-800">
-                Pagamentos Cancelados
+            <div className="flex-1">
+              <p className="text-sm font-medium text-red-800 mb-2">
+                Cancelados
               </p>
-              <p className="text-2xl font-bold text-red-600 mt-1">
+              <p className="text-xl font-bold text-red-600 break-words">
                 {formatCurrency(summary.totalCancelled)}
               </p>
-              <p className="text-xs text-red-700 mt-1">
+              <p className="text-xs text-red-700 mt-2">
                 {summary.countCancelled} pagamento(s)
               </p>
             </div>
-            <XCircle className="w-10 h-10 text-red-600 opacity-50" />
+            <XCircle className="w-10 h-10 text-red-600 opacity-50 flex-shrink-0" />
           </div>
         </Card>
 
         <Card className="bg-blue-50 border-blue-200">
           <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-blue-800">
+            <div className="flex-1">
+              <p className="text-sm font-medium text-blue-800 mb-2">
                 Total Geral
               </p>
-              <p className="text-2xl font-bold text-blue-600 mt-1">
+              <p className="text-xl font-bold text-blue-600 break-words">
                 {formatCurrency(summary.totalPaid + summary.totalPending + summary.totalCancelled)}
               </p>
-              <p className="text-xs text-blue-700 mt-1">
+              <p className="text-xs text-blue-700 mt-2">
                 {summary.countPaid + summary.countPending + summary.countCancelled} pagamento(s)
               </p>
             </div>
-            <DollarSign className="w-10 h-10 text-blue-600 opacity-50" />
+            <DollarSign className="w-10 h-10 text-blue-600 opacity-50 flex-shrink-0" />
           </div>
         </Card>
 
         <Card className="bg-gray-50 border-gray-200">
           <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-800">
+            <div className="flex-1">
+              <p className="text-sm font-medium text-gray-800 mb-2">
                 Selecionados
               </p>
-              <p className="text-2xl font-bold text-gray-900 mt-1">
+              <p className="text-xl font-bold text-gray-900 break-words">
                 {selectedPayments.size}
               </p>
-              <p className="text-xs text-gray-700 mt-1">
+              <p className="text-xs text-gray-700 mt-2">
                 {formatCurrency(
                   payments
                     .filter((p) => selectedPayments.has(p.id))
@@ -341,7 +341,7 @@ const PaymentsListPage = () => {
                 )}
               </p>
             </div>
-            <CheckSquare className="w-10 h-10 text-gray-600 opacity-50" />
+            <CheckSquare className="w-10 h-10 text-gray-600 opacity-50 flex-shrink-0" />
           </div>
         </Card>
       </div>
