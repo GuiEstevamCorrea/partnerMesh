@@ -91,7 +91,15 @@ const PaymentsListPage = () => {
       paymentsApi.process({ paymentIds }),
     onSuccess: () => {
       showToast('success', 'Pagamentos processados com sucesso');
+      // Invalidar queries relacionadas a pagamentos
       queryClient.invalidateQueries({ queryKey: ['payments'] });
+      // Invalidar queries relacionadas a negócios para atualizar status
+      queryClient.invalidateQueries({ queryKey: ['businesses'] });
+      queryClient.invalidateQueries({ queryKey: ['business'] });
+      // Invalidar relatórios que dependem de status de negócios
+      queryClient.invalidateQueries({ queryKey: ['business-report'] });
+      queryClient.invalidateQueries({ queryKey: ['financial-report'] });
+      queryClient.invalidateQueries({ queryKey: ['financial-payments'] });
       setSelectedPayments(new Set());
       setConfirmDialog({ isOpen: false, payments: [] });
     },
