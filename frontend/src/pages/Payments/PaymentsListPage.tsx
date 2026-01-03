@@ -64,7 +64,7 @@ const PaymentsListPage = () => {
       paymentsApi.list({
         page,
         pageSize: 20,
-        status: (statusFilter as 'Pending' | 'Paid' | undefined) || undefined,
+        status: (statusFilter as 'Pending' | 'Paid' | 'Cancelled' | undefined) || undefined,
         level: levelFilter ? Number(levelFilter) : undefined,
         vectorId: vectorFilter || undefined,
         startDate: dateStart || undefined,
@@ -97,7 +97,7 @@ const PaymentsListPage = () => {
     ],
     queryFn: () =>
       paymentsApi.getSummary({
-        status: (statusFilter as 'Pending' | 'Paid' | undefined) || undefined,
+        status: (statusFilter as 'Pending' | 'Paid' | 'Cancelled' | undefined) || undefined,
         level: levelFilter ? Number(levelFilter) : undefined,
         vectorId: vectorFilter || undefined,
         startDate: dateStart || undefined,
@@ -340,6 +340,7 @@ const PaymentsListPage = () => {
               <option value="">Todos</option>
               <option value="Pending">Pendente</option>
               <option value="Paid">Pago</option>
+              <option value="Cancelled">Cancelado</option>
             </select>
           </div>
 

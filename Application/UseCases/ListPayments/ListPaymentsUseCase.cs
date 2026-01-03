@@ -101,12 +101,6 @@ public class ListPaymentsUseCase : IListPaymentsUseCase
                 // Buscar dados do negócio através da comissão
                 var business = await _businessRepository.GetByIdAsync(comission.BussinessId, cancellationToken);
 
-                // Ignorar negócios cancelados
-                if (business != null && business.Status == Domain.ValueTypes.BusinessStatus.Cancelado)
-                {
-                    continue;
-                }
-
                 // Buscar o parceiro do negócio para obter o VetorId
                 Guid vetorId = Guid.Empty;
                 string vetorName = "";

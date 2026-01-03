@@ -45,7 +45,9 @@ public class ComissionPayment
 
     public void CancelPayment()
     {
-        if (Status == PaymentStatus.APagar)
+        // Permitir cancelar pagamentos em qualquer status
+        // Quando um negócio é cancelado, todos os seus pagamentos devem ser cancelados
+        if (Status != PaymentStatus.Cancelado)
         {
             Status = PaymentStatus.Cancelado;
         }

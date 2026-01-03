@@ -43,10 +43,31 @@ public sealed record CommissionCancellationSummary
     public Guid CommissionId { get; init; }
     public decimal OriginalTotalValue { get; init; }
     public int TotalPayments { get; init; }
+    
+    /// <summary>
+    /// Quantidade de pagamentos que estavam pendentes e foram cancelados
+    /// </summary>
     public int PendingPaymentsCancelled { get; init; }
+    
+    /// <summary>
+    /// Quantidade de pagamentos que estavam pagos e foram cancelados (sempre 0 agora)
+    /// Mantido para compatibilidade com versões anteriores
+    /// </summary>
+    [Obsolete("Todos os pagamentos são cancelados. Este campo sempre será 0.")]
     public int PaidPaymentsKept { get; init; }
+    
+    /// <summary>
+    /// Valor total de todos os pagamentos cancelados
+    /// </summary>
     public decimal PendingValueCancelled { get; init; }
+    
+    /// <summary>
+    /// Valor de pagamentos mantidos (sempre 0 agora)
+    /// Mantido para compatibilidade com versões anteriores
+    /// </summary>
+    [Obsolete("Todos os pagamentos são cancelados. Este campo sempre será 0.")]
     public decimal PaidValueKept { get; init; }
+    
     public IEnumerable<PaymentCancellationDetail> PaymentDetails { get; init; } = new List<PaymentCancellationDetail>();
 }
 

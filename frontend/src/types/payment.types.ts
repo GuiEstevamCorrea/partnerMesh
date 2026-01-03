@@ -25,7 +25,7 @@ export interface ProcessPaymentRequest {
 export interface PaymentFilter {
   vectorId?: string;
   partnerId?: string;
-  status?: 'Pending' | 'Paid';
+  status?: 'Pending' | 'Paid' | 'Cancelled';
   startDate?: string;
   endDate?: string;
   level?: number;

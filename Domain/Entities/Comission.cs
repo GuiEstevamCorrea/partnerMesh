@@ -44,6 +44,18 @@ public class Comission
         }
     }
 
+    /// <summary>
+    /// Cancela TODOS os pagamentos da comissão (pendentes e pagos)
+    /// Usado quando um negócio é cancelado
+    /// </summary>
+    public void CancelAllPayments()
+    {
+        foreach (var payment in _payments)
+        {
+            payment.CancelPayment();
+        }
+    }
+
     public int GetPendingPaymentsCount()
     {
         return _payments.Count(p => p.Status == ValueTypes.PaymentStatus.APagar);

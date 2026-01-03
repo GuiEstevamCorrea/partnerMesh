@@ -48,27 +48,18 @@ public class CancelBusinessUseCase : ICancelBusinessUseCase
             return CancelBusinessResult.Failure("Comissão não encontrada para este negócio");
         }
 
-        // Verificar se há pagamentos já efetuados
+        // Coletar dados antes do cancelamento para o relatório
         var paidPaymentsCount = commission.GetPaidPaymentsCount();
         var paidPaymentsValue = commission.GetPaidPaymentsValue();
-
-        if (paidPaymentsCount > 0 && !request.ForceCancel)
-        {
-            return CancelBusinessResult.Failure(
-                $"Não é possível cancelar o negócio pois há {paidPaymentsCount} pagamento(s) já efetuado(s) " +
-                $"no valor total de {paidPaymentsValue:C}. Use ForceCancel=true se desejar cancelar mesmo assim.");
-        }
-
-        // Coletar dados antes do cancelamento para o relatório
         var pendingPaymentsCount = commission.GetPendingPaymentsCount();
         var pendingPaymentsValue = commission.GetPendingPaymentsValue();
+        var totalPaymentsCount = commission.Pagamentos.Count;
 
         // Buscar informações dos parceiros para o relatório detalhado
         var paymentDetails = new List<PaymentCancellationDetail>();
         foreach (var payment in commission.Pagamentos)
         {
             var paymentPartner = await _partnerRepository.GetByIdAsync(payment.PartnerId);
-            var wasCancelled = payment.Status == PaymentStatus.APagar;
             
             paymentDetails.Add(new PaymentCancellationDetail
             {
@@ -78,15 +69,16 @@ public class CancelBusinessUseCase : ICancelBusinessUseCase
                 PaymentType = payment.TipoPagamento.ToLegacyString(),
                 Value = payment.Value,
                 OriginalStatus = payment.Status.ToLegacyString(),
-                FinalStatus = wasCancelled ? PaymentStatus.Cancelado.ToLegacyString() : payment.Status.ToLegacyString(),
-                WasCancelled = wasCancelled,
-                CancellationNote = wasCancelled ? "Cancelado devido ao cancelamento do negócio" : 
-                                 payment.Status == PaymentStatus.Pago ? "Mantido - já estava pago" : "Não alterado"
+                FinalStatus = PaymentStatus.Cancelado.ToLegacyString(),
+                WasCancelled = true,
+                CancellationNote = payment.Status == PaymentStatus.Pago 
+                    ? "Pagamento cancelado (já havia sido pago)" 
+                    : "Pagamento cancelado (estava pendente)"
             });
         }
 
-        // Cancelar pagamentos pendentes
-        commission.CancelPendingPayments();
+        // Cancelar TODOS os pagamentos (pendentes e pagos)
+        commission.CancelAllPayments();
 
         // Cancelar o negócio
         business.CancelBusiness();
@@ -120,11 +112,11 @@ public class CancelBusinessUseCase : ICancelBusinessUseCase
         {
             CommissionId = commission.Id,
             OriginalTotalValue = commission.TotalValue,
-            TotalPayments = commission.Pagamentos.Count,
+            TotalPayments = totalPaymentsCount,
             PendingPaymentsCancelled = pendingPaymentsCount,
-            PaidPaymentsKept = paidPaymentsCount,
-            PendingValueCancelled = pendingPaymentsValue,
-            PaidValueKept = paidPaymentsValue,
+            PaidPaymentsKept = 0, // Agora todos são cancelados, nenhum é mantido
+            PendingValueCancelled = pendingPaymentsValue + paidPaymentsValue, // Todo o valor é cancelado
+            PaidValueKept = 0, // Nenhum valor é mantido
             PaymentDetails = paymentDetails
         };
 
