@@ -93,7 +93,7 @@ public class CreateBusinessUseCase : ICreateBusinessUseCase
         var recommendationChain = await BuildRecommendationChainAsync(partner);
 
         // Distribuir comissões dinamicamente baseado no tamanho da cadeia
-        await DistributeCommissionDynamicallyAsync(commission, recommendationChain, commissionValue);
+        await DistributeCommissionDynamicallyAsync(commission, recommendationChain, commissionValue, partner);
 
         await _commissionRepository.AddAsync(commission);
         return commission;
@@ -131,24 +131,24 @@ public class CreateBusinessUseCase : ICreateBusinessUseCase
     private async Task DistributeCommissionDynamicallyAsync(
         Comission commission, 
         List<Partner> partnerChain, 
-        decimal totalValue)
+        decimal totalValue,
+        Partner partnerWhoClosedDeal)
     {
         // A cadeia SEMPRE inclui o Vetor, mesmo que não seja um Partner
         // chain.Count = partnerChain.Count + 1 (para incluir o Vetor)
         var totalChainLength = partnerChain.Count + 1;
         
-        if (totalChainLength <= 1)
+        if (totalChainLength == 1)
         {
-            // Sem parceiros na cadeia, só o Vetor receberia, mas como não é Partner, não faz pagamento
+            // Caso especial: Apenas o Vetor (N1 fecha negócio)
+            // Vetor recebe 100% da comissão
+            await AddVetorPaymentAsync(commission, partnerChain, totalValue, 1.0m, partnerWhoClosedDeal);
             return;
         }
 
         // Obter distribuição de percentuais (incluindo o Vetor)
         var distribution = _commissionSettings.CalculateDistribution(totalChainLength);
 
-        // Distribuir para o Vetor (se existir como Partner - caso especial)
-        // Por enquanto, pular a posição [0] do distribution que é o Vetor
-        
         // Distribuir para os parceiros na cadeia
         for (int i = 0; i < partnerChain.Count; i++)
         {
@@ -168,27 +168,36 @@ public class CreateBusinessUseCase : ICreateBusinessUseCase
         }
 
         // Adicionar pagamento para o Vetor (se necessário)
-        await AddVetorPaymentAsync(commission, partnerChain, totalValue, distribution[0]);
+        await AddVetorPaymentAsync(commission, partnerChain, totalValue, distribution[0], partnerWhoClosedDeal);
     }
 
     /// <summary>
     /// Adiciona pagamento para o Vetor se necessário
     /// </summary>
-    private async Task AddVetorPaymentAsync(Comission commission, List<Partner> partnerChain, decimal totalValue, decimal vetorPercentage)
+    private async Task AddVetorPaymentAsync(Comission commission, List<Partner> partnerChain, decimal totalValue, decimal vetorPercentage, Partner? partnerWhoClosedDeal = null)
     {
-        if (partnerChain.Count == 0 || vetorPercentage <= 0) return;
+        if (vetorPercentage <= 0) return;
 
-        // Pegar o Vetor do primeiro parceiro da cadeia (todos pertencem ao mesmo Vetor)
-        var firstPartner = partnerChain[0];
+        // Determinar o VetorId: se há cadeia, usar o primeiro; se não, usar quem fechou
+        Guid vetorId;
+        if (partnerChain.Count > 0)
+        {
+            vetorId = partnerChain[0].VetorId;
+        }
+        else if (partnerWhoClosedDeal != null)
+        {
+            vetorId = partnerWhoClosedDeal.VetorId;
+        }
+        else
+        {
+            return; // Não conseguiu determinar o Vetor
+        }
+
         var vetorValue = totalValue * vetorPercentage;
         
         // Buscar se existe um Partner que representa o Vetor
-        // Isso pode ser implementado de diferentes formas:
-        // 1. O Vetor pode ter um Partner associado
-        // 2. Pode haver uma convenção específica no sistema
-        
-        // Por enquanto, vou implementar buscando por Partners do mesmo VetorId que não têm RecommenderId
-        var vetorAsPartners = await _partnerRepository.GetByVetorIdAsync(firstPartner.VetorId);
+        // Convenção: Partner sem RecommenderId no mesmo Vetor
+        var vetorAsPartners = await _partnerRepository.GetByVetorIdAsync(vetorId);
         var vetorPartner = vetorAsPartners.FirstOrDefault(p => !p.RecommenderId.HasValue);
         
         if (vetorPartner != null)
