@@ -65,7 +65,17 @@ public class PaymentsController : ControllerBase
                 return BadRequest(result);
             }
 
-            return Ok(result);
+            // Retornar no formato esperado pelo frontend
+            var response = new
+            {
+                items = result.Payments,
+                totalItems = result.Pagination.TotalItems,
+                page = result.Pagination.Page,
+                pageSize = result.Pagination.PageSize,
+                totalPages = result.Pagination.TotalPages
+            };
+
+            return Ok(response);
         }
         catch (Exception ex)
         {
