@@ -1,0 +1,44 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build
+dist/
+build/
+
+# Environment
+.env
+.env.local
+.env.production
+
+# IDE
+.vscode/
+.vs/
+
+# Git
+.git
+.gitignore
+
+# Documentation
+*.md
+README.md
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Coverage
+coverage/
+
+# Testing
+.nyc_output
+
+# Docker
+Dockerfile
+docker-compose*.yml
+.dockerignore

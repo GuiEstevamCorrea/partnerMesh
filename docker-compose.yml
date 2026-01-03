@@ -1,26 +1,69 @@
 version: '3.8'
 
 services:
+  # SQL Server Database
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: partnermesh-sqlserver
     environment:
       - ACCEPT_EULA=Y
-      - SA_PASSWORD=YourStrong@Passw0rd
+      - SA_PASSWORD=PartnerMesh@2026
       - MSSQL_PID=Developer
     ports:
       - "1433:1433"
     volumes:
-      - sqlserver_data:/var/opt/mssql
+      - ./data/mssql:/var/opt/mssql
     networks:
       - partnermesh-network
     restart: unless-stopped
     healthcheck:
-      test: /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P YourStrong@Passw0rd -Q "SELECT 1" || exit 1
-      interval: 10s
-      timeout: 3s
-      retries: 10
-      start_period: 10s
+      test: /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P PartnerMesh@2026 -Q "SELECT 1" || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # .NET Backend API
+  backend:
+    build:
+      context: .
+      dockerfile: Api/Dockerfile
+    container_name: partnermesh-backend
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5000
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=PartnerMeshDb;User Id=sa;Password=PartnerMesh@2026;TrustServerCertificate=true;
+    ports:
+      - "5000:5000"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    networks:
+      - partnermesh-network
+    restart: unless-stopped
+    healthcheck:
+      test: curl --fail http://localhost:5000/health || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # React Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: partnermesh-frontend
+    environment:
+      - VITE_API_URL=http://localhost:5000/api
+    ports:
+      - "3000:3000"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - partnermesh-network
+    restart: unless-stopped
 
 volumes:
   sqlserver_data:
