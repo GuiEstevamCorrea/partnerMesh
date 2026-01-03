@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -20,7 +20,7 @@ import { Loading } from '@/components/common/Loading';
 
 // Schema de validação para criação
 const createBusinessSchema = z.object({
-  partnerId: z.string().min(1, 'Parceiro é obrigatório'),
+  partnerIds: z.array(z.string()).min(1, 'Pelo menos um parceiro deve ser selecionado'),
   businessTypeId: z.string().min(1, 'Tipo de negócio é obrigatório'),
   value: z.number().min(0.01, 'Valor deve ser maior que zero'),
   date: z.string().min(1, 'Data é obrigatória'),
@@ -41,6 +41,9 @@ export function BusinessFormPage() {
   const navigate = useNavigate();
   const { showToast } = useToast();
   const isEditMode = !!id;
+
+  // Estado para parceiros selecionados (múltipla seleção)
+  const [selectedPartnerIds, setSelectedPartnerIds] = useState<string[]>([]);
 
   // Data de hoje formatada para o input date (YYYY-MM-DD)
   const today = new Date().toISOString().split('T')[0];
@@ -89,6 +92,7 @@ export function BusinessFormPage() {
     defaultValues: isEditMode
       ? {}
       : {
+          partnerIds: [],
           date: today,
           value: 0,
           observations: '',
@@ -103,7 +107,12 @@ export function BusinessFormPage() {
     const value = typeof watchValue === 'number' ? watchValue : parseFloat(String(watchValue)) || 0;
     return value * 0.1;
   }, [watchValue]);
-
+  // Calcular valor por parceiro
+  const valuePerPartner = useMemo(() => {
+    const value = typeof watchValue === 'number' ? watchValue : parseFloat(String(watchValue)) || 0;
+    const partnersCount = selectedPartnerIds.length || 1;
+    return value / partnersCount;
+  }, [watchValue, selectedPartnerIds.length]);
   // Preencher formulário em modo edição
   useEffect(() => {
     if (business && isEditMode) {
@@ -111,13 +120,37 @@ export function BusinessFormPage() {
     }
   }, [business, isEditMode, setValue]);
 
+  // Sincronizar parceiros selecionados com formulário
+  useEffect(() => {
+    if (!isEditMode) {
+      setValue('partnerIds' as keyof BusinessFormData, selectedPartnerIds);
+    }
+  }, [selectedPartnerIds, setValue, isEditMode]);
+
+  // Handler para seleção/desseleção de parceiros
+  const handlePartnerToggle = (partnerId: string) => {
+    setSelectedPartnerIds(prev => {
+      if (prev.includes(partnerId)) {
+        return prev.filter(id => id !== partnerId);
+      } else {
+        return [...prev, partnerId];
+      }
+    });
+  };
+
   // Mutation para criar negócio
   const createMutation = useMutation({
     mutationFn: (data: CreateBusinessFormData) => businessApi.create(data),
-    onSuccess: (newBusiness) => {
-      showToast('success', 'Negócio criado com sucesso! Comissões calculadas automaticamente.');
-      // Redirecionar para a página de detalhes do negócio
-      navigate(`/negocios/${newBusiness.id}`);
+    onSuccess: (newBusinesses) => {
+      if (newBusinesses.length === 1) {
+        showToast('success', 'Negócio criado com sucesso! Comissões calculadas automaticamente.');
+        // Redirecionar para a página de detalhes do negócio
+        navigate(`/negocios/${newBusinesses[0].id}`);
+      } else {
+        showToast('success', `${newBusinesses.length} negócios criados com sucesso! Comissões calculadas automaticamente.`);
+        // Redirecionar para a lista de negócios
+        navigate('/negocios');
+      }
     },
     onError: (error: any) => {
       showToast('error', error.response?.data?.message || 'Erro ao criar negócio');
@@ -183,9 +216,10 @@ export function BusinessFormPage() {
           <div>
             <p className="font-medium">Cálculo Automático de Comissões</p>
             <p className="text-sm mt-1">
-              Ao criar um negócio, o sistema calculará automaticamente as comissões para até 3
-              níveis da rede do parceiro selecionado. A comissão total será de 10% do valor do
-              negócio.
+              Você pode selecionar um ou múltiplos parceiros para um negócio. Se múltiplos parceiros
+              forem selecionados, o valor será dividido igualmente entre eles e será criado um negócio
+              individual para cada parceiro. A comissão total será de 10% do valor de cada negócio,
+              distribuída automaticamente para até 3 níveis da rede de cada parceiro.
             </p>
           </div>
         </Alert>
@@ -279,28 +313,49 @@ export function BusinessFormPage() {
             {/* Campos apenas em modo criação */}
             {!isEditMode && (
               <>
-                {/* Parceiro */}
+                {/* Parceiros */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Parceiro <span className="text-red-500">*</span>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Parceiros Envolvidos <span className="text-red-500">*</span>
                   </label>
-                  <select
-                    {...register('partnerId' as keyof BusinessFormData)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
-                  >
-                    <option value="">Selecione um parceiro</option>
-                    {activePartners.map((partner) => (
-                      <option key={partner.id} value={partner.id}>
-                        {partner.name} - Nível {partner.level}
-                      </option>
-                    ))}
-                  </select>
-                  {!isEditMode && 'partnerId' in errors && errors.partnerId && (
-                    <p className="text-red-500 text-sm mt-1">{String(errors.partnerId.message)}</p>
+                  <div className="border border-gray-300 rounded-lg p-3 max-h-60 overflow-y-auto">
+                    {activePartners.length > 0 ? (
+                      <div className="space-y-2">
+                        {activePartners.map((partner) => (
+                          <label key={partner.id} className="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                            <input
+                              type="checkbox"
+                              checked={selectedPartnerIds.includes(partner.id)}
+                              onChange={() => handlePartnerToggle(partner.id)}
+                              className="h-4 w-4 text-black focus:ring-black border-gray-300 rounded"
+                            />
+                            <div className="flex-1">
+                              <div className="text-sm font-medium text-gray-900">{partner.name}</div>
+                              <div className="text-xs text-gray-500">Nível {partner.level}</div>
+                            </div>
+                          </label>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-500">Nenhum parceiro ativo disponível</p>
+                    )}
+                  </div>
+                  {!isEditMode && 'partnerIds' in errors && errors.partnerIds && (
+                    <p className="text-red-500 text-sm mt-1">{String(errors.partnerIds.message)}</p>
                   )}
-                  <p className="text-sm text-gray-600 mt-1">
-                    Selecione o parceiro responsável pelo negócio
-                  </p>
+                  <div className="mt-2">
+                    <p className="text-sm text-gray-600">
+                      {selectedPartnerIds.length === 0 
+                        ? 'Selecione os parceiros responsáveis pelo negócio'
+                        : `${selectedPartnerIds.length} parceiro(s) selecionado(s)`
+                      }
+                    </p>
+                    {selectedPartnerIds.length > 1 && (
+                      <p className="text-xs text-blue-600 mt-1">
+                        O valor será dividido igualmente entre os parceiros selecionados
+                      </p>
+                    )}
+                  </div>
                 </div>
 
                 {/* Tipo de Negócio */}
@@ -397,21 +452,50 @@ export function BusinessFormPage() {
                 </h3>
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
-                    <span className="text-blue-700">Valor do Negócio:</span>
+                    <span className="text-blue-700">Valor Total do Negócio:</span>
                     <span className="text-blue-900 font-semibold text-lg">
                       {formatCurrency(typeof watchValue === 'number' ? watchValue : parseFloat(String(watchValue)) || 0)}
                     </span>
                   </div>
+                  
+                  {selectedPartnerIds.length > 1 && (
+                    <>
+                      <div className="flex justify-between items-center">
+                        <span className="text-blue-700">Parceiros Selecionados:</span>
+                        <span className="text-blue-900 font-medium">
+                          {selectedPartnerIds.length}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-blue-700">Valor por Parceiro:</span>
+                        <span className="text-blue-900 font-semibold">
+                          {formatCurrency(valuePerPartner)}
+                        </span>
+                      </div>
+                    </>
+                  )}
+                  
                   <div className="flex justify-between items-center border-t border-blue-300 pt-2">
                     <span className="text-blue-700 font-medium">Comissão Total (10%):</span>
                     <span className="text-blue-900 font-bold text-xl">
                       {formatCurrency(commissionPreview)}
                     </span>
                   </div>
+                  
+                  {selectedPartnerIds.length > 1 && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-blue-700">Comissão por Parceiro:</span>
+                      <span className="text-blue-900 font-bold">
+                        {formatCurrency(commissionPreview / selectedPartnerIds.length)}
+                      </span>
+                    </div>
+                  )}
                 </div>
                 <p className="text-sm text-blue-700 mt-3">
-                  A comissão será distribuída automaticamente entre os parceiros da rede (até 3
-                  níveis) após a criação do negócio.
+                  {selectedPartnerIds.length > 1 
+                    ? `Será criado um negócio para cada parceiro selecionado. A comissão será calculada individualmente para cada negócio de ${formatCurrency(valuePerPartner)}.`
+                    : 'A comissão será distribuída automaticamente entre os parceiros da rede (até 3 níveis) após a criação do negócio.'
+                  }
                 </p>
               </div>
             </div>
@@ -430,10 +514,17 @@ export function BusinessFormPage() {
           </Button>
           <Button
             type="submit"
-            disabled={isSubmitting || (isEditMode && business?.status === 'Cancelled')}
+            disabled={isSubmitting || (isEditMode && business?.status === 'Cancelled') || (!isEditMode && selectedPartnerIds.length === 0)}
           >
             <Save className="w-4 h-4 mr-2" />
-            {isSubmitting ? 'Salvando...' : isEditMode ? 'Salvar Alterações' : 'Criar Negócio'}
+            {isSubmitting 
+              ? 'Salvando...' 
+              : isEditMode 
+                ? 'Salvar Alterações' 
+                : selectedPartnerIds.length > 1 
+                  ? `Criar ${selectedPartnerIds.length} Negócios` 
+                  : 'Criar Negócio'
+            }
           </Button>
         </div>
 

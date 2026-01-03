@@ -124,20 +124,58 @@ Comissão_total = Valor_negócio × 0.10
 ### **Nível 1**
 
 - Vetor: 50%
-- Recomendador direto: 50%
+- Level 1: 50%
 
 ### **Nível 2**
 
 - Vetor: 15%
-- Level 0 (você): 35%
-- Recomendador intermediário: 50%
+- Level 1: 35%
+- Level 2 Recomendador direto: 50%
 
 ### **Nível 3**
 
 - Vetor: 10%
-- Level 0 (você): 15%
-- Nível 1 intermediário: 25%
-- Nível 2 intermediário: 50%
+- Level 1: 15%
+- Nível 2: 25%
+- Nível 3 Recomendador direto: 50%
+
+### **Nível 4**
+
+- Vetor: 10%
+- Level 1: 0%
+- Nível 2: 15%
+- Nível 3: 25%
+- Nível 4 Recomendador direto: 50%
+
+## Exemplo com valores:
+
+- Comissão de 10.000
+
+### **Nível 1**
+
+- Vetor: 5.000
+- Level 1: 5.000
+
+### **Nível 2**
+
+- Vetor: 1.500
+- Level 1: 3.500
+- Level 2 Recomendador direto: 5.000
+
+### **Nível 3**
+
+- Vetor: 1.000
+- Level 1: 1.500
+- Nível 2: 2.500
+- Nível 3 Recomendador direto: 5.000
+
+### **Nível 4**
+
+- Vetor: 1.000
+- Level 1: 0
+- Nível 2: 1.500
+- Nível 3: 2.500
+- Nível 4 Recomendador direto: 5.000
 
 ---
 

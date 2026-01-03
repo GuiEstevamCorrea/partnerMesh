@@ -104,7 +104,17 @@ export const partnersApi = {
   },
 
   toggleActive: async (id: string): Promise<void> => {
-    await api.patch(`/partners/${id}/toggle-active`);
+    // Primeiro, buscar o parceiro atual para saber o estado
+    const partner = await api.get(`/partners/${id}`);
+    const isActive = partner.data?.partner?.isActive ?? false;
+    
+    // Preparar o request para inverter o estado
+    const requestBody = {
+      active: !isActive,
+      reason: !isActive ? 'Ativação via interface' : 'Desativação via interface'
+    };
+    
+    await api.patch(`/partners/${id}/status`, requestBody);
   },
 
   delete: async (id: string): Promise<void> => {

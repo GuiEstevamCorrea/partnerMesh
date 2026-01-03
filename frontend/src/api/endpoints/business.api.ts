@@ -42,9 +42,42 @@ export const businessApi = {
     return [];
   },
 
-  create: async (data: CreateBusinessRequest): Promise<Business> => {
-    const response = await api.post('/business', data);
-    return response.data;
+  create: async (data: CreateBusinessRequest): Promise<Business[]> => {
+    // Se múltiplos parceiros foram selecionados, criar um negócio para cada
+    if (data.partnerIds.length > 1) {
+      const valuePerPartner = data.value / data.partnerIds.length;
+      const businesses: Business[] = [];
+      
+      // Criar negócios sequencialmente para cada parceiro
+      for (const partnerId of data.partnerIds) {
+        const businessData = {
+          partnerId: partnerId,
+          businessTypeId: data.businessTypeId,
+          value: valuePerPartner,
+          date: data.date,
+          observations: data.observations ? 
+            `${data.observations} (Negócio dividido entre ${data.partnerIds.length} parceiros)` : 
+            `Negócio dividido entre ${data.partnerIds.length} parceiros`
+        };
+        
+        const response = await api.post('/business', businessData);
+        businesses.push(response.data);
+      }
+      
+      return businesses;
+    } else {
+      // Um único parceiro - comportamento original
+      const businessData = {
+        partnerId: data.partnerIds[0],
+        businessTypeId: data.businessTypeId,
+        value: data.value,
+        date: data.date,
+        observations: data.observations
+      };
+      
+      const response = await api.post('/business', businessData);
+      return [response.data];
+    }
   },
 
   update: async (id: string, data: UpdateBusinessRequest): Promise<Business> => {

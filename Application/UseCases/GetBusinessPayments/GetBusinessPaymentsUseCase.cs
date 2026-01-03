@@ -14,19 +14,22 @@ public class GetBusinessPaymentsUseCase : IGetBusinessPaymentsUseCase
     private readonly IPartnerRepository _partnerRepository;
     private readonly IBusinessTypeRepository _businessTypeRepository;
     private readonly IUserRepository _userRepository;
+    private readonly IVetorRepository _vetorRepository;
 
     public GetBusinessPaymentsUseCase(
         IBusinessRepository businessRepository,
         ICommissionRepository commissionRepository,
         IPartnerRepository partnerRepository,
         IBusinessTypeRepository businessTypeRepository,
-        IUserRepository userRepository)
+        IUserRepository userRepository,
+        IVetorRepository vetorRepository)
     {
         _businessRepository = businessRepository;
         _commissionRepository = commissionRepository;
         _partnerRepository = partnerRepository;
         _businessTypeRepository = businessTypeRepository;
         _userRepository = userRepository;
+        _vetorRepository = vetorRepository;
     }
 
     public async Task<GetBusinessPaymentsResult> ExecuteAsync(
@@ -91,13 +94,25 @@ public class GetBusinessPaymentsUseCase : IGetBusinessPaymentsUseCase
             var paymentDtos = new List<BusinessPaymentDto>();
             foreach (var payment in commission.Pagamentos)
             {
-                var paymentPartner = await _partnerRepository.GetByIdAsync(payment.PartnerId, cancellationToken);
+                string partnerName;
+                
+                // Verificar se é pagamento para vetor ou parceiro
+                if (payment.TipoPagamento == PaymentType.Vetor)
+                {
+                    var vetor = await _vetorRepository.GetByIdAsync(payment.PartnerId, cancellationToken);
+                    partnerName = vetor?.Name ?? "Vetor não encontrado";
+                }
+                else
+                {
+                    var paymentPartner = await _partnerRepository.GetByIdAsync(payment.PartnerId, cancellationToken);
+                    partnerName = paymentPartner?.Name ?? "Parceiro não encontrado";
+                }
                 
                 var paymentDto = new BusinessPaymentDto
                 {
                     Id = payment.Id,
                     PartnerId = payment.PartnerId,
-                    PartnerName = paymentPartner?.Name ?? "Parceiro não encontrado",
+                    PartnerName = partnerName,
                     TipoPagamento = payment.TipoPagamento.ToLegacyString(),
                     Value = payment.Value,
                     Status = payment.Status.ToLegacyString(),

@@ -11,15 +11,18 @@ public class ProcessPaymentUseCase : IProcessPaymentUseCase
     private readonly ICommissionRepository _commissionRepository;
     private readonly IPartnerRepository _partnerRepository;
     private readonly IUserRepository _userRepository;
+    private readonly IVetorRepository _vetorRepository;
 
     public ProcessPaymentUseCase(
         ICommissionRepository commissionRepository,
         IPartnerRepository partnerRepository,
-        IUserRepository userRepository)
+        IUserRepository userRepository,
+        IVetorRepository vetorRepository)
     {
         _commissionRepository = commissionRepository;
         _partnerRepository = partnerRepository;
         _userRepository = userRepository;
+        _vetorRepository = vetorRepository;
     }
 
     public async Task<ProcessPaymentResult> ExecuteAsync(
@@ -80,8 +83,18 @@ public class ProcessPaymentUseCase : IProcessPaymentUseCase
             // Atualizar no repositório
             await _commissionRepository.UpdateAsync(commission, cancellationToken);
 
-            // Buscar dados do parceiro
-            var partner = await _partnerRepository.GetByIdAsync(payment.PartnerId, cancellationToken);
+            // Buscar dados do destinatário
+            string partnerName;
+            if (payment.TipoPagamento == Domain.ValueTypes.PaymentType.Vetor)
+            {
+                var vetor = await _vetorRepository.GetByIdAsync(payment.PartnerId, cancellationToken);
+                partnerName = vetor?.Name ?? "Vetor não encontrado";
+            }
+            else
+            {
+                var partner = await _partnerRepository.GetByIdAsync(payment.PartnerId, cancellationToken);
+                partnerName = partner?.Name ?? "Parceiro não encontrado";
+            }
 
             // Criar DTO de resposta
             var paymentDto = new PaymentProcessedDto
@@ -89,7 +102,7 @@ public class ProcessPaymentUseCase : IProcessPaymentUseCase
                 Id = payment.Id,
                 ComissionId = payment.ComissionId,
                 PartnerId = payment.PartnerId,
-                PartnerName = partner?.Name ?? "Parceiro não encontrado",
+                PartnerName = partnerName,
                 TipoPagamento = payment.TipoPagamento.ToLegacyString(),
                 Value = payment.Value,
                 Status = payment.Status.ToLegacyString(),

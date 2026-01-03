@@ -13,17 +13,20 @@ public class GetBusinessByIdUseCase : IGetBusinessByIdUseCase
     private readonly ICommissionRepository _commissionRepository;
     private readonly IPartnerRepository _partnerRepository;
     private readonly IBusinessTypeRepository _businessTypeRepository;
+    private readonly IVetorRepository _vetorRepository;
 
     public GetBusinessByIdUseCase(
         IBusinessRepository businessRepository,
         ICommissionRepository commissionRepository,
         IPartnerRepository partnerRepository,
-        IBusinessTypeRepository businessTypeRepository)
+        IBusinessTypeRepository businessTypeRepository,
+        IVetorRepository vetorRepository)
     {
         _businessRepository = businessRepository;
         _commissionRepository = commissionRepository;
         _partnerRepository = partnerRepository;
         _businessTypeRepository = businessTypeRepository;
+        _vetorRepository = vetorRepository;
     }
 
     public async Task<GetBusinessByIdResult> ExecuteAsync(Guid businessId, Guid userId)
@@ -129,7 +132,19 @@ public class GetBusinessByIdUseCase : IGetBusinessByIdUseCase
         var paymentDetails = new List<CommissionPaymentDetailDto>();
         foreach (var payment in commission.Pagamentos.OrderBy(p => p.PartnerId))
         {
-            var paymentPartner = await _partnerRepository.GetByIdAsync(payment.PartnerId);
+            string partnerName;
+            
+            // Verificar se é pagamento para vetor ou parceiro
+            if (payment.TipoPagamento == Domain.ValueTypes.PaymentType.Vetor)
+            {
+                var vetor = await _vetorRepository.GetByIdAsync(payment.PartnerId);
+                partnerName = vetor?.Name ?? "Vetor não encontrado";
+            }
+            else
+            {
+                var paymentPartner = await _partnerRepository.GetByIdAsync(payment.PartnerId);
+                partnerName = paymentPartner?.Name ?? "Parceiro não encontrado";
+            }
             
             // Determinar o nível baseado no tipo de pagamento
             string level = payment.TipoPagamento switch
@@ -145,7 +160,7 @@ public class GetBusinessByIdUseCase : IGetBusinessByIdUseCase
             {
                 PaymentId = payment.Id,
                 PartnerId = payment.PartnerId,
-                PartnerName = paymentPartner?.Name ?? "Partner não encontrado",
+                PartnerName = partnerName,
                 PaymentType = payment.TipoPagamento.ToLegacyString(),
                 Value = payment.Value,
                 Status = payment.Status.ToLegacyString(),

@@ -3,7 +3,7 @@ namespace Domain.ValueTypes;
 /// <summary>
 /// Configurações de comissão do sistema
 /// Define os percentuais de comissão distribuídos na cadeia de recomendação
-/// Suporta níveis infinitos de recomendação com regras dinâmicas
+/// IMPORTANTE: Quem fecha o negócio NÃO recebe comissão, apenas recomendadores e vetor
 /// </summary>
 public class CommissionSettings
 {
@@ -14,75 +14,75 @@ public class CommissionSettings
     public decimal TotalPercentage { get; init; } = 0.10m;
 
     /// <summary>
-    /// Percentual fixo que quem fechou o negócio sempre recebe
-    /// Padrão: 50% (0.50) do total da comissão
-    /// </summary>
-    public decimal CloserPercentage { get; init; } = 0.50m;
-
-    /// <summary>
     /// Calcula a distribuição de percentuais para uma cadeia de recomendação
     /// </summary>
-    /// <param name="chainLength">Número total de pessoas na cadeia (incluindo quem fechou)</param>
-    /// <returns>Array de percentuais, onde [0] é o Vetor e [chainLength-1] é quem fechou</returns>
+    /// <param name="chainLength">Número total de recomendadores na cadeia (EXCLUINDO quem fechou)</param>
+    /// <returns>Array de percentuais, onde [0] é o Vetor e [chainLength-1] é o recomendador direto</returns>
     /// <remarks>
-    /// Regras de distribuição:
-    /// - Quem fecha sempre recebe 50%
-    /// - 2 pessoas: Vetor 50% / Closer 50%
-    /// - 3 pessoas: Vetor 15% / Finder1 35% / Closer 50%
-    /// - 4 pessoas: Vetor 10% / Finder1 15% / Finder2 25% / Closer 50%
-    /// - 5+ pessoas: Vetor 10% / Finder1 0% / Finder2 15% / Finder3 25% / ... / Closer 50%
-    /// A partir do 4º nível, Finder1 não recebe mais (0%)
+    /// Regras de distribuição (conforme documento do projeto):
+    /// - Nível 1: Vetor 50% + Level 1 50%
+    /// - Nível 2: Vetor 15% + Level 1 35% + Level 2 Recomendador direto 50%
+    /// - Nível 3: Vetor 10% + Level 1 15% + Nível 2 25% + Nível 3 Recomendador direto 50%
+    /// - Nível 4+: Vetor 10% + Level 1 0% + Nível 2 15% + Nível 3 25% + Nível 4+ Recomendador direto 50%
+    /// - O recomendador direto (mais próximo de quem fechou) sempre recebe 50%
+    /// - Quem fecha o negócio NÃO recebe comissão
     /// </remarks>
     public decimal[] CalculateDistribution(int chainLength)
     {
-        if (chainLength <= 0)
-            throw new ArgumentException("Cadeia deve ter pelo menos 1 pessoa", nameof(chainLength));
+        if (chainLength < 0)
+            throw new ArgumentException("Cadeia não pode ser negativa", nameof(chainLength));
 
         var distribution = new decimal[chainLength];
 
-        // Quem fechou sempre recebe 50%
-        distribution[chainLength - 1] = CloserPercentage;
-
-        if (chainLength == 1)
+        if (chainLength == 0)
         {
-            // Apenas 1 pessoa (Vetor): recebe 100%
-            distribution[0] = 1.0m;
+            // Sem recomendadores: ninguém recebe comissão
+            return new decimal[0];
+        }
+        else if (chainLength == 1)
+        {
+            // Nível 1: Apenas Vetor recebe 100%
+            distribution[0] = 1.0m; // Vetor
         }
         else if (chainLength == 2)
         {
-            // Vetor -> Closer: 50% / 50%
+            // Nível 1: Vetor 50% + Level 1 50%
             distribution[0] = 0.50m; // Vetor
+            distribution[1] = 0.50m; // Level 1 (recomendador direto)
         }
         else if (chainLength == 3)
         {
-            // Vetor -> Finder1 -> Closer: 15% / 35% / 50%
+            // Nível 2: Vetor 15% + Level 1 35% + Level 2 Recomendador direto 50%
             distribution[0] = 0.15m; // Vetor
-            distribution[1] = 0.35m; // Finder1
+            distribution[1] = 0.35m; // Level 1
+            distribution[2] = 0.50m; // Level 2 Recomendador direto
         }
         else if (chainLength == 4)
         {
-            // Vetor -> Finder1 -> Finder2 -> Closer: 10% / 15% / 25% / 50%
+            // Nível 3: Vetor 10% + Level 1 15% + Nível 2 25% + Nível 3 Recomendador direto 50%
             distribution[0] = 0.10m; // Vetor
-            distribution[1] = 0.15m; // Finder1
-            distribution[2] = 0.25m; // Finder2
+            distribution[1] = 0.15m; // Level 1
+            distribution[2] = 0.25m; // Nível 2
+            distribution[3] = 0.50m; // Nível 3 Recomendador direto
         }
         else // chainLength >= 5
         {
-            // CORRENTE DINÂMICA: Os percentuais "andam" para frente conforme novos níveis entram
+            // Nível 4+: Vetor 10% + Level 1 0% + Nível 2 15% + Nível 3 25% + Nível 4+ Recomendador direto 50%
+            distribution[0] = 0.10m; // Vetor
+            distribution[1] = 0.00m; // Level 1 (não recebe a partir do nível 4)
+            distribution[2] = 0.15m; // Nível 2
+            distribution[3] = 0.25m; // Nível 3
             
-            // Vetor sempre recebe 10% a partir do 4º nível
-            distribution[0] = 0.10m;
-
-            // Todos os intermediários entre Vetor e os 2 últimos ativos recebem 0%
-            // Os 2 últimos antes do Closer sempre recebem 15% e 25%
-            for (int i = 1; i < chainLength - 2; i++)
+            // O recomendador direto (último da cadeia) sempre recebe 50%
+            distribution[chainLength - 1] = 0.50m;
+            
+            // Intermediários entre Nível 3 e o recomendador direto recebem 0%
+            for (int i = 4; i < chainLength - 1; i++)
             {
                 distribution[i] = 0.00m;
             }
-
-            distribution[chainLength - 3] = 0.15m;
-            distribution[chainLength - 2] = 0.25m;
         }
+
 
         return distribution;
     }
@@ -93,9 +93,7 @@ public class CommissionSettings
     public bool IsValid()
     {
         return TotalPercentage > 0 &&
-               TotalPercentage <= 1.0m &&
-               CloserPercentage > 0 &&
-               CloserPercentage <= 1.0m;
+               TotalPercentage <= 1.0m;
     }
 
     /// <summary>

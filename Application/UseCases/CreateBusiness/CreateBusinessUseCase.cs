@@ -100,15 +100,16 @@ public class CreateBusinessUseCase : ICreateBusinessUseCase
     }
 
     /// <summary>
-    /// Constrói a cadeia completa de recomendação, indo do parceiro que fechou até o Vetor
-    /// Suporta níveis infinitos
+    /// Constrói a cadeia de recomendação completa, EXCLUINDO quem fechou o negócio
+    /// Considera toda a estrutura de recomendação até o Vetor
     /// </summary>
-    private async Task<List<Partner>> BuildRecommendationChainAsync(Partner startPartner)
+    private async Task<List<Partner>> BuildRecommendationChainAsync(Partner partnerWhoClosedDeal)
     {
-        var chain = new List<Partner> { startPartner };
-        var current = startPartner;
+        var chain = new List<Partner>();
+        var current = partnerWhoClosedDeal;
 
-        // Continuar até não haver mais recomendadores
+        // Construir cadeia a partir de quem fechou o negócio (EXCLUINDO ele próprio)
+        // Subir na hierarquia até chegar ao topo (Vetor não é Partner, então parar quando não houver RecommenderId)
         while (current.RecommenderId.HasValue)
         {
             var recommender = await _partnerRepository.GetByIdAsync(current.RecommenderId.Value);
@@ -118,67 +119,104 @@ public class CreateBusinessUseCase : ICreateBusinessUseCase
             current = recommender;
         }
 
+        // A cadeia está ordenada: [0] = recomendador direto, [n-1] = parceiro mais próximo do Vetor
         return chain;
     }
 
     /// <summary>
     /// Distribui a comissão dinamicamente baseado no tamanho da cadeia
     /// Usa CommissionSettings.CalculateDistribution para obter os percentuais
+    /// IMPORTANTE: A distribuição sempre inclui o Vetor na posição [0]
     /// </summary>
     private async Task DistributeCommissionDynamicallyAsync(
         Comission commission, 
-        List<Partner> chain, 
+        List<Partner> partnerChain, 
         decimal totalValue)
     {
-        if (chain.Count == 0) return;
-
-        // Obter distribuição de percentuais
-        var distribution = _commissionSettings.CalculateDistribution(chain.Count);
-
-        // O último da cadeia é o Vetor, então precisamos inverter
-        // chain[0] = quem fechou, chain[n-1] = Vetor
-        // distribution[0] = Vetor, distribution[n-1] = quem fechou
-
-        for (int i = 0; i < chain.Count; i++)
+        // A cadeia SEMPRE inclui o Vetor, mesmo que não seja um Partner
+        // chain.Count = partnerChain.Count + 1 (para incluir o Vetor)
+        var totalChainLength = partnerChain.Count + 1;
+        
+        if (totalChainLength <= 1)
         {
-            var partner = chain[i];
-            var percentage = distribution[chain.Count - 1 - i]; // Inverter índice
+            // Sem parceiros na cadeia, só o Vetor receberia, mas como não é Partner, não faz pagamento
+            return;
+        }
+
+        // Obter distribuição de percentuais (incluindo o Vetor)
+        var distribution = _commissionSettings.CalculateDistribution(totalChainLength);
+
+        // Distribuir para o Vetor (se existir como Partner - caso especial)
+        // Por enquanto, pular a posição [0] do distribution que é o Vetor
+        
+        // Distribuir para os parceiros na cadeia
+        for (int i = 0; i < partnerChain.Count; i++)
+        {
+            var partner = partnerChain[i];
+            // partnerChain[0] = recomendador direto -> distribution[totalChainLength - 1]
+            // partnerChain[n-1] = último da hierarquia -> distribution[1] (posição 0 é do Vetor)
+            var distributionIndex = totalChainLength - 1 - i;
+            var percentage = distribution[distributionIndex];
             var value = totalValue * percentage;
 
             if (value > 0)
             {
-                // Determinar tipo de pagamento baseado na posição
-                var paymentType = DeterminePaymentType(i, chain.Count);
+                // Determinar tipo de pagamento baseado na posição na cadeia
+                var paymentType = DeterminePaymentTypeForPartner(i, partnerChain.Count);
                 commission.AddPagamento(partner.Id, value, paymentType);
             }
         }
+
+        // Adicionar pagamento para o Vetor (se necessário)
+        await AddVetorPaymentAsync(commission, partnerChain, totalValue, distribution[0]);
     }
 
     /// <summary>
-    /// Determina o tipo de pagamento baseado na posição na cadeia
+    /// Adiciona pagamento para o Vetor se necessário
     /// </summary>
-    /// <param name="position">Posição na cadeia (0 = quem fechou, n-1 = Vetor)</param>
-    /// <param name="chainLength">Tamanho total da cadeia</param>
-    private PaymentType DeterminePaymentType(int position, int chainLength)
+    private async Task AddVetorPaymentAsync(Comission commission, List<Partner> partnerChain, decimal totalValue, decimal vetorPercentage)
     {
-        if (position == 0)
+        if (partnerChain.Count == 0 || vetorPercentage <= 0) return;
+
+        // Pegar o Vetor do primeiro parceiro da cadeia (todos pertencem ao mesmo Vetor)
+        var firstPartner = partnerChain[0];
+        var vetorValue = totalValue * vetorPercentage;
+        
+        // Buscar se existe um Partner que representa o Vetor
+        // Isso pode ser implementado de diferentes formas:
+        // 1. O Vetor pode ter um Partner associado
+        // 2. Pode haver uma convenção específica no sistema
+        
+        // Por enquanto, vou implementar buscando por Partners do mesmo VetorId que não têm RecommenderId
+        var vetorAsPartners = await _partnerRepository.GetByVetorIdAsync(firstPartner.VetorId);
+        var vetorPartner = vetorAsPartners.FirstOrDefault(p => !p.RecommenderId.HasValue);
+        
+        if (vetorPartner != null)
         {
-            // Quem fechou o negócio
-            return chainLength == 1 ? PaymentType.Vetor : PaymentType.Participante;
+            commission.AddPagamento(vetorPartner.Id, vetorValue, PaymentType.Vetor);
         }
-        else if (position == chainLength - 1)
+        
+        // Se não encontrou o Vetor como Partner, ele não recebe comissão diretamente
+        // Isso pode estar correto dependendo da regra de negócio
+    }
+
+    /// <summary>
+    /// Determina o tipo de pagamento para parceiros (excluindo Vetor)
+    /// </summary>
+    private PaymentType DeterminePaymentTypeForPartner(int position, int partnerChainLength)
+    {
+        if (partnerChainLength == 0)
         {
-            // Último da cadeia (Vetor)
-            return PaymentType.Vetor;
+            throw new InvalidOperationException("Cadeia de parceiros vazia");
         }
-        else if (position == 1 && chainLength == 2)
+        else if (position == 0)
         {
-            // Apenas 2 níveis: o segundo é Recomendador
+            // Primeiro da cadeia de parceiros = Recomendador direto
             return PaymentType.Recomendador;
         }
         else
         {
-            // Intermediários
+            // Posições intermediárias na cadeia de parceiros
             return PaymentType.Intermediario;
         }
     }

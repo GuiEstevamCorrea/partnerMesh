@@ -63,7 +63,7 @@ export interface Business {
 }
 
 export interface CreateBusinessRequest {
-  partnerId: string;
+  partnerIds: string[]; // Array de parceiros envolvidos no negócio
   businessTypeId: string;
   value: number;
   date: string;
