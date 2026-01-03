@@ -69,17 +69,6 @@ export function BusinessFormPage() {
     queryFn: () => businessTypesApi.list({ pageSize: 100 }),
     enabled: !isEditMode,
   });
-  
-  console.log('📋 BusinessFormPage - Query state:', {
-    isEditMode,
-    queryEnabled: !isEditMode,
-    isLoadingTypes,
-    hasError: !!typesError,
-    typesError,
-    typesData,
-    hasItems: !!typesData?.items,
-    itemsCount: typesData?.items?.length || 0
-  });
 
   // Form setup com schema condicional
   const {

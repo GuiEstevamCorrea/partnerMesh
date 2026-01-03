@@ -65,7 +65,6 @@ export function PartnersListPage() {
         params.isActive = false;
       }
 
-      console.log('PartnersListPage - Parâmetros da requisição:', params);
       return partnersApi.list(params);
     },
   });

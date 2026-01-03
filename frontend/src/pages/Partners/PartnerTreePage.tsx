@@ -64,31 +64,24 @@ export function PartnerTreePage() {
         params.vetorId = vectorsData.items[0].id;
       }
       
-      console.log('Buscando árvore com parâmetros:', params);
-      
       // Se não tem nenhum parâmetro, não faz a busca
       if (!params.rootPartnerId && !params.vetorId) {
-        console.log('Nenhum parâmetro válido, retornando null');
         return null;
       }
       
       const response = await api.get('/partners/tree', { params });
-      console.log('Resposta da árvore (RAW):', response.data);
       
       // A API retorna: { isSuccess, message, tree: {...} }
       if (response.data?.tree) {
-        console.log('Tree encontrada:', response.data.tree);
         // Mapear campos com maiúscula para minúscula
         const tree = {
           vetor: response.data.tree.vetor || response.data.tree.Vetor,
           rootPartners: response.data.tree.rootPartners || response.data.tree.RootPartners || [],
           orphanPartners: response.data.tree.orphanPartners || response.data.tree.OrphanPartners || []
         };
-        console.log('Tree mapeada:', tree);
         return tree;
       }
       
-      console.log('Retornando data direto:', response.data);
       return response.data;
     },
     enabled: true, // Sempre habilitado, mas só faz request se tiver parâmetros válidos

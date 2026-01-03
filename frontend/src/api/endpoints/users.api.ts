@@ -15,7 +15,6 @@ export const usersApi = {
 
   getById: async (id: string): Promise<User> => {
     const response = await api.get(`/users/${id}`);
-    console.log('usersApi.getById - Resposta completa:', response.data);
     
     // A API retorna: { isSuccess, message, user: {...} }
     if (response.data?.user) {
@@ -33,7 +32,6 @@ export const usersApi = {
         createdAt: apiUser.createdAt,
       };
       
-      console.log('usersApi.getById - Usuário adaptado:', adaptedUser);
       return adaptedUser;
     }
     

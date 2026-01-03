@@ -84,7 +84,6 @@ export function PartnerFormPage() {
   // Preencher form quando carregar parceiro (modo edição)
   useEffect(() => {
     if (partner && isEditMode) {
-      console.log('Preenchendo formulário com dados do parceiro:', partner);
       reset({
         name: partner.name,
         contact: partner.contact,
@@ -131,20 +130,13 @@ export function PartnerFormPage() {
 
   // Submit handler
   const onSubmit = (data: PartnerFormData) => {
-    console.log('🟢 onSubmit chamado!');
-    console.log('Form data:', data);
-    console.log('isEditMode:', isEditMode);
-    
     // Determinar se o contato é email ou telefone
     const isEmail = data.contact.includes('@');
     
     // Determinar o vetorId
     const vetorId = data.vectorId || user?.vectorId;
     
-    console.log('VetorId:', vetorId, 'User:', user);
-    
     if (!vetorId) {
-      console.log('❌ Erro: Nenhum vetorId encontrado!');
       showToast('error', 'Selecione um vetor para o parceiro');
       return;
     }
@@ -167,8 +159,6 @@ export function PartnerFormPage() {
         payload.recommenderId = data.recommenderId;
       }
 
-      console.log('🚀 Payload a ser enviado:', payload);
-      console.log('🚀 Chamando createMutation.mutate...');
       createMutation.mutate(payload);
     } else {
       // Modo edição (apenas nome, contato e status)

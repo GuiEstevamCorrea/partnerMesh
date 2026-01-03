@@ -21,19 +21,13 @@ export const businessTypesApi = {
   list: async (params?: FilterParams): Promise<PaginatedResponse<BusinessType>> => {
     const response = await api.get('/business-types', { params });
     
-    console.log('🔍 businessTypesApi.list - Resposta completa:', response.data);
-    
     // A API retorna: { isSuccess, message, BusinessTypes: [...], Pagination: {...} }
     // ou { isSuccess, message, businessTypes: [...], pagination: {...} }
     const businessTypes = response.data?.BusinessTypes || response.data?.businessTypes;
     const pagination = response.data?.Pagination || response.data?.pagination;
     
-    console.log('🔍 businessTypes array:', businessTypes);
-    console.log('🔍 pagination:', pagination);
-    
     if (businessTypes && pagination) {
       const items = businessTypes.map(adaptBusinessTypeFromApi);
-      console.log('✅ Items adaptados:', items);
       
       return {
         items,
@@ -44,13 +38,11 @@ export const businessTypesApi = {
       };
     }
     
-    console.error('❌ Formato inesperado da resposta');
     return { items: [], currentPage: 1, pageSize: 10, totalItems: 0, totalPages: 0 };
   },
 
   getById: async (id: string): Promise<BusinessType> => {
     const response = await api.get(`/business-types/${id}`);
-    console.log('businessTypesApi.getById - Resposta completa:', response.data);
     
     // A API retorna: { isSuccess, message, businessType: {...} }
     if (response.data?.businessType) {

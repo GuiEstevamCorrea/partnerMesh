@@ -37,8 +37,6 @@ export const partnersApi = {
   list: async (params?: FilterParams): Promise<PaginatedResponse<Partner>> => {
     const response = await api.get('/partners', { params });
     
-    console.log('partnersApi.list - Resposta completa:', response.data);
-    
     // A API retorna: { isSuccess, message, partners: [...], pagination: {...} }
     if (response.data?.partners && response.data?.pagination) {
       return {
@@ -55,7 +53,6 @@ export const partnersApi = {
 
   getById: async (id: string): Promise<Partner> => {
     const response = await api.get(`/partners/${id}`);
-    console.log('partnersApi.getById - Resposta completa:', response.data);
     
     // A API retorna: { isSuccess, message, partner: {...} }
     if (response.data?.partner) {
@@ -76,8 +73,6 @@ export const partnersApi = {
       params: { rootPartnerId: id }
     });
     
-    console.log('partnersApi.getTree - Resposta completa:', response.data);
-    
     // A API retorna: { isSuccess, message, tree: {...} }
     if (response.data?.tree) {
       return response.data.tree;
@@ -86,9 +81,7 @@ export const partnersApi = {
   },
 
   create: async (data: CreatePartnerRequest): Promise<Partner> => {
-    console.log('partnersApi.create - Dados recebidos:', data);
     const response = await api.post('/partners', data);
-    console.log('partnersApi.create - Resposta da API:', response);
     if (response.data?.partner) {
       return adaptPartnerFromApi(response.data.partner);
     }
