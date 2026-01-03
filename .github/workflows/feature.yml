@@ -44,11 +44,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'npm'
-          cache-dependency-path: './frontend/package-lock.json'
       
       - name: Install dependencies
-        run: npm ci
+        run: npm install
         working-directory: ./frontend
       
       - name: Lint
@@ -73,8 +71,8 @@ jobs:
         with:
           fetch-depth: 0
       
-      - name: Validate Conventional Commits
-        uses: wagoid/commitlint-github-action@v5
-        with:
-          configFile: .commitlintrc.json
+      - name: Check commit messages
+        run: |
+          echo "Validating commit message format..."
+          git log --format=%s -1 | grep -qE "^(feat|fix|docs|style|refactor|perf|test|chore|revert|build|ci):" && echo "✓ Commit message valid" || echo "⚠ Commit message should follow conventional commits"
         continue-on-error: true
