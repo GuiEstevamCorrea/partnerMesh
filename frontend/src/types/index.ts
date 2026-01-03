@@ -22,7 +22,6 @@ export type {
   FinancialReport,
   BusinessReport,
   ReportFilter,
-  PaginatedResponse,
   PartnersReportResult,
   PartnersReportData,
   LevelSummary,

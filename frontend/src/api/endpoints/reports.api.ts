@@ -1,13 +1,13 @@
 import api from '../axios.config';
-import { 
+import type { 
   PartnerReport, 
   FinancialReport, 
   BusinessReport,
   ReportFilter,
-  PaginatedResponse,
   PartnersReportResult,
-  PartnerTreeNode
-} from '@/types';
+} from '@/types/report.types';
+import type { PartnerTreeNode } from '@/types/report.types';
+import type { PaginatedResponse } from '@/types/common.types';
 
 export const reportsApi = {
   partners: async (params?: ReportFilter): Promise<PaginatedResponse<PartnerReport>> => {
@@ -47,7 +47,8 @@ export const reportsApi = {
     return {
       items,
       totalItems: items.length,
-      currentPage: params?.page || 1,
+      page: params?.page || 1,
+      pageSize: params?.pageSize || 20,
       totalPages: Math.ceil(items.length / (params?.pageSize || 20)),
     };
   },

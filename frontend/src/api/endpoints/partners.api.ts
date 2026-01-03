@@ -41,7 +41,7 @@ export const partnersApi = {
     if (response.data?.partners && response.data?.pagination) {
       return {
         items: response.data.partners.map(adaptPartnerFromApi),
-        currentPage: response.data.pagination.page,
+        page: response.data.pagination.page,
         pageSize: response.data.pagination.pageSize,
         totalItems: response.data.pagination.totalItems,
         totalPages: response.data.pagination.totalPages,

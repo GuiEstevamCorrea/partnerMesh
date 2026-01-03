@@ -31,14 +31,14 @@ export const businessTypesApi = {
       
       return {
         items,
-        currentPage: pagination.page || pagination.Page,
+        page: pagination.page || pagination.Page,
         pageSize: pagination.pageSize || pagination.PageSize,
         totalItems: pagination.totalItems || pagination.TotalItems,
         totalPages: pagination.totalPages || pagination.TotalPages,
       };
     }
     
-    return { items: [], currentPage: 1, pageSize: 10, totalItems: 0, totalPages: 0 };
+    return { items: [], page: 1, pageSize: 10, totalItems: 0, totalPages: 0 };
   },
 
   getById: async (id: string): Promise<BusinessType> => {

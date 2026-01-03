@@ -113,7 +113,7 @@ export function BusinessFormPage() {
   // Sincronizar parceiros selecionados com formulário
   useEffect(() => {
     if (!isEditMode) {
-      setValue('partnerIds' as keyof BusinessFormData, selectedPartnerIds);
+      setValue('partnerIds', selectedPartnerIds);
     }
   }, [selectedPartnerIds, setValue, isEditMode]);
 
@@ -130,7 +130,13 @@ export function BusinessFormPage() {
 
   // Mutation para criar negócio
   const createMutation = useMutation({
-    mutationFn: (data: CreateBusinessFormData) => businessApi.create(data),
+    mutationFn: (data: CreateBusinessFormData) => businessApi.create({
+      partnerIds: data.partnerIds || selectedPartnerIds,
+      businessTypeId: data.businessTypeId!,
+      value: data.value!,
+      date: data.date!,
+      observations: data.observations,
+    }),
     onSuccess: (newBusinesses) => {
       // Invalidar queries relacionadas aos negócios
       queryClient.invalidateQueries({ queryKey: ['business'] });
