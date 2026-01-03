@@ -271,7 +271,7 @@ const BusinessDetailPage = () => {
                 isActive ? 'text-blue-600' : 'text-gray-500'
               }`}
             >
-              {formatCurrency(business.totalCommission || 0)}
+              {formatCurrency(business.commission?.totalValue || 0)}
             </p>
           </div>
 
