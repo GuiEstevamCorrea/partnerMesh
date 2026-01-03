@@ -6,6 +6,7 @@ using Application.UseCases.ChangePassword.DTO;
 using Application.UseCases.ActivateDeactivateUser.DTO;
 using Application.UseCases.ListUsers.DTO;
 using Application.UseCases.GetUserById.DTO;
+using Application.UseCases.LogAudit.DTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -23,6 +24,7 @@ public class UsersController : ControllerBase
     private readonly IActivateDeactivateUserUseCase _activateDeactivateUserUseCase;
     private readonly IListUsersUseCase _listUsersUseCase;
     private readonly IGetUserByIdUseCase _getUserByIdUseCase;
+    private readonly ILogAuditUseCase _logAuditUseCase;
 
     public UsersController(
         ICreateUserUseCase createUserUseCase,
@@ -30,7 +32,8 @@ public class UsersController : ControllerBase
         IChangePasswordUseCase changePasswordUseCase,
         IActivateDeactivateUserUseCase activateDeactivateUserUseCase,
         IListUsersUseCase listUsersUseCase,
-        IGetUserByIdUseCase getUserByIdUseCase)
+        IGetUserByIdUseCase getUserByIdUseCase,
+        ILogAuditUseCase logAuditUseCase)
     {
         _createUserUseCase = createUserUseCase;
         _updateUserUseCase = updateUserUseCase;
@@ -38,6 +41,7 @@ public class UsersController : ControllerBase
         _activateDeactivateUserUseCase = activateDeactivateUserUseCase;
         _listUsersUseCase = listUsersUseCase;
         _getUserByIdUseCase = getUserByIdUseCase;
+        _logAuditUseCase = logAuditUseCase;
     }
 
     /// <summary>
@@ -67,6 +71,16 @@ public class UsersController : ControllerBase
         {
             return BadRequest(result);
         }
+
+        // Registrar auditoria
+        _ = _logAuditUseCase.ExecuteAsync(new LogAuditRequest
+        {
+            UserId = currentUserId,
+            Action = "Create",
+            Entity = "User",
+            EntityId = result.User!.Id,
+            Data = $"Usuário criado: {result.User.Name} ({result.User.Email})"
+        }, cancellationToken);
 
         return CreatedAtAction(
             nameof(GetUser), 
@@ -201,6 +215,16 @@ public class UsersController : ControllerBase
             return BadRequest(result);
         }
 
+        // Registrar auditoria
+        _ = _logAuditUseCase.ExecuteAsync(new LogAuditRequest
+        {
+            UserId = currentUserId,
+            Action = "Update",
+            Entity = "User",
+            EntityId = id,
+            Data = $"Usuário atualizado"
+        }, cancellationToken);
+
         return Ok(result);
     }
 
@@ -229,6 +253,16 @@ public class UsersController : ControllerBase
         {
             return BadRequest(result);
         }
+
+        // Registrar auditoria
+        _ = _logAuditUseCase.ExecuteAsync(new LogAuditRequest
+        {
+            UserId = currentUserId,
+            Action = "Update",
+            Entity = "User",
+            EntityId = currentUserId,
+            Data = "Senha alterada"
+        }, cancellationToken);
 
         return Ok(result);
     }
@@ -263,6 +297,16 @@ public class UsersController : ControllerBase
             return BadRequest(result);
         }
 
+        // Registrar auditoria
+        _ = _logAuditUseCase.ExecuteAsync(new LogAuditRequest
+        {
+            UserId = adminUserId,
+            Action = "Update",
+            Entity = "User",
+            EntityId = id,
+            Data = "Senha resetada pelo administrador"
+        }, cancellationToken);
+
         return Ok(result);
     }
 
@@ -294,6 +338,16 @@ public class UsersController : ControllerBase
         {
             return BadRequest(result);
         }
+
+        // Registrar auditoria
+        _ = _logAuditUseCase.ExecuteAsync(new LogAuditRequest
+        {
+            UserId = currentUserId,
+            Action = "Update",
+            Entity = "User",
+            EntityId = id,
+            Data = "Usuário ativado"
+        }, cancellationToken);
 
         return Ok(result);
     }

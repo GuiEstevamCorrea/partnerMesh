@@ -2,6 +2,7 @@
 using Application.UseCases.AuthenticateUser.DTO;
 using Application.UseCases.RefreshToken.DTO;
 using Application.UseCases.Logout.DTO;
+using Application.UseCases.LogAudit.DTO;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 
@@ -14,15 +15,18 @@ public class AuthController : ControllerBase
     private readonly IAuthenticateUserUseCase _authenticateUserUseCase;
     private readonly IRefreshTokenUseCase _refreshTokenUseCase;
     private readonly ILogoutUseCase _logoutUseCase;
+    private readonly ILogAuditUseCase _logAuditUseCase;
 
     public AuthController(
         IAuthenticateUserUseCase authenticateUserUseCase,
         IRefreshTokenUseCase refreshTokenUseCase,
-        ILogoutUseCase logoutUseCase)
+        ILogoutUseCase logoutUseCase,
+        ILogAuditUseCase logAuditUseCase)
     {
         _authenticateUserUseCase = authenticateUserUseCase;
         _refreshTokenUseCase = refreshTokenUseCase;
         _logoutUseCase = logoutUseCase;
+        _logAuditUseCase = logAuditUseCase;
     }
 
     /// <summary>
@@ -42,6 +46,19 @@ public class AuthController : ControllerBase
         if (!result.IsSuccess)
         {
             return BadRequest(result);
+        }
+
+        // Registrar auditoria de login
+        if (result.User != null)
+        {
+            _ = _logAuditUseCase.ExecuteAsync(new LogAuditRequest
+            {
+                UserId = result.User.Id,
+                Action = "Login",
+                Entity = "User",
+                EntityId = result.User.Id,
+                Data = $"Login realizado: {result.User.Email}"
+            }, cancellationToken);
         }
 
         return Ok(result);
@@ -80,11 +97,32 @@ public class AuthController : ControllerBase
     [ProducesResponseType(typeof(LogoutResult), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Logout([FromBody] LogoutRequest request, CancellationToken cancellationToken = default)
     {
+        // Tentar obter o userId do token JWT (se estiver autenticado)
+        var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        Guid? userId = null;
+        if (!string.IsNullOrEmpty(userIdClaim) && Guid.TryParse(userIdClaim, out var parsedUserId))
+        {
+            userId = parsedUserId;
+        }
+
         var result = await _logoutUseCase.LogoutAsync(request, cancellationToken);
 
         if (!result.IsSuccess)
         {
             return BadRequest(result);
+        }
+
+        // Registrar auditoria de logout se conseguiu identificar o usuário
+        if (userId.HasValue)
+        {
+            _ = _logAuditUseCase.ExecuteAsync(new LogAuditRequest
+            {
+                UserId = userId.Value,
+                Action = "Logout",
+                Entity = "User",
+                EntityId = userId.Value,
+                Data = "Logout realizado"
+            }, cancellationToken);
         }
 
         return Ok(result);

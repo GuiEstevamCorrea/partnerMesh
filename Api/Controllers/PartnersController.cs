@@ -6,6 +6,7 @@ using Application.UseCases.ActivateDeactivatePartner.DTO;
 using Application.UseCases.ListPartners.DTO;
 using Application.UseCases.GetPartnerById.DTO;
 using Application.UseCases.GetPartnerTree.DTO;
+using Application.UseCases.LogAudit.DTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -23,6 +24,7 @@ public class PartnersController : ControllerBase
     private readonly IListPartnersUseCase _listPartnersUseCase;
     private readonly IGetPartnerByIdUseCase _getPartnerByIdUseCase;
     private readonly IGetPartnerTreeUseCase _getPartnerTreeUseCase;
+    private readonly ILogAuditUseCase _logAuditUseCase;
 
     public PartnersController(
         ICreatePartnerUseCase createPartnerUseCase,
@@ -30,7 +32,8 @@ public class PartnersController : ControllerBase
         IActivateDeactivatePartnerUseCase activateDeactivatePartnerUseCase,
         IListPartnersUseCase listPartnersUseCase,
         IGetPartnerByIdUseCase getPartnerByIdUseCase,
-        IGetPartnerTreeUseCase getPartnerTreeUseCase)
+        IGetPartnerTreeUseCase getPartnerTreeUseCase,
+        ILogAuditUseCase logAuditUseCase)
     {
         _createPartnerUseCase = createPartnerUseCase;
         _updatePartnerUseCase = updatePartnerUseCase;
@@ -38,6 +41,7 @@ public class PartnersController : ControllerBase
         _listPartnersUseCase = listPartnersUseCase;
         _getPartnerByIdUseCase = getPartnerByIdUseCase;
         _getPartnerTreeUseCase = getPartnerTreeUseCase;
+        _logAuditUseCase = logAuditUseCase;
     }
 
     /// <summary>
@@ -139,6 +143,16 @@ public class PartnersController : ControllerBase
         {
             return BadRequest(result);
         }
+
+        // Registrar auditoria
+        _ = _logAuditUseCase.ExecuteAsync(new LogAuditRequest
+        {
+            UserId = currentUserId,
+            Action = "Create",
+            Entity = "Partner",
+            EntityId = result.Partner!.Id,
+            Data = $"Parceiro criado: {result.Partner.Name} ({result.Partner.Email})"
+        }, cancellationToken);
 
         return CreatedAtAction(
             nameof(GetPartnerById), 

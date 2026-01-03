@@ -6,6 +6,7 @@ using Application.UseCases.ListBusinesses.DTO;
 using Application.UseCases.GetBusinessById.DTO;
 using Application.UseCases.GetBusinessPayments.DTO;
 using Application.UseCases.BusinessReport.DTO;
+using Application.UseCases.LogAudit.DTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -25,6 +26,7 @@ public class BusinessController : ControllerBase
     private readonly IGetBusinessByIdUseCase _getBusinessByIdUseCase;
     private readonly IGetBusinessPaymentsUseCase _getBusinessPaymentsUseCase;
     private readonly IBusinessReportUseCase _businessReportUseCase;
+    private readonly ILogAuditUseCase _logAuditUseCase;
 
     public BusinessController(
         ICreateBusinessUseCase createBusinessUseCase,
@@ -33,7 +35,8 @@ public class BusinessController : ControllerBase
         IListBusinessesUseCase listBusinessesUseCase,
         IGetBusinessByIdUseCase getBusinessByIdUseCase,
         IGetBusinessPaymentsUseCase getBusinessPaymentsUseCase,
-        IBusinessReportUseCase businessReportUseCase)
+        IBusinessReportUseCase businessReportUseCase,
+        ILogAuditUseCase logAuditUseCase)
     {
         _createBusinessUseCase = createBusinessUseCase;
         _updateBusinessUseCase = updateBusinessUseCase;
@@ -42,6 +45,7 @@ public class BusinessController : ControllerBase
         _getBusinessByIdUseCase = getBusinessByIdUseCase;
         _getBusinessPaymentsUseCase = getBusinessPaymentsUseCase;
         _businessReportUseCase = businessReportUseCase;
+        _logAuditUseCase = logAuditUseCase;
     }
 
     /// <summary>
@@ -182,6 +186,20 @@ public class BusinessController : ControllerBase
             }
 
             var result = await _createBusinessUseCase.ExecuteAsync(request, userId);
+            
+            // Registrar auditoria
+            if (result.IsSuccess && result.Business != null)
+            {
+                _ = _logAuditUseCase.ExecuteAsync(new LogAuditRequest
+                {
+                    UserId = userId,
+                    Action = "Create",
+                    Entity = "Business",
+                    EntityId = result.Business.Id,
+                    Data = $"Negócio criado: Valor={result.Business.Value:C}, Parceiro={result.Business.PartnerId}"
+                }, cancellationToken);
+            }
+            
             return Ok(result);
         }
         catch (ArgumentException ex)
@@ -222,6 +240,16 @@ public class BusinessController : ControllerBase
                 return BadRequest(new { message = result.Message });
             }
 
+            // Registrar auditoria
+            _ = _logAuditUseCase.ExecuteAsync(new LogAuditRequest
+            {
+                UserId = userId,
+                Action = "Update",
+                Entity = "Business",
+                EntityId = businessId,
+                Data = $"Negócio atualizado"
+            }, cancellationToken);
+
             return Ok(result);
         }
         catch (ArgumentException ex)
@@ -261,6 +289,16 @@ public class BusinessController : ControllerBase
             {
                 return BadRequest(new { message = result.Message });
             }
+
+            // Registrar auditoria
+            _ = _logAuditUseCase.ExecuteAsync(new LogAuditRequest
+            {
+                UserId = userId,
+                Action = "Cancel",
+                Entity = "Business",
+                EntityId = businessId,
+                Data = $"Negócio cancelado: Razão={request.CancellationReason}"
+            }, cancellationToken);
 
             return Ok(result);
         }
