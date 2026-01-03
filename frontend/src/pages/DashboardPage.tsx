@@ -187,16 +187,16 @@ export const DashboardPage = () => {
         {/* Comissões Pagas (Mês Atual) */}
         <Card className="bg-green-50 border-green-200">
           <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-green-800">
+            <div className="flex-1">
+              <p className="text-sm font-medium text-green-800 mb-3">
                 Pagas (Mês Atual)
               </p>
-              <p className="text-3xl font-bold text-green-600 mt-2">
+              <p className="text-2xl font-bold text-green-600 break-words">
                 {formatCurrency(totalPaidCommissionsThisMonth)}
               </p>
               <Link
                 to="/pagamentos"
-                className="text-xs text-green-700 hover:text-green-900 mt-2 inline-flex items-center"
+                className="text-xs text-green-700 hover:text-green-900 mt-3 inline-flex items-center"
               >
                 Ver pagamentos
                 <ChevronRight className="w-3 h-3 ml-1" />
