@@ -12,10 +12,11 @@ import {
 } from 'lucide-react';
 import { useAuthStore } from '@/store/auth.store';
 import { Permission } from '@/types';
+import { useI18n } from '@/hooks/useI18n';
 
 interface MenuItem {
   path: string;
-  label: string;
+  labelKey: string;
   icon: React.ReactNode;
   permissions: Permission[];
 }
@@ -23,49 +24,49 @@ interface MenuItem {
 const menuItems: MenuItem[] = [
   {
     path: '/dashboard',
-    label: 'Dashboard',
+    labelKey: 'navigation.dashboard',
     icon: <LayoutDashboard className="h-5 w-5" />,
     permissions: [Permission.AdminGlobal, Permission.AdminVetor, Permission.Operador],
   },
   {
     path: '/usuarios',
-    label: 'Usuários',
+    labelKey: 'navigation.users',
     icon: <Users className="h-5 w-5" />,
     permissions: [Permission.AdminGlobal, Permission.AdminVetor],
   },
   {
     path: '/vetores',
-    label: 'Vetores',
+    labelKey: 'navigation.vectors',
     icon: <GitBranch className="h-5 w-5" />,
     permissions: [Permission.AdminGlobal],
   },
   {
     path: '/parceiros',
-    label: 'Parceiros',
+    labelKey: 'navigation.partners',
     icon: <UserCheck className="h-5 w-5" />,
     permissions: [Permission.AdminGlobal, Permission.AdminVetor, Permission.Operador],
   },
   {
     path: '/tipos-negocio',
-    label: 'Tipos de Negócio',
+    labelKey: 'navigation.businessTypes',
     icon: <Briefcase className="h-5 w-5" />,
     permissions: [Permission.AdminGlobal, Permission.AdminVetor],
   },
   {
     path: '/negocios',
-    label: 'Negócios',
+    labelKey: 'navigation.business',
     icon: <FileText className="h-5 w-5" />,
     permissions: [Permission.AdminGlobal, Permission.AdminVetor, Permission.Operador],
   },
   {
     path: '/pagamentos',
-    label: 'Pagamentos',
+    labelKey: 'navigation.payments',
     icon: <DollarSign className="h-5 w-5" />,
     permissions: [Permission.AdminGlobal, Permission.AdminVetor, Permission.Operador],
   },
   {
     path: '/auditoria',
-    label: 'Auditoria',
+    labelKey: 'navigation.audit',
     icon: <FileSearch className="h-5 w-5" />,
     permissions: [Permission.AdminGlobal],
   },
@@ -73,6 +74,7 @@ const menuItems: MenuItem[] = [
 
 export const Sidebar: React.FC = () => {
   const hasPermission = useAuthStore((state) => state.hasPermission);
+  const { t } = useI18n();
 
   const filteredMenuItems = menuItems.filter((item) =>
     hasPermission(item.permissions)
@@ -94,7 +96,7 @@ export const Sidebar: React.FC = () => {
             }
           >
             {item.icon}
-            <span className="font-medium">{item.label}</span>
+            <span className="font-medium">{t(item.labelKey)}</span>
           </NavLink>
         ))}
       </nav>

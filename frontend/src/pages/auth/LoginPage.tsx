@@ -6,31 +6,34 @@ import { z } from 'zod';
 import { Input, Button, Alert, Card } from '@/components';
 import { authApi } from '@/api/endpoints/auth.api';
 import { useAuthStore } from '@/store/auth.store';
+import { LanguageSelector } from '@/components/common/LanguageSelector';
+import { useI18n } from '@/hooks/useI18n';
 
-const loginSchema = z.object({
+const createLoginSchema = (t: any) => z.object({
   email: z
     .string()
-    .min(1, 'Email é obrigatório')
-    .email('Email inválido'),
+    .min(1, t('auth.validation.emailRequired'))
+    .email(t('auth.validation.emailInvalid')),
   password: z
     .string()
-    .min(6, 'Senha deve ter no mínimo 6 caracteres'),
+    .min(6, t('auth.validation.passwordMin')),
 });
 
-type LoginFormData = z.infer<typeof loginSchema>;
+type LoginFormData = z.infer<ReturnType<typeof createLoginSchema>>;
 
 export const LoginPage = () => {
   const navigate = useNavigate();
   const setAuth = useAuthStore((state) => state.setAuth);
   const [error, setError] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
+  const { t } = useI18n();
 
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
+    resolver: zodResolver(createLoginSchema(t)),
   });
 
   const onSubmit = async (data: LoginFormData) => {
@@ -51,7 +54,7 @@ export const LoginPage = () => {
       const errorMessage = 
         err.response?.data?.message || 
         err.response?.data?.error ||
-        'Erro ao fazer login. Verifique suas credenciais.';
+        t('auth.loginError');
       
       setError(errorMessage);
     } finally {
@@ -61,13 +64,21 @@ export const LoginPage = () => {
 
   return (
     <div className="w-full max-w-md">
+      {/* Seletor de Idioma */}
+      <div className="flex justify-end mb-4">
+        <LanguageSelector />
+      </div>
+
       {/* Card com Formulário */}
       <Card>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-6">
-              Entrar
+            <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+              {t('auth.loginTitle')}
             </h2>
+            <p className="text-sm text-gray-600 mb-6">
+              {t('auth.loginSubtitle')}
+            </p>
 
             {/* Alerta de Erro */}
             {error && (
@@ -81,7 +92,7 @@ export const LoginPage = () => {
             {/* Campo Email */}
             <div className="mb-4">
               <Input
-                label="Email"
+                label={t('auth.email')}
                 type="email"
                 placeholder="seu@email.com"
                 error={errors.email?.message}
@@ -93,7 +104,7 @@ export const LoginPage = () => {
             {/* Campo Senha */}
             <div className="mb-6">
               <Input
-                label="Senha"
+                label={t('auth.password')}
                 type="password"
                 placeholder="••••••"
                 error={errors.password?.message}
@@ -108,7 +119,7 @@ export const LoginPage = () => {
               fullWidth
               isLoading={isLoading}
             >
-              Entrar
+              {t('auth.login')}
             </Button>
           </div>
         </form>
@@ -117,7 +128,7 @@ export const LoginPage = () => {
       {/* Link de Ajuda (Opcional) */}
       <div className="text-center mt-4">
         <p className="text-sm text-gray-600">
-          Problemas para acessar? Entre em contato com o administrador.
+          {t('auth.forgotPassword')}
         </p>
       </div>
     </div>

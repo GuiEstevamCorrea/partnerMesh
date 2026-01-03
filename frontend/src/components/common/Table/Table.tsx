@@ -1,4 +1,5 @@
 import React from 'react';
+import { useI18n } from '@/hooks/useI18n';
 
 export interface Column<T> {
   key: string;
@@ -22,13 +23,17 @@ export function Table<T>({
   columns,
   onRowClick,
   isLoading,
-  emptyMessage = 'Nenhum registro encontrado',
+  emptyMessage,
   keyExtractor,
 }: TableProps<T>) {
+  const { t } = useI18n();
+  const defaultEmptyMessage = emptyMessage || t('common.noData');
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center py-12">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black"></div>
+        <span className="ml-3 text-gray-600">{t('common.loading')}</span>
       </div>
     );
   }
@@ -36,7 +41,7 @@ export function Table<T>({
   if (data.length === 0) {
     return (
       <div className="text-center py-12 text-gray-500 bg-white rounded-lg border border-gray-200">
-        {emptyMessage}
+        {defaultEmptyMessage}
       </div>
     );
   }

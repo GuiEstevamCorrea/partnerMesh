@@ -3,10 +3,13 @@ import { LogOut, User } from 'lucide-react';
 import { useAuthStore } from '@/store/auth.store';
 import { Button } from '@/components/common/Button';
 import { authApi } from '@/api/endpoints/auth.api';
+import { LanguageSelector } from '@/components/common/LanguageSelector';
+import { useI18n } from '@/hooks/useI18n';
 
 export const Header: React.FC = () => {
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
+  const { t } = useI18n();
 
   const handleLogout = async () => {
     try {
@@ -26,6 +29,8 @@ export const Header: React.FC = () => {
           </div>
           
           <div className="flex items-center space-x-4">
+            <LanguageSelector className="text-white" />
+            
             <div className="flex items-center space-x-2 text-sm">
               <User className="h-4 w-4" />
               <span>{user?.name}</span>
@@ -39,7 +44,7 @@ export const Header: React.FC = () => {
               onClick={handleLogout}
               className="text-white hover:bg-gray-800"
             >
-              Sair
+              {t('navigation.logout')}
             </Button>
           </div>
         </div>

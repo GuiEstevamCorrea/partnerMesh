@@ -6,6 +6,7 @@ import { Plus, Edit, Power, Search, GitBranch } from 'lucide-react';
 import { vectorsApi } from '@/api/endpoints/vectors.api';
 import { useAuthStore } from '@/store/auth.store';
 import { useToast } from '@/components/common/Toast';
+import { useI18n } from '@/hooks/useI18n';
 import { Permission } from '@/types/auth.types';
 
 import { Table } from '@/components/common/Table';
@@ -19,6 +20,7 @@ import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { EmptyState } from '@/components/common/EmptyState';
 
 export function VectorsListPage() {
+  const { t } = useI18n();
   const { showToast } = useToast();
   const queryClient = useQueryClient();
   const { user: currentUser } = useAuthStore();
@@ -65,13 +67,13 @@ export function VectorsListPage() {
     onSuccess: () => {
       showToast(
         'success',
-        `Vetor ${confirmDialog.action === 'activate' ? 'ativado' : 'inativado'} com sucesso!`
+        t(confirmDialog.action === 'activate' ? 'vectors.vectorCreated' : 'vectors.vectorDeleted')
       );
       setConfirmDialog({ isOpen: false, vectorId: '', vectorName: '', action: 'activate' });
       queryClient.invalidateQueries({ queryKey: ['vectors'] });
     },
     onError: (error: any) => {
-      const message = error.response?.data?.message || 'Erro ao atualizar vetor';
+      const message = error.response?.data?.message || t('vectors.vectorError');
       showToast('error', message);
     },
   });
@@ -180,16 +182,16 @@ export function VectorsListPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Vetores</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{t('vectors.title')}</h1>
           <p className="text-sm text-gray-500 mt-1">
-            Gerencie os vetores do sistema
+            {t('vectors.title')}
           </p>
         </div>
         {isAdminGlobal && (
-          <Link to="/vetores/novo">
+          <Link to="/vectors/new">
             <Button>
               <Plus className="w-4 h-4 mr-2" />
-              Novo Vetor
+              {t('vectors.newVector')}
             </Button>
           </Link>
         )}
@@ -202,7 +204,7 @@ export function VectorsListPage() {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input
-              placeholder="Buscar por nome ou email..."
+              placeholder={t('vectors.searchPlaceholder')}
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
@@ -223,9 +225,9 @@ export function VectorsListPage() {
             }}
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
           >
-            <option value="">Todos os status</option>
-            <option value="active">Ativos</option>
-            <option value="inactive">Inativos</option>
+            <option value="">{t('common.allStatuses')}</option>
+            <option value="active">{t('common.active')}</option>
+            <option value="inactive">{t('common.inactive')}</option>
           </select>
         </div>
       </div>
@@ -233,18 +235,18 @@ export function VectorsListPage() {
       {/* Mensagem de permissão para AdminVetor */}
       {!isAdminGlobal && (
         <Alert type="info">
-          Você está visualizando apenas seu vetor. Apenas AdminGlobal pode criar e gerenciar múltiplos vetores.
+          {t('vectors.viewOnlyYourVector')}
         </Alert>
       )}
 
       {/* Tabela */}
       {vectors.length === 0 ? (
         <EmptyState
-          title="Nenhum vetor encontrado"
+          title={t('vectors.noVectorFound')}
           description={
             search || statusFilter
-              ? 'Tente ajustar os filtros de busca'
-              : 'Comece criando seu primeiro vetor'
+              ? t('common.adjustFilters')
+              : t('common.createFirst')
           }
           action={
             isAdminGlobal && !search && !statusFilter ? (

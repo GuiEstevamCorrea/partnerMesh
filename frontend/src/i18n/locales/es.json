@@ -1,0 +1,342 @@
+{
+  "common": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "back": "Volver",
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "confirm": "Confirmar",
+    "yes": "Sí",
+    "no": "No",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "clear": "Limpiar",
+    "close": "Cerrar",
+    "add": "Agregar",
+    "remove": "Eliminar",
+    "total": "Total",
+    "actions": "Acciones",
+    "name": "Nombre",
+    "email": "Email",
+    "status": "Estado",
+    "date": "Fecha",
+    "value": "Valor",
+    "description": "Descripción",
+    "active": "Activo",
+    "inactive": "Inactivo",
+    "select": "Seleccionar",
+    "selectAll": "Seleccionar Todo",
+    "deselectAll": "Deseleccionar Todo",
+    "page": "Página",
+    "of": "de",
+    "items": "elementos",
+    "noData": "No se encontraron datos",
+    "welcome": "Bienvenido",
+    "viewAll": "Ver todos",
+    "first": "Primera",
+    "last": "Última",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "allStatuses": "Todos los estados",
+    "searchPlaceholder": "Buscar...",
+    "noResults": "No se encontraron registros",
+    "adjustFilters": "Intente ajustar los filtros de búsqueda",
+    "createFirst": "Comience creando el primer registro"
+  },
+  "navigation": {
+    "dashboard": "Panel",
+    "partners": "Socios",
+    "business": "Negocios",
+    "businessTypes": "Tipos de Negocio", 
+    "payments": "Pagos",
+    "vectors": "Vectores",
+    "users": "Usuarios",
+    "audit": "Auditoría",
+    "logout": "Salir"
+  },
+  "auth": {
+    "login": "Iniciar Sesión",
+    "logout": "Cerrar Sesión",
+    "email": "Email",
+    "password": "Contraseña",
+    "rememberMe": "Recordarme",
+    "forgotPassword": "Olvidé mi contraseña",
+    "loginTitle": "Inicia sesión en tu cuenta",
+    "loginSubtitle": "Sistema de gestión de red de socios",
+    "invalidCredentials": "Credenciales inválidas",
+    "loginSuccess": "¡Inicio de sesión exitoso!",
+    "loginError": "Error de inicio de sesión",
+    "validation": {
+      "emailRequired": "El email es obligatorio",
+      "emailInvalid": "Email inválido",
+      "passwordRequired": "La contraseña es obligatoria",
+      "passwordMin": "La contraseña debe tener al menos 6 caracteres"
+    }
+  },
+  "dashboard": {
+    "title": "Panel",
+    "overview": "Vista General",    "recentBusiness": "Negocios Recientes",
+    "pendingPayments": "Pagos Pendientes",
+    "partnerTree": "Árbol de Socios",
+    "viewCompleteTree": "Ver Árbol Completo",
+    "viewHierarchy": "Visualice la jerarquía completa de su red de socios",
+    "noRecentBusiness": "No se encontraron negocios recientes.",
+    "noPendingPayments": "No hay pagos pendientes.",
+    "seePayments": "Ver pagos",
+    "viewAll": "Ver Todos",
+    "commissionsPending": "Comisiones Pendientes",
+    "paidCurrentMonth": "Pagadas (Mes Actual)",
+    "level": "Nivel",
+    "createdAt": "Creado en",
+    "recipient": "Destinatario",
+    "partner": "Socio",
+    "type": "Tipo",
+    "value": "Valor",
+    "date": "Fecha",
+    "status": "Estado",
+    "actions": "Acciones",    "kpis": {
+      "totalPartners": "Total de Socios",
+      "activePartners": "Socios Activos", 
+      "totalBusiness": "Total de Negocios",
+      "businessThisMonth": "Negocios Este Mes",
+      "totalRevenue": "Ingresos Totales",
+      "revenueThisMonth": "Ingresos Este Mes",
+      "pendingPayments": "Pagos Pendientes",
+      "paidThisMonth": "Pagos Este Mes"
+    }
+  },
+  "partners": {
+    "title": "Socios",
+    "addPartner": "Agregar Socio",
+    "editPartner": "Editar Socio",
+    "partnerDetails": "Detalles del Socio",
+    "partnersList": "Lista de Socios",
+    "createPartner": "Crear Socio",
+    "updatePartner": "Actualizar Socio",
+    "deletePartner": "Eliminar Socio",
+    "partnerCreated": "¡Socio creado exitosamente!",
+    "partnerUpdated": "¡Socio actualizado exitosamente!",
+    "partnerDeleted": "¡Socio eliminado exitosamente!",
+    "partnerError": "Error al procesar socio",
+    "form": {
+      "name": "Nombre",
+      "email": "Email",
+      "phone": "Teléfono",
+      "document": "Documento (CPF/CNPJ)",
+      "vector": "Vector",
+      "sponsor": "Patrocinador",
+      "level": "Nivel",
+      "observations": "Observaciones",
+      "selectVector": "Seleccione un vector",
+      "selectSponsor": "Seleccione un patrocinador",
+      "noSponsor": "Sin patrocinador (nivel 1)",
+      "namePlaceholder": "Ingrese el nombre del socio",
+      "emailPlaceholder": "Ingrese el email",
+      "phonePlaceholder": "Ingrese el teléfono",
+      "documentPlaceholder": "Ingrese el documento",
+      "observationsPlaceholder": "Observaciones adicionales"
+    },
+    "validation": {
+      "nameRequired": "El nombre es obligatorio",
+      "emailRequired": "El email es obligatorio",
+      "emailInvalid": "Email inválido",
+      "phoneRequired": "El teléfono es obligatorio",
+      "documentRequired": "El documento es obligatorio",
+      "vectorRequired": "El vector es obligatorio"
+    }
+  },
+  "business": {
+    "title": "Negocios",
+    "addBusiness": "Agregar Negocio",
+    "editBusiness": "Editar Negocio",
+    "businessDetails": "Detalles del Negocio",
+    "businessList": "Lista de Negocios",
+    "createBusiness": "Crear Negocio",
+    "updateBusiness": "Actualizar Negocio",
+    "deleteBusiness": "Eliminar Negocio",
+    "cancelBusiness": "Cancelar Negocio",
+    "businessCreated": "¡Negocio creado exitosamente!",
+    "businessUpdated": "¡Negocio actualizado exitosamente!",
+    "businessCanceled": "¡Negocio cancelado exitosamente!",
+    "businessError": "Error al procesar negocio",
+    "form": {
+      "partners": "Socios",
+      "businessType": "Tipo de Negocio",
+      "value": "Valor",
+      "date": "Fecha",
+      "observations": "Observaciones",
+      "selectPartners": "Seleccione los socios",
+      "selectBusinessType": "Seleccione el tipo de negocio",
+      "valuePlaceholder": "Ingrese el valor del negocio",
+      "observationsPlaceholder": "Observaciones sobre el negocio"
+    },
+    "validation": {
+      "partnersRequired": "Al menos un socio debe ser seleccionado",
+      "businessTypeRequired": "El tipo de negocio es obligatorio",
+      "valueRequired": "El valor es obligatorio",
+      "valueMin": "El valor debe ser mayor que cero",
+      "dateRequired": "La fecha es obligatoria"
+    },
+    "status": {
+      "active": "Activo",
+      "canceled": "Cancelado"
+    }
+  },
+  "businessTypes": {
+    "title": "Tipos de Negocio",
+    "addBusinessType": "Agregar Tipo de Negocio",
+    "editBusinessType": "Editar Tipo de Negocio",
+    "createBusinessType": "Crear Tipo de Negocio",
+    "updateBusinessType": "Actualizar Tipo de Negocio",
+    "deleteBusinessType": "Eliminar Tipo de Negocio",
+    "businessTypeCreated": "¡Tipo de negocio creado exitosamente!",
+    "businessTypeUpdated": "¡Tipo de negocio actualizado exitosamente!",
+    "businessTypeDeleted": "¡Tipo de negocio eliminado exitosamente!",
+    "businessTypeError": "Error al procesar tipo de negocio",
+    "form": {
+      "name": "Nombre",
+      "description": "Descripción",
+      "isActive": "Activo",
+      "namePlaceholder": "Ingrese el nombre del tipo de negocio",
+      "descriptionPlaceholder": "Descripción del tipo de negocio"
+    },
+    "validation": {
+      "nameRequired": "El nombre es obligatorio"
+    }
+  },
+  "payments": {
+    "title": "Pagos",
+    "paymentsList": "Lista de Pagos",
+    "processPayments": "Procesar Pagos",
+    "processSelected": "Procesar Seleccionados",
+    "paymentProcessed": "¡Pago procesado exitosamente!",
+    "paymentsProcessed": "¡Pagos procesados exitosamente!",
+    "paymentError": "Error al procesar pago",
+    "confirmPayment": "Confirmar Pago",
+    "confirmPayments": "Confirmar Pagos",
+    "paymentConfirmation": "¿Está seguro de que desea procesar {{count}} pago(s)?",
+    "totalValue": "Valor Total",
+    "recipients": "Destinatarios",
+    "kpis": {
+      "totalPending": "Total Pendiente",
+      "totalPaid": "Total Pagado",
+      "paidThisMonth": "Pagado Este Mes",
+      "pendingCount": "Pendientes"
+    },
+    "status": {
+      "pending": "Pendiente",
+      "paid": "Pagado",
+      "canceled": "Cancelado"
+    },
+    "filters": {
+      "all": "Todos",
+      "pending": "Pendientes",
+      "paid": "Pagados",
+      "canceled": "Cancelados"
+    },
+    "table": {
+      "recipient": "Destinatario",
+      "business": "Negocio",
+      "value": "Valor",
+      "level": "Nivel",
+      "status": "Estado",
+      "date": "Fecha",
+      "processedAt": "Procesado en"
+    }
+  },
+  "vectors": {
+    "title": "Vectores",
+    "addVector": "Agregar Vector",
+    "editVector": "Editar Vector",
+    "createVector": "Crear Vector",
+    "updateVector": "Actualizar Vector",
+    "deleteVector": "Eliminar Vector",
+    "vectorCreated": "¡Vector creado exitosamente!",
+    "vectorUpdated": "¡Vector actualizado exitosamente!",
+    "vectorDeleted": "¡Vector eliminado exitosamente!",
+    "vectorError": "Error al procesar vector",
+    "searchPlaceholder": "Buscar por nombre o email...",
+    "noVectorFound": "No se encontró ningún vector",
+    "viewOnlyYourVector": "Está viendo solo su vector. Solo AdminGlobal puede crear y administrar múltiples vectores.",
+    "newVector": "Nuevo Vector",
+    "form": {
+      "name": "Nombre",
+      "description": "Descripción",
+      "namePlaceholder": "Ingrese el nombre del vector",
+      "descriptionPlaceholder": "Descripción del vector"
+    },
+    "validation": {
+      "nameRequired": "El nombre es obligatorio"
+    }
+  },
+  "users": {
+    "title": "Usuarios",
+    "addUser": "Agregar Usuario",
+    "editUser": "Editar Usuario",
+    "createUser": "Crear Usuario",
+    "updateUser": "Actualizar Usuario",
+    "deleteUser": "Eliminar Usuario",
+    "userCreated": "¡Usuario creado exitosamente!",
+    "userUpdated": "¡Usuario actualizado exitosamente!",
+    "userDeleted": "¡Usuario eliminado exitosamente!",
+    "userError": "Error al procesar usuario",
+    "form": {
+      "name": "Nombre",
+      "email": "Email",
+      "password": "Contraseña",
+      "confirmPassword": "Confirmar Contraseña",
+      "role": "Rol",
+      "namePlaceholder": "Ingrese el nombre del usuario",
+      "emailPlaceholder": "Ingrese el email",
+      "passwordPlaceholder": "Ingrese la contraseña",
+      "confirmPasswordPlaceholder": "Confirme la contraseña"
+    },
+    "validation": {
+      "nameRequired": "El nombre es obligatorio",
+      "emailRequired": "El email es obligatorio",
+      "emailInvalid": "Email inválido",
+      "passwordRequired": "La contraseña es obligatoria",
+      "passwordMin": "La contraseña debe tener al menos 6 caracteres",
+      "passwordsNotMatch": "Las contraseñas no coinciden"
+    },
+    "roles": {
+      "admin": "Administrador",
+      "user": "Usuario"
+    }
+  },
+  "audit": {
+    "title": "Auditoría",
+    "auditLog": "Registro de Auditoría",
+    "table": {
+      "action": "Acción",
+      "entity": "Entidad",
+      "entityId": "ID",
+      "user": "Usuario",
+      "timestamp": "Fecha/Hora",
+      "details": "Detalles"
+    },
+    "actions": {
+      "CREATE": "Crear",
+      "UPDATE": "Actualizar", 
+      "DELETE": "Eliminar",
+      "PAYMENT_PROCESSED": "Pago Procesado"
+    }
+  },
+  "errors": {
+    "networkError": "Error de red. Verifique su conexión.",
+    "serverError": "Error del servidor. Intente nuevamente más tarde.",
+    "validationError": "Datos inválidos. Verifique los campos.",
+    "notFound": "Recurso no encontrado.",
+    "unauthorized": "No autorizado. Inicie sesión nuevamente.",
+    "forbidden": "Acceso denegado.",
+    "generic": "Ocurrió un error inesperado."
+  },
+  "formatters": {
+    "currency": "${{value}}",
+    "dateShort": "{{date, DD/MM/YYYY}}",
+    "dateTime": "{{date, DD/MM/YYYY HH:mm}}"
+  }
+}

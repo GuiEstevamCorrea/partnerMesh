@@ -10,10 +10,11 @@ import { Table } from '@/components/common/Table';
 import { businessApi } from '@/api/endpoints/business.api';
 import { paymentsApi } from '@/api/endpoints/payments.api';
 import { partnersApi } from '@/api/endpoints/partners.api';
-import { formatCurrency, formatDate } from '@/utils/formatters';
+import { formatDate } from '@/utils/formatters';
 import { Permission } from '@/types/auth.types';
 import { Business } from '@/types/business.types';
 import { Payment } from '@/types/payment.types';
+import { useI18n } from '@/hooks/useI18n';
 import {
   Users,
   Network,
@@ -28,6 +29,7 @@ import {
 export const DashboardPage = () => {
   const navigate = useNavigate();
   const { user } = useAuthStore();
+  const { t, formatCurrency } = useI18n();
 
   // Verificar permissões
   const isAdminVetorOrOperator =
@@ -106,8 +108,8 @@ export const DashboardPage = () => {
     <div className="min-h-screen bg-gray-50 p-6">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-gray-600 mt-1">Bem-vindo, {user?.name}!</p>
+        <h1 className="text-3xl font-bold text-gray-900">{t('dashboard.title')}</h1>
+        <p className="text-gray-600 mt-1">{t('common.welcome')}, {user?.name}!</p>
       </div>
 
       {/* Seção: Visão Geral - Cards de Métricas */}
@@ -117,7 +119,7 @@ export const DashboardPage = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-blue-800">
-                Parceiros Ativos
+                {t('dashboard.kpis.activePartners')}
               </p>
               <p className="text-3xl font-bold text-blue-600 mt-2">
                 {totalActivePartners}
@@ -126,7 +128,7 @@ export const DashboardPage = () => {
                 to="/parceiros"
                 className="text-xs text-blue-700 hover:text-blue-900 mt-2 inline-flex items-center"
               >
-                Ver todos
+                {t('common.viewAll')}
                 <ChevronRight className="w-3 h-3 ml-1" />
               </Link>
             </div>
@@ -141,7 +143,7 @@ export const DashboardPage = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-purple-800">
-                Negócios (Mês Atual)
+                {t('dashboard.kpis.businessThisMonth')}
               </p>
               <p className="text-3xl font-bold text-purple-600 mt-2">
                 {totalBusinessThisMonth}
@@ -150,7 +152,7 @@ export const DashboardPage = () => {
                 to="/negocios"
                 className="text-xs text-purple-700 hover:text-purple-900 mt-2 inline-flex items-center"
               >
-                Ver todos
+                {t('common.viewAll')}
                 <ChevronRight className="w-3 h-3 ml-1" />
               </Link>
             </div>
@@ -165,7 +167,7 @@ export const DashboardPage = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-yellow-800">
-                Comissões Pendentes
+                {t('dashboard.commissionsPending')}
               </p>
               <p className="text-3xl font-bold text-yellow-600 mt-2">
                 {formatCurrency(totalPendingCommissions)}
@@ -174,7 +176,7 @@ export const DashboardPage = () => {
                 to="/pagamentos"
                 className="text-xs text-yellow-700 hover:text-yellow-900 mt-2 inline-flex items-center"
               >
-                Ver pagamentos
+                {t('dashboard.seePayments')}
                 <ChevronRight className="w-3 h-3 ml-1" />
               </Link>
             </div>
@@ -189,7 +191,7 @@ export const DashboardPage = () => {
           <div className="flex items-center justify-between">
             <div className="flex-1">
               <p className="text-sm font-medium text-green-800 mb-3">
-                Pagas (Mês Atual)
+                {t('dashboard.paidCurrentMonth')}
               </p>
               <p className="text-2xl font-bold text-green-600 break-words">
                 {formatCurrency(totalPaidCommissionsThisMonth)}
@@ -198,7 +200,7 @@ export const DashboardPage = () => {
                 to="/pagamentos"
                 className="text-xs text-green-700 hover:text-green-900 mt-3 inline-flex items-center"
               >
-                Ver pagamentos
+                {t('dashboard.seePayments')}
                 <ChevronRight className="w-3 h-3 ml-1" />
               </Link>
             </div>
@@ -214,11 +216,11 @@ export const DashboardPage = () => {
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-semibold text-gray-900 flex items-center">
             <Briefcase className="w-5 h-5 mr-2" />
-            Negócios Recentes
+            {t('dashboard.recentBusiness')}
           </h2>
           <Link to="/negocios">
             <Button variant="secondary" size="sm">
-              Ver Todos
+              {t('dashboard.viewAll')}
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
           </Link>
@@ -227,7 +229,7 @@ export const DashboardPage = () => {
         {isLoadingRecentBusiness ? (
           <Loading />
         ) : recentBusiness.length === 0 ? (
-          <Alert type="info">Nenhum negócio recente encontrado.</Alert>
+          <Alert type="info">{t('dashboard.noRecentBusiness')}</Alert>
         ) : (
           <Table
             data={recentBusiness}
@@ -243,7 +245,7 @@ export const DashboardPage = () => {
               },
               {
                 key: 'partner',
-                header: 'Parceiro',
+                header: t('dashboard.partner'),
                 render: (business: Business) => (
                   <span className="font-medium text-gray-900">
                     {business.partnerName}
@@ -252,7 +254,7 @@ export const DashboardPage = () => {
               },
               {
                 key: 'type',
-                header: 'Tipo',
+                header: t('dashboard.type'),
                 render: (business: Business) => (
                   <span className="text-gray-700">
                     {business.businessTypeName}
@@ -261,7 +263,7 @@ export const DashboardPage = () => {
               },
               {
                 key: 'value',
-                header: 'Valor',
+                header: t('dashboard.value'),
                 render: (business: Business) => (
                   <span className="font-semibold text-green-600">
                     {formatCurrency(business.value)}
@@ -270,7 +272,7 @@ export const DashboardPage = () => {
               },
               {
                 key: 'date',
-                header: 'Data',
+                header: t('dashboard.date'),
                 render: (business: Business) => (
                   <span className="text-gray-700">
                     {formatDate(business.date)}
@@ -279,20 +281,20 @@ export const DashboardPage = () => {
               },
               {
                 key: 'status',
-                header: 'Status',
+                header: t('dashboard.status'),
                 render: (business: Business) => (
                   <Badge
                     variant={
                       business.status === 'Active' ? 'success' : 'error'
                     }
                   >
-                    {business.status === 'Active' ? 'Ativo' : 'Cancelado'}
+                    {business.status === 'Active' ? t('common.active') : t('business.status.canceled')}
                   </Badge>
                 ),
               },
               {
                 key: 'actions',
-                header: 'Ações',
+                header: t('dashboard.actions'),
                 render: (business: Business) => (
                   <button
                     onClick={() => navigate(`/negocios/${business.id}`)}
@@ -312,11 +314,11 @@ export const DashboardPage = () => {
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-semibold text-gray-900 flex items-center">
             <DollarSign className="w-5 h-5 mr-2" />
-            Pagamentos Pendentes
+            {t('dashboard.pendingPayments')}
           </h2>
           <Link to="/pagamentos">
             <Button variant="secondary" size="sm">
-              Ver Todos
+              {t('dashboard.viewAll')}
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
           </Link>
@@ -325,7 +327,7 @@ export const DashboardPage = () => {
         {isLoadingPendingPayments ? (
           <Loading />
         ) : pendingPayments.length === 0 ? (
-          <Alert type="info">Nenhum pagamento pendente.</Alert>
+          <Alert type="info">{t('dashboard.noPendingPayments')}</Alert>
         ) : (
           <Table
             data={pendingPayments}
@@ -341,7 +343,7 @@ export const DashboardPage = () => {
               },
               {
                 key: 'recipient',
-                header: 'Destinatário',
+                header: t('dashboard.recipient'),
                 render: (payment: Payment) => (
                   <div>
                     <p className="font-medium text-gray-900">
@@ -355,7 +357,7 @@ export const DashboardPage = () => {
               },
               {
                 key: 'level',
-                header: 'Nível',
+                header: t('dashboard.level'),
                 render: (payment: Payment) => (
                   <Badge
                     variant={
@@ -366,13 +368,13 @@ export const DashboardPage = () => {
                         : 'default'
                     }
                   >
-                    Nível {payment.level}
+                    {t('dashboard.level')} {payment.level}
                   </Badge>
                 ),
               },
               {
                 key: 'value',
-                header: 'Valor',
+                header: t('dashboard.value'),
                 render: (payment: Payment) => (
                   <span className="font-semibold text-yellow-600">
                     {formatCurrency(payment.value)}
@@ -381,7 +383,7 @@ export const DashboardPage = () => {
               },
               {
                 key: 'createdAt',
-                header: 'Criado em',
+                header: t('dashboard.createdAt'),
                 render: (payment: Payment) => (
                   <span className="text-gray-700">
                     {formatDate(payment.createdAt)}
@@ -400,29 +402,29 @@ export const DashboardPage = () => {
             <div>
               <h2 className="text-xl font-semibold text-gray-900 flex items-center mb-2">
                 <Network className="w-5 h-5 mr-2" />
-                Árvore de Parceiros
+                {t('dashboard.partnerTree')}
               </h2>
               <p className="text-sm text-gray-600">
-                Visualize a hierarquia completa da sua rede de parceiros
+                {t('dashboard.viewHierarchy')}
               </p>
               <div className="flex gap-4 mt-4">
                 <div className="flex items-center">
                   <div className="w-3 h-3 bg-blue-500 rounded-full mr-2" />
-                  <span className="text-sm text-gray-700">Nível 1</span>
+                  <span className="text-sm text-gray-700">{t('dashboard.level')} 1</span>
                 </div>
                 <div className="flex items-center">
                   <div className="w-3 h-3 bg-green-500 rounded-full mr-2" />
-                  <span className="text-sm text-gray-700">Nível 2</span>
+                  <span className="text-sm text-gray-700">{t('dashboard.level')} 2</span>
                 </div>
                 <div className="flex items-center">
                   <div className="w-3 h-3 bg-purple-500 rounded-full mr-2" />
-                  <span className="text-sm text-gray-700">Nível 3+</span>
+                  <span className="text-sm text-gray-700">{t('dashboard.level')} 3+</span>
                 </div>
               </div>
             </div>
             <Link to="/parceiros/arvore">
               <Button variant="primary">
-                Ver Árvore Completa
+                {t('dashboard.viewCompleteTree')}
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </Link>

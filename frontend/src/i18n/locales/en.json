@@ -1,0 +1,342 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "back": "Back",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "confirm": "Confirm",
+    "yes": "Yes",
+    "no": "No",
+    "search": "Search",
+    "filter": "Filter",
+    "clear": "Clear",
+    "close": "Close",
+    "add": "Add",
+    "remove": "Remove",
+    "total": "Total",
+    "actions": "Actions",
+    "name": "Name",
+    "email": "Email",
+    "status": "Status",
+    "date": "Date",
+    "value": "Value",
+    "description": "Description",
+    "active": "Active",
+    "inactive": "Inactive",
+    "select": "Select",
+    "selectAll": "Select All",
+    "deselectAll": "Deselect All",
+    "page": "Page",
+    "of": "of",
+    "items": "items",
+    "noData": "No data found",
+    "welcome": "Welcome",
+    "viewAll": "View all",
+    "first": "First",
+    "last": "Last",
+    "previous": "Previous",
+    "next": "Next",
+    "allStatuses": "All statuses",
+    "searchPlaceholder": "Search...",
+    "noResults": "No records found",
+    "adjustFilters": "Try adjusting the search filters",
+    "createFirst": "Start by creating the first record"
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "partners": "Partners",
+    "business": "Business",
+    "businessTypes": "Business Types", 
+    "payments": "Payments",
+    "vectors": "Vectors",
+    "users": "Users",
+    "audit": "Audit",
+    "logout": "Logout"
+  },
+  "auth": {
+    "login": "Sign In",
+    "logout": "Sign Out",
+    "email": "Email",
+    "password": "Password",
+    "rememberMe": "Remember me",
+    "forgotPassword": "Forgot password",
+    "loginTitle": "Sign in to your account",
+    "loginSubtitle": "Partner network management system",
+    "invalidCredentials": "Invalid credentials",
+    "loginSuccess": "Login successful!",
+    "loginError": "Login error",
+    "validation": {
+      "emailRequired": "Email is required",
+      "emailInvalid": "Invalid email",
+      "passwordRequired": "Password is required",
+      "passwordMin": "Password must be at least 6 characters"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "overview": "Overview",    "recentBusiness": "Recent Business",
+    "pendingPayments": "Pending Payments",
+    "partnerTree": "Partner Tree",
+    "viewCompleteTree": "View Complete Tree",
+    "viewHierarchy": "View the complete hierarchy of your partner network",
+    "noRecentBusiness": "No recent business found.",
+    "noPendingPayments": "No pending payments.",
+    "seePayments": "View payments",
+    "viewAll": "View All",
+    "commissionsPending": "Pending Commissions",
+    "paidCurrentMonth": "Paid (Current Month)",
+    "level": "Level",
+    "createdAt": "Created at",
+    "recipient": "Recipient",
+    "partner": "Partner",
+    "type": "Type",
+    "value": "Value",
+    "date": "Date",
+    "status": "Status",
+    "actions": "Actions",    "kpis": {
+      "totalPartners": "Total Partners",
+      "activePartners": "Active Partners", 
+      "totalBusiness": "Total Business",
+      "businessThisMonth": "Business This Month",
+      "totalRevenue": "Total Revenue",
+      "revenueThisMonth": "Revenue This Month",
+      "pendingPayments": "Pending Payments",
+      "paidThisMonth": "Paid This Month"
+    }
+  },
+  "partners": {
+    "title": "Partners",
+    "addPartner": "Add Partner",
+    "editPartner": "Edit Partner",
+    "partnerDetails": "Partner Details",
+    "partnersList": "Partners List",
+    "createPartner": "Create Partner",
+    "updatePartner": "Update Partner",
+    "deletePartner": "Delete Partner",
+    "partnerCreated": "Partner created successfully!",
+    "partnerUpdated": "Partner updated successfully!",
+    "partnerDeleted": "Partner deleted successfully!",
+    "partnerError": "Error processing partner",
+    "form": {
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "document": "Document (CPF/CNPJ)",
+      "vector": "Vector",
+      "sponsor": "Sponsor",
+      "level": "Level",
+      "observations": "Observations",
+      "selectVector": "Select a vector",
+      "selectSponsor": "Select a sponsor",
+      "noSponsor": "No sponsor (level 1)",
+      "namePlaceholder": "Enter partner name",
+      "emailPlaceholder": "Enter email",
+      "phonePlaceholder": "Enter phone",
+      "documentPlaceholder": "Enter document",
+      "observationsPlaceholder": "Additional observations"
+    },
+    "validation": {
+      "nameRequired": "Name is required",
+      "emailRequired": "Email is required",
+      "emailInvalid": "Invalid email",
+      "phoneRequired": "Phone is required",
+      "documentRequired": "Document is required",
+      "vectorRequired": "Vector is required"
+    }
+  },
+  "business": {
+    "title": "Business",
+    "addBusiness": "Add Business",
+    "editBusiness": "Edit Business",
+    "businessDetails": "Business Details",
+    "businessList": "Business List",
+    "createBusiness": "Create Business",
+    "updateBusiness": "Update Business",
+    "deleteBusiness": "Delete Business",
+    "cancelBusiness": "Cancel Business",
+    "businessCreated": "Business created successfully!",
+    "businessUpdated": "Business updated successfully!",
+    "businessCanceled": "Business canceled successfully!",
+    "businessError": "Error processing business",
+    "form": {
+      "partners": "Partners",
+      "businessType": "Business Type",
+      "value": "Value",
+      "date": "Date",
+      "observations": "Observations",
+      "selectPartners": "Select partners",
+      "selectBusinessType": "Select business type",
+      "valuePlaceholder": "Enter business value",
+      "observationsPlaceholder": "Business observations"
+    },
+    "validation": {
+      "partnersRequired": "At least one partner must be selected",
+      "businessTypeRequired": "Business type is required",
+      "valueRequired": "Value is required",
+      "valueMin": "Value must be greater than zero",
+      "dateRequired": "Date is required"
+    },
+    "status": {
+      "active": "Active",
+      "canceled": "Canceled"
+    }
+  },
+  "businessTypes": {
+    "title": "Business Types",
+    "addBusinessType": "Add Business Type",
+    "editBusinessType": "Edit Business Type",
+    "createBusinessType": "Create Business Type",
+    "updateBusinessType": "Update Business Type",
+    "deleteBusinessType": "Delete Business Type",
+    "businessTypeCreated": "Business type created successfully!",
+    "businessTypeUpdated": "Business type updated successfully!",
+    "businessTypeDeleted": "Business type deleted successfully!",
+    "businessTypeError": "Error processing business type",
+    "form": {
+      "name": "Name",
+      "description": "Description",
+      "isActive": "Active",
+      "namePlaceholder": "Enter business type name",
+      "descriptionPlaceholder": "Business type description"
+    },
+    "validation": {
+      "nameRequired": "Name is required"
+    }
+  },
+  "payments": {
+    "title": "Payments",
+    "paymentsList": "Payments List",
+    "processPayments": "Process Payments",
+    "processSelected": "Process Selected",
+    "paymentProcessed": "Payment processed successfully!",
+    "paymentsProcessed": "Payments processed successfully!",
+    "paymentError": "Error processing payment",
+    "confirmPayment": "Confirm Payment",
+    "confirmPayments": "Confirm Payments",
+    "paymentConfirmation": "Are you sure you want to process {{count}} payment(s)?",
+    "totalValue": "Total Value",
+    "recipients": "Recipients",
+    "kpis": {
+      "totalPending": "Total Pending",
+      "totalPaid": "Total Paid",
+      "paidThisMonth": "Paid This Month",
+      "pendingCount": "Pending"
+    },
+    "status": {
+      "pending": "Pending",
+      "paid": "Paid",
+      "canceled": "Canceled"
+    },
+    "filters": {
+      "all": "All",
+      "pending": "Pending",
+      "paid": "Paid",
+      "canceled": "Canceled"
+    },
+    "table": {
+      "recipient": "Recipient",
+      "business": "Business",
+      "value": "Value",
+      "level": "Level",
+      "status": "Status",
+      "date": "Date",
+      "processedAt": "Processed at"
+    }
+  },
+  "vectors": {
+    "title": "Vectors",
+    "addVector": "Add Vector",
+    "editVector": "Edit Vector",
+    "createVector": "Create Vector",
+    "updateVector": "Update Vector",
+    "deleteVector": "Delete Vector",
+    "vectorCreated": "Vector created successfully!",
+    "vectorUpdated": "Vector updated successfully!",
+    "vectorDeleted": "Vector deleted successfully!",
+    "vectorError": "Error processing vector",
+    "searchPlaceholder": "Search by name or email...",
+    "noVectorFound": "No vector found",
+    "viewOnlyYourVector": "You are viewing only your vector. Only AdminGlobal can create and manage multiple vectors.",
+    "newVector": "New Vector",
+    "form": {
+      "name": "Name",
+      "description": "Description",
+      "namePlaceholder": "Enter vector name",
+      "descriptionPlaceholder": "Vector description"
+    },
+    "validation": {
+      "nameRequired": "Name is required"
+    }
+  },
+  "users": {
+    "title": "Users",
+    "addUser": "Add User",
+    "editUser": "Edit User",
+    "createUser": "Create User",
+    "updateUser": "Update User",
+    "deleteUser": "Delete User",
+    "userCreated": "User created successfully!",
+    "userUpdated": "User updated successfully!",
+    "userDeleted": "User deleted successfully!",
+    "userError": "Error processing user",
+    "form": {
+      "name": "Name",
+      "email": "Email",
+      "password": "Password",
+      "confirmPassword": "Confirm Password",
+      "role": "Role",
+      "namePlaceholder": "Enter user name",
+      "emailPlaceholder": "Enter email",
+      "passwordPlaceholder": "Enter password",
+      "confirmPasswordPlaceholder": "Confirm password"
+    },
+    "validation": {
+      "nameRequired": "Name is required",
+      "emailRequired": "Email is required",
+      "emailInvalid": "Invalid email",
+      "passwordRequired": "Password is required",
+      "passwordMin": "Password must be at least 6 characters",
+      "passwordsNotMatch": "Passwords do not match"
+    },
+    "roles": {
+      "admin": "Administrator",
+      "user": "User"
+    }
+  },
+  "audit": {
+    "title": "Audit",
+    "auditLog": "Audit Log",
+    "table": {
+      "action": "Action",
+      "entity": "Entity",
+      "entityId": "ID",
+      "user": "User",
+      "timestamp": "Date/Time",
+      "details": "Details"
+    },
+    "actions": {
+      "CREATE": "Create",
+      "UPDATE": "Update", 
+      "DELETE": "Delete",
+      "PAYMENT_PROCESSED": "Payment Processed"
+    }
+  },
+  "errors": {
+    "networkError": "Network error. Check your connection.",
+    "serverError": "Server error. Please try again later.",
+    "validationError": "Invalid data. Check the fields.",
+    "notFound": "Resource not found.",
+    "unauthorized": "Unauthorized. Please sign in again.",
+    "forbidden": "Access denied.",
+    "generic": "An unexpected error occurred."
+  },
+  "formatters": {
+    "currency": "${{value}}",
+    "dateShort": "{{date, MM/DD/YYYY}}",
+    "dateTime": "{{date, MM/DD/YYYY HH:mm}}"
+  }
+}
