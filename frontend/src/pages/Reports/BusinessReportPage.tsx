@@ -57,7 +57,7 @@ export const BusinessReportPage = () => {
   // Query: Tipos de Negócio
   const { data: businessTypesData } = useQuery({
     queryKey: ['business-types-select'],
-    queryFn: () => businessTypesApi.list({ page: 1, pageSize: 1000 }),
+    queryFn: () => businessTypesApi.list({ page: 1, pageSize: 100 }),
   });
 
   // Query: Relatório de Negócios

@@ -86,7 +86,7 @@ export function BusinessListPage() {
   // Query para carregar tipos de negócio (para o filtro)
   const { data: typesData } = useQuery({
     queryKey: ['business-types-for-filter'],
-    queryFn: () => businessTypesApi.list({ pageSize: 1000 }),
+    queryFn: () => businessTypesApi.list({ pageSize: 100 }),
   });
 
   // Mutation para cancelar negócio
