@@ -362,7 +362,6 @@ export const AuditLogsPage = () => {
               <div>
                 <label className="text-sm font-medium text-gray-700">Usuário</label>
                 <p className="text-sm text-gray-900">{selectedLog.userName}</p>
-                <p className="text-xs text-gray-500">ID: {selectedLog.userId}</p>
               </div>
 
               <div>
@@ -379,7 +378,9 @@ export const AuditLogsPage = () => {
                 <p className="text-sm text-gray-900">
                   {ENTITY_LABELS[selectedLog.entity as keyof typeof ENTITY_LABELS] || selectedLog.entity}
                 </p>
-                <p className="text-xs text-gray-500">ID: {selectedLog.entityId || '-'}</p>
+                {selectedLog.entityName && (
+                  <p className="text-sm text-blue-600 font-medium">{selectedLog.entityName}</p>
+                )}
               </div>
 
               {selectedLog.ipAddress && (
@@ -402,11 +403,13 @@ export const AuditLogsPage = () => {
             {selectedLog.details && (
               <div>
                 <label className="text-sm font-medium text-gray-700 block mb-2">
-                  Detalhes (Payload)
+                  Detalhes da Ação
                 </label>
-                <pre className="text-xs bg-gray-100 p-4 rounded-lg overflow-auto max-h-96 border border-gray-200">
-                  {JSON.stringify(JSON.parse(selectedLog.details), null, 2)}
-                </pre>
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                  <p className="text-sm text-blue-800">
+                    {selectedLog.details}
+                  </p>
+                </div>
               </div>
             )}
 
