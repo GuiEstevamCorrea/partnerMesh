@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { DollarSign, CheckSquare, Square } from 'lucide-react';
 
@@ -171,7 +171,15 @@ const PaymentsListPage = () => {
   }, [paymentsData?.items]);
 
   const payments = paymentsData?.items || [];
-  const totalPages = paymentsData?.totalPages || 1;
+  const totalPages = paymentsData?.totalPages || 0;
+  const hasData = paymentsData && paymentsData.items.length > 0;
+
+  // Reset página se ela for maior que o total de páginas
+  useEffect(() => {
+    if (totalPages > 0 && page > totalPages) {
+      setPage(1);
+    }
+  }, [totalPages, page]);
 
   // Loading state
   if (isLoading && !paymentsData) {
@@ -391,9 +399,13 @@ const PaymentsListPage = () => {
             {(error as any)?.response?.data?.message ||
               'Erro ao carregar pagamentos'}
           </Alert>
-        ) : payments.length === 0 ? (
+        ) : payments.length === 0 && totalPages === 0 ? (
           <Alert type="info">
             Nenhum pagamento encontrado com os filtros aplicados.
+          </Alert>
+        ) : payments.length === 0 && totalPages > 0 ? (
+          <Alert type="info">
+            Página vazia. Use a paginação abaixo para navegar.
           </Alert>
         ) : (
           <>
@@ -517,16 +529,23 @@ const PaymentsListPage = () => {
                 },
               ]}
             />
-
-            {/* Paginação */}
-            <div className="mt-6">
-              <Pagination
-                currentPage={page}
-                totalPages={totalPages}
-                onPageChange={setPage}
-              />
-            </div>
           </>
+        )}
+
+        {/* Paginação - sempre exibir se há mais de uma página */}
+        {totalPages > 1 && (
+          <div className="mt-6">
+            <Pagination
+              currentPage={page}
+              totalPages={totalPages}
+              onPageChange={(newPage) => {
+                // Validar se a nova página está dentro do range válido
+                if (newPage >= 1 && newPage <= totalPages) {
+                  setPage(newPage);
+                }
+              }}
+            />
+          </div>
         )}
       </Card>
 
