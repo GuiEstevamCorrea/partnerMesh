@@ -210,7 +210,7 @@ export function BusinessListPage() {
             <Eye className="w-4 h-4" />
           </button>
           <button
-            onClick={() => navigate(`/negocios/${business.id}/pagamentos`)}
+            onClick={() => navigate(`/negocios/${business.id}`)}
             className="p-1 text-green-600 hover:text-green-800"
             title="Ver Pagamentos"
           >
