@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Save, Calculator, AlertCircle } from 'lucide-react';
 
 import { businessApi } from '@/api/endpoints/business.api';
@@ -40,6 +40,7 @@ export function BusinessFormPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const queryClient = useQueryClient();
   const isEditMode = !!id;
 
   // Estado para parceiros selecionados (múltipla seleção)
@@ -142,6 +143,11 @@ export function BusinessFormPage() {
   const createMutation = useMutation({
     mutationFn: (data: CreateBusinessFormData) => businessApi.create(data),
     onSuccess: (newBusinesses) => {
+      // Invalidar queries relacionadas aos negócios
+      queryClient.invalidateQueries({ queryKey: ['business'] });
+      queryClient.invalidateQueries({ queryKey: ['payments'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      
       if (newBusinesses.length === 1) {
         showToast('success', 'Negócio criado com sucesso! Comissões calculadas automaticamente.');
         // Redirecionar para a página de detalhes do negócio
@@ -161,6 +167,9 @@ export function BusinessFormPage() {
   const updateMutation = useMutation({
     mutationFn: (data: UpdateBusinessFormData) => businessApi.update(id!, data),
     onSuccess: () => {
+      // Invalidar queries relacionadas aos negócios
+      queryClient.invalidateQueries({ queryKey: ['business'] });
+      
       showToast('success', 'Negócio atualizado com sucesso');
       navigate('/negocios');
     },
