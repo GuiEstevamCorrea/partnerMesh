@@ -93,7 +93,10 @@ public class ListPartnersUseCase : IListPartnersUseCase
                 // Calcular nível do parceiro (cadeia de recomendação)
                 int level = await CalculatePartnerLevelAsync(partner.Id, cancellationToken);
 
-                partnerDtos.Add(PartnerDto.FromEntity(partner, vetorName, recommenderName, level));
+                // Contar quantos parceiros este parceiro recomendou diretamente
+                int totalRecommended = await CountDirectRecommendationsAsync(partner.Id, cancellationToken);
+
+                partnerDtos.Add(PartnerDto.FromEntity(partner, vetorName, recommenderName, level, totalRecommended));
             }
 
             // Criar informação de paginação
@@ -133,5 +136,15 @@ public class ListPartnersUseCase : IListPartnersUseCase
         // Se tem recomendador, o nível é: nível do recomendador + 1
         var recommenderLevel = await CalculatePartnerLevelAsync(partner.RecommenderId.Value, cancellationToken);
         return recommenderLevel + 1;
+    }
+
+    /// <summary>
+    /// Conta quantos parceiros este parceiro recomendou diretamente
+    /// </summary>
+    private async Task<int> CountDirectRecommendationsAsync(Guid partnerId, CancellationToken cancellationToken)
+    {
+        // Buscar parceiros que têm este partnerId como RecommenderId
+        var recommendedPartners = await _partnerRepository.GetRecommendedByPartnerAsync(partnerId, cancellationToken);
+        return recommendedPartners?.Count() ?? 0;
     }
 }

@@ -8,6 +8,58 @@ export interface PartnerReport {
   activeRecommendations: number;
 }
 
+// Tipos para a resposta real do backend
+export interface PartnerTreeNode {
+  id: string;
+  name: string;
+  email: string;
+  phoneNumber: string;
+  isActive: boolean;
+  createdAt: string;
+  level: number;
+  totalReceived: number;
+  totalPending: number;
+  businessCount: number;
+  recommenderId?: string;
+  recommenderName: string;
+  children: PartnerTreeNode[];
+}
+
+export interface LevelSummary {
+  level: number;
+  activePartnersCount: number;
+  inactivePartnersCount: number;
+  totalPartnersCount: number;
+  totalReceived: number;
+  totalPending: number;
+  totalBusinessCount: number;
+}
+
+export interface ReportTotals {
+  totalActivePartners: number;
+  totalInactivePartners: number;
+  totalPartners: number;
+  totalReceived: number;
+  totalPending: number;
+  totalBusinessCount: number;
+  maxDepth: number;
+}
+
+export interface PartnersReportData {
+  vetorName: string;
+  vetorId: string;
+  generatedAt: string;
+  partnersTree: PartnerTreeNode[];
+  levelsSummary: LevelSummary[];
+  totals: ReportTotals;
+}
+
+export interface PartnersReportResult {
+  isSuccess: boolean;
+  message: string;
+  report?: PartnersReportData;
+}
+
 export interface FinancialReport {
   totalPaid: number;
   totalPending: number;

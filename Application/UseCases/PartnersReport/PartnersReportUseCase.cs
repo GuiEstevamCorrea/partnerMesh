@@ -204,7 +204,10 @@ public class PartnersReportUseCase : IPartnersReportUseCase
                 TotalReceived = financial.received,
                 TotalPending = financial.pending,
                 BusinessCount = financial.businessCount,
-                Children = new List<PartnerTreeNodeDto>()
+                RecommenderId = partner.RecommenderId,
+                RecommenderName = recommender?.Name ?? string.Empty,
+                // Chamada recursiva para construir filhos
+                Children = BuildPartnersTree(partners, financialData, partner.Id, level + 1)
             };
 
             result.Add(node);
