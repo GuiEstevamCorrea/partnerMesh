@@ -67,7 +67,7 @@ export function VectorsListPage() {
     onSuccess: () => {
       showToast(
         'success',
-        t(confirmDialog.action === 'activate' ? 'vectors.vectorCreated' : 'vectors.vectorDeleted')
+        t(confirmDialog.action === 'activate' ? 'vectors.vectorActivated' : 'vectors.vectorDeactivated')
       );
       setConfirmDialog({ isOpen: false, vectorId: '', vectorName: '', action: 'activate' });
       queryClient.invalidateQueries({ queryKey: ['vectors'] });
@@ -97,7 +97,7 @@ export function VectorsListPage() {
   const columns = [
     {
       key: 'name',
-      header: 'Nome/Email',
+      header: t('vectors.table.nameEmail'),
       render: (vector: any) => (
         <div>
           <div className="font-medium text-gray-900">{vector.name}</div>
@@ -107,28 +107,28 @@ export function VectorsListPage() {
     },
     {
       key: 'partnersCount',
-      header: 'Qtd Parceiros',
+      header: t('vectors.table.partnersCount'),
       render: (vector: any) => (
         <span className="text-gray-900 font-medium">{vector.partnersCount || 0}</span>
       ),
     },
     {
       key: 'isActive',
-      header: 'Status',
+      header: t('vectors.table.status'),
       render: (vector: any) => (
         <Badge variant={vector.isActive ? 'success' : 'default'}>
-          {vector.isActive ? 'Ativo' : 'Inativo'}
+          {vector.isActive ? t('common.active') : t('common.inactive')}
         </Badge>
       ),
     },
     {
       key: 'actions',
-      header: 'Ações',
+      header: t('vectors.table.actions'),
       render: (vector: any) => (
         <div className="flex items-center gap-2">
           {/* Botão Ver Árvore */}
           <Link to={`/parceiros/arvore?vectorId=${vector.id}`}>
-            <Button variant="ghost" size="sm" title="Ver Árvore de Parceiros">
+            <Button variant="ghost" size="sm" title={t('vectors.actions.viewTree')}>
               <GitBranch className="w-4 h-4" />
             </Button>
           </Link>
@@ -136,7 +136,7 @@ export function VectorsListPage() {
           {/* Botão Editar (apenas AdminGlobal) */}
           {isAdminGlobal && (
             <Link to={`/vetores/${vector.id}/editar`}>
-              <Button variant="ghost" size="sm" title="Editar">
+              <Button variant="ghost" size="sm" title={t('vectors.actions.edit')}>
                 <Edit className="w-4 h-4" />
               </Button>
             </Link>
@@ -148,7 +148,7 @@ export function VectorsListPage() {
               variant="ghost"
               size="sm"
               onClick={() => handleToggleActive(vector)}
-              title={vector.isActive ? 'Inativar' : 'Ativar'}
+              title={vector.isActive ? t('vectors.actions.deactivate') : t('vectors.actions.activate')}
               className={vector.isActive ? 'text-red-600 hover:text-red-700' : 'text-green-600 hover:text-green-700'}
             >
               <Power className="w-4 h-4" />
@@ -172,7 +172,7 @@ export function VectorsListPage() {
   if (error) {
     return (
       <Alert type="error">
-        Erro ao carregar vetores. Tente novamente mais tarde.
+        {t('vectors.errorLoading')}
       </Alert>
     );
   }
@@ -184,7 +184,7 @@ export function VectorsListPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">{t('vectors.title')}</h1>
           <p className="text-sm text-gray-500 mt-1">
-            {t('vectors.title')}
+            {t('vectors.subtitle')}
           </p>
         </div>
         {isAdminGlobal && (
@@ -253,7 +253,7 @@ export function VectorsListPage() {
               <Link to="/vetores/novo">
                 <Button>
                   <Plus className="w-4 h-4 mr-2" />
-                  Criar Primeiro Vetor
+                  {t('vectors.createFirstVector')}
                 </Button>
               </Link>
             ) : undefined
@@ -283,16 +283,14 @@ export function VectorsListPage() {
       {/* Dialog de Confirmação */}
       <ConfirmDialog
         isOpen={confirmDialog.isOpen}
-        title={`${confirmDialog.action === 'activate' ? 'Ativar' : 'Inativar'} Vetor`}
-        message={`Tem certeza que deseja ${
-          confirmDialog.action === 'activate' ? 'ativar' : 'inativar'
-        } o vetor "${confirmDialog.vectorName}"?${
-          confirmDialog.action === 'deactivate'
-            ? ' Usuários e parceiros associados serão afetados.'
-            : ''
-        }`}
-        confirmText={confirmDialog.action === 'activate' ? 'Ativar' : 'Inativar'}
-        cancelText="Cancelar"
+        title={confirmDialog.action === 'activate' ? t('vectors.dialog.activateTitle') : t('vectors.dialog.deactivateTitle')}
+        message={
+          confirmDialog.action === 'activate'
+            ? t('vectors.dialog.activateMessage', { name: confirmDialog.vectorName })
+            : t('vectors.dialog.deactivateMessage', { name: confirmDialog.vectorName })
+        }
+        confirmText={confirmDialog.action === 'activate' ? t('vectors.dialog.confirmActivate') : t('vectors.dialog.confirmDeactivate')}
+        cancelText={t('vectors.dialog.cancel')}
         isLoading={toggleActiveMutation.isPending}
         onClose={() =>
           setConfirmDialog({ isOpen: false, vectorId: '', vectorName: '', action: 'activate' })

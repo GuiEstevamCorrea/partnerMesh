@@ -272,6 +272,7 @@
   },
   "vectors": {
     "title": "Vetores",
+    "subtitle": "Gerencie os vetores do sistema",
     "addVector": "Adicionar Vetor",
     "editVector": "Editar Vetor",
     "createVector": "Criar Vetor",
@@ -280,19 +281,72 @@
     "vectorCreated": "Vetor criado com sucesso!",
     "vectorUpdated": "Vetor atualizado com sucesso!",
     "vectorDeleted": "Vetor excluído com sucesso!",
+    "vectorActivated": "Vetor ativado com sucesso!",
+    "vectorDeactivated": "Vetor inativado com sucesso!",
     "vectorError": "Erro ao processar vetor",
+    "errorLoading": "Erro ao carregar vetores. Tente novamente mais tarde.",
     "searchPlaceholder": "Buscar por nome ou email...",
     "noVectorFound": "Nenhum vetor encontrado",
     "viewOnlyYourVector": "Você está visualizando apenas seu vetor. Apenas AdminGlobal pode criar e gerenciar múltiplos vetores.",
     "newVector": "Novo Vetor",
+    "createFirstVector": "Criar Primeiro Vetor",
+    "table": {
+      "nameEmail": "Nome/Email",
+      "partnersCount": "Qtd Parceiros",
+      "status": "Status",
+      "actions": "Ações"
+    },
+    "actions": {
+      "viewTree": "Ver Árvore de Parceiros",
+      "edit": "Editar",
+      "activate": "Ativar",
+      "deactivate": "Inativar"
+    },
+    "dialog": {
+      "activateTitle": "Ativar Vetor",
+      "deactivateTitle": "Inativar Vetor",
+      "activateMessage": "Tem certeza que deseja ativar o vetor \"{{name}}\"?",
+      "deactivateMessage": "Tem certeza que deseja inativar o vetor \"{{name}}\"? Usuários e parceiros associados serão afetados.",
+      "confirmActivate": "Ativar",
+      "confirmDeactivate": "Inativar",
+      "cancel": "Cancelar"
+    },
     "form": {
+      "title": "Novo Vetor",
+      "editTitle": "Editar Vetor",
+      "subtitle": "Preencha os dados para criar um novo vetor",
+      "editSubtitle": "Atualize as informações do vetor",
       "name": "Nome",
-      "description": "Descrição",
       "namePlaceholder": "Digite o nome do vetor",
-      "descriptionPlaceholder": "Descrição do vetor"
+      "nameHelp": "Nome único que identifica o vetor no sistema",
+      "email": "Email",
+      "emailPlaceholder": "contato@vetor.com",
+      "emailHelp": "Email de contato do vetor (deve ser único)",
+      "login": "Login",
+      "loginPlaceholder": "Digite o login de acesso",
+      "loginHelp": "Login único para acesso administrativo do vetor",
+      "isActive": "Vetor ativo",
+      "isActiveHelp": "Vetores inativos não podem ter novos parceiros ou negócios cadastrados",
+      "basicInfo": "Informações do Vetor",
+      "statusSection": "Status",
+      "cancel": "Cancelar",
+      "save": "Salvar Alterações",
+      "create": "Criar Vetor",
+      "vectorInfo": "Informações do Vetor",
+      "currentLogin": "Login:",
+      "currentStatus": "Status Atual:",
+      "createAlert": "Ao criar um vetor, você precisará posteriormente criar um usuário com perfil AdminVetor para gerenciá-lo.",
+      "createWarning": "Após criar o vetor, não esqueça de:",
+      "createAdminVetor": "Criar um usuário com perfil AdminVetor e associá-lo a este vetor",
+      "ensureAdmin": "Garantir que haja pelo menos um AdminVetor ativo para gerenciar o vetor",
+      "errorLoading": "Erro ao carregar vetor. Verifique se o ID é válido e tente novamente.",
+      "backToList": "Voltar para Lista"
     },
     "validation": {
-      "nameRequired": "Nome é obrigatório"
+      "nameRequired": "Nome é obrigatório",
+      "emailRequired": "Email é obrigatório",
+      "emailInvalid": "Email inválido",
+      "loginRequired": "Login é obrigatório"
     }
   },
   "users": {

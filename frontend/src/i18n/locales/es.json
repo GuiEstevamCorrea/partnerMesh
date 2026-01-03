@@ -259,19 +259,73 @@
     "vectorCreated": "¡Vector creado exitosamente!",
     "vectorUpdated": "¡Vector actualizado exitosamente!",
     "vectorDeleted": "¡Vector eliminado exitosamente!",
+    "vectorActivated": "¡Vector activado con éxito!",
+    "vectorDeactivated": "¡Vector desactivado con éxito!",
     "vectorError": "Error al procesar vector",
+    "errorLoading": "Error al cargar vectores. Inténtelo de nuevo más tarde.",
     "searchPlaceholder": "Buscar por nombre o email...",
     "noVectorFound": "No se encontró ningún vector",
     "viewOnlyYourVector": "Está viendo solo su vector. Solo AdminGlobal puede crear y administrar múltiples vectores.",
     "newVector": "Nuevo Vector",
+    "subtitle": "Gestionar vectores del sistema",
+    "createFirstVector": "Crear Primer Vector",
+    "table": {
+      "nameEmail": "Nombre/Email",
+      "partnersCount": "Cant. Socios",
+      "status": "Estado",
+      "actions": "Acciones"
+    },
+    "actions": {
+      "viewTree": "Ver Árbol de Socios",
+      "edit": "Editar",
+      "activate": "Activar",
+      "deactivate": "Desactivar"
+    },
+    "dialog": {
+      "activateTitle": "Activar Vector",
+      "deactivateTitle": "Desactivar Vector",
+      "activateMessage": "¿Está seguro de que desea activar el vector \"{{name}}\"?",
+      "deactivateMessage": "¿Está seguro de que desea desactivar el vector \"{{name}}\"? Los usuarios y socios asociados se verán afectados.",
+      "confirmActivate": "Activar",
+      "confirmDeactivate": "Desactivar",
+      "cancel": "Cancelar"
+    },
     "form": {
+      "title": "Nuevo Vector",
+      "editTitle": "Editar Vector",
+      "subtitle": "Complete los datos para crear un nuevo vector",
+      "editSubtitle": "Actualice la información del vector",
       "name": "Nombre",
-      "description": "Descripción",
       "namePlaceholder": "Ingrese el nombre del vector",
-      "descriptionPlaceholder": "Descripción del vector"
+      "nameHelp": "Nombre único que identifica el vector en el sistema",
+      "email": "Email",
+      "emailPlaceholder": "contacto@vector.com",
+      "emailHelp": "Email de contacto del vector (debe ser único)",
+      "login": "Login",
+      "loginPlaceholder": "Ingrese el login de acceso",
+      "loginHelp": "Login único para acceso administrativo del vector",
+      "isActive": "Vector activo",
+      "isActiveHelp": "Los vectores inactivos no pueden tener nuevos socios o negocios registrados",
+      "basicInfo": "Información del Vector",
+      "statusSection": "Estado",
+      "cancel": "Cancelar",
+      "save": "Guardar Cambios",
+      "create": "Crear Vector",
+      "vectorInfo": "Información del Vector",
+      "currentLogin": "Login:",
+      "currentStatus": "Estado Actual:",
+      "createAlert": "Al crear un vector, necesitará posteriormente crear un usuario con perfil AdminVetor para gestionarlo.",
+      "createWarning": "Después de crear el vector, no olvide:",
+      "createAdminVetor": "Crear un usuario con perfil AdminVetor y asociarlo a este vector",
+      "ensureAdmin": "Garantizar que haya al menos un AdminVetor activo para gestionar el vector",
+      "errorLoading": "Error al cargar vector. Verifique si el ID es válido e intente nuevamente.",
+      "backToList": "Volver a la Lista"
     },
     "validation": {
-      "nameRequired": "El nombre es obligatorio"
+      "nameRequired": "El nombre es obligatorio",
+      "emailRequired": "El email es obligatorio",
+      "emailInvalid": "Email inválido",
+      "loginRequired": "El login es obligatorio"
     }
   },
   "users": {

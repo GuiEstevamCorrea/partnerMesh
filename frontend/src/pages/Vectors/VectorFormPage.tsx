@@ -8,6 +8,7 @@ import { ArrowLeft, Save, Network } from 'lucide-react';
 
 import { vectorsApi } from '@/api/endpoints/vectors.api';
 import { useToast } from '@/components/common/Toast';
+import { useI18n } from '@/hooks/useI18n';
 
 import { Input } from '@/components/common/Input';
 import { Button } from '@/components/common/Button';
@@ -15,20 +16,22 @@ import { Card } from '@/components/common/Card';
 import { Alert } from '@/components/common/Alert';
 import { Loading } from '@/components/common/Loading';
 
-// Schema de validação com Zod
-const vectorFormSchema = z.object({
-  name: z.string().min(1, 'Nome é obrigatório'),
-  email: z.string().email('Email inválido').min(1, 'Email é obrigatório'),
-  login: z.string().min(1, 'Login é obrigatório'),
-  isActive: z.boolean().default(true),
-});
+// Schema de validação com Zod dinâmico
+const createVectorFormSchema = (t: (key: string) => string) =>
+  z.object({
+    name: z.string().min(1, t('vectors.validation.nameRequired')),
+    email: z.string().email(t('vectors.validation.emailInvalid')).min(1, t('vectors.validation.emailRequired')),
+    login: z.string().min(1, t('vectors.validation.loginRequired')),
+    isActive: z.boolean().default(true),
+  });
 
-type VectorFormData = z.infer<typeof vectorFormSchema>;
+type VectorFormData = z.infer<ReturnType<typeof createVectorFormSchema>>;
 
 export function VectorFormPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const { t } = useI18n();
 
   const isEditMode = !!id;
 
@@ -46,7 +49,7 @@ export function VectorFormPage() {
     formState: { errors, isSubmitting },
     reset,
   } = useForm<VectorFormData>({
-    resolver: zodResolver(vectorFormSchema),
+    resolver: zodResolver(createVectorFormSchema(t)),
     defaultValues: {
       name: '',
       email: '',
@@ -71,11 +74,11 @@ export function VectorFormPage() {
   const createMutation = useMutation({
     mutationFn: vectorsApi.create,
     onSuccess: () => {
-      showToast('success', 'Vetor criado com sucesso!');
+      showToast('success', t('vectors.vectorCreated'));
       navigate('/vetores');
     },
     onError: (error: any) => {
-      const message = error.response?.data?.message || 'Erro ao criar vetor';
+      const message = error.response?.data?.message || t('vectors.vectorError');
       showToast('error', message);
     },
   });
@@ -84,11 +87,11 @@ export function VectorFormPage() {
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: any }) => vectorsApi.update(id, data),
     onSuccess: () => {
-      showToast('success', 'Vetor atualizado com sucesso!');
+      showToast('success', t('vectors.vectorUpdated'));
       navigate('/vetores');
     },
     onError: (error: any) => {
-      const message = error.response?.data?.message || 'Erro ao atualizar vetor';
+      const message = error.response?.data?.message || t('vectors.vectorError');
       showToast('error', message);
     },
   });
@@ -123,11 +126,11 @@ export function VectorFormPage() {
     return (
       <div className="space-y-4">
         <Alert type="error">
-          Erro ao carregar vetor. Verifique se o ID é válido e tente novamente.
+          {t('vectors.form.errorLoading')}
         </Alert>
         <Button variant="outline" onClick={() => navigate('/vetores')}>
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Voltar para Lista
+          {t('vectors.form.backToList')}
         </Button>
       </div>
     );
@@ -143,12 +146,12 @@ export function VectorFormPage() {
           </Button>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">
-              {isEditMode ? 'Editar Vetor' : 'Novo Vetor'}
+              {isEditMode ? t('vectors.form.editTitle') : t('vectors.form.title')}
             </h1>
             <p className="text-sm text-gray-500 mt-1">
               {isEditMode
-                ? 'Atualize as informações do vetor'
-                : 'Preencha os dados para criar um novo vetor'}
+                ? t('vectors.form.editSubtitle')
+                : t('vectors.form.subtitle')}
             </p>
           </div>
         </div>
@@ -158,7 +161,7 @@ export function VectorFormPage() {
       {/* Avisos Importantes */}
       {!isEditMode && (
         <Alert type="info">
-          <strong>Atenção:</strong> Ao criar um vetor, você precisará posteriormente criar um usuário com perfil AdminVetor para gerenciá-lo.
+          <strong>{t('common.attention')}:</strong> {t('vectors.form.createAlert')}
         </Alert>
       )}
 
@@ -168,50 +171,50 @@ export function VectorFormPage() {
           {/* Informações Básicas */}
           <div className="space-y-4">
             <h2 className="text-lg font-semibold text-gray-900 border-b pb-2">
-              Informações do Vetor
+              {t('vectors.form.basicInfo')}
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Nome */}
               <div>
                 <Input
-                  label="Nome"
-                  placeholder="Digite o nome do vetor"
+                  label={t('vectors.form.name')}
+                  placeholder={t('vectors.form.namePlaceholder')}
                   error={errors.name?.message}
                   {...register('name')}
                   required
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  Nome único que identifica o vetor no sistema
+                  {t('vectors.form.nameHelp')}
                 </p>
               </div>
 
               {/* Email */}
               <div>
                 <Input
-                  label="Email"
+                  label={t('vectors.form.email')}
                   type="email"
-                  placeholder="contato@vetor.com"
+                  placeholder={t('vectors.form.emailPlaceholder')}
                   error={errors.email?.message}
                   {...register('email')}
                   required
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  Email de contato do vetor (deve ser único)
+                  {t('vectors.form.emailHelp')}
                 </p>
               </div>
 
               {/* Login */}
               <div>
                 <Input
-                  label="Login"
-                  placeholder="Digite o login de acesso"
+                  label={t('vectors.form.login')}
+                  placeholder={t('vectors.form.loginPlaceholder')}
                   error={errors.login?.message}
                   {...register('login')}
                   required
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  Login único para acesso administrativo do vetor
+                  {t('vectors.form.loginHelp')}
                 </p>
               </div>
             </div>
@@ -219,7 +222,7 @@ export function VectorFormPage() {
 
           {/* Status */}
           <div className="space-y-4">
-            <h2 className="text-lg font-semibold text-gray-900 border-b pb-2">Status</h2>
+            <h2 className="text-lg font-semibold text-gray-900 border-b pb-2">{t('vectors.form.statusSection')}</h2>
 
             <div className="flex items-center gap-3">
               <input
@@ -229,21 +232,21 @@ export function VectorFormPage() {
                 {...register('isActive')}
               />
               <label htmlFor="isActive" className="text-sm font-medium text-gray-700">
-                Vetor ativo
+                {t('vectors.form.isActive')}
               </label>
             </div>
             <p className="text-xs text-gray-500">
-              Vetores inativos não podem ter novos parceiros ou negócios cadastrados
+              {t('vectors.form.isActiveHelp')}
             </p>
           </div>
 
           {/* Informações sobre Administrador (apenas modo criação) */}
           {!isEditMode && (
             <Alert type="warning">
-              <strong>Importante:</strong> Após criar o vetor, não esqueça de:
+              <strong>{t('common.important')}:</strong> {t('vectors.form.createWarning')}
               <ul className="list-disc list-inside mt-2 space-y-1">
-                <li>Criar um usuário com perfil <strong>AdminVetor</strong> e associá-lo a este vetor</li>
-                <li>Garantir que haja pelo menos um AdminVetor ativo para gerenciar o vetor</li>
+                <li>{t('vectors.form.createAdminVetor')}</li>
+                <li>{t('vectors.form.ensureAdmin')}</li>
               </ul>
             </Alert>
           )}
@@ -251,16 +254,16 @@ export function VectorFormPage() {
           {/* Informações sobre Parceiros (modo edição) */}
           {isEditMode && vector && (
             <div className="bg-gray-50 rounded-lg p-4">
-              <h3 className="text-sm font-semibold text-gray-900 mb-2">Informações do Vetor</h3>
+              <h3 className="text-sm font-semibold text-gray-900 mb-2">{t('vectors.form.vectorInfo')}</h3>
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <span className="text-gray-500">Login:</span>
+                  <span className="text-gray-500">{t('vectors.form.currentLogin')}</span>
                   <span className="ml-2 font-medium text-gray-900">{vector.login}</span>
                 </div>
                 <div>
-                  <span className="text-gray-500">Status Atual:</span>
+                  <span className="text-gray-500">{t('vectors.form.currentStatus')}</span>
                   <span className={`ml-2 font-medium ${vector.isActive ? 'text-green-600' : 'text-red-600'}`}>
-                    {vector.isActive ? 'Ativo' : 'Inativo'}
+                    {vector.isActive ? t('common.active') : t('common.inactive')}
                   </span>
                 </div>
               </div>
@@ -275,7 +278,7 @@ export function VectorFormPage() {
               onClick={() => navigate('/vetores')}
               disabled={isSubmitting}
             >
-              Cancelar
+              {t('vectors.form.cancel')}
             </Button>
             <Button
               type="submit"
@@ -283,7 +286,7 @@ export function VectorFormPage() {
               isLoading={isSubmitting}
             >
               <Save className="w-4 h-4 mr-2" />
-              {isEditMode ? 'Salvar Alterações' : 'Criar Vetor'}
+              {isEditMode ? t('vectors.form.save') : t('vectors.form.create')}
             </Button>
           </div>
         </form>
