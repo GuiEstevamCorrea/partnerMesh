@@ -91,10 +91,22 @@ export function UserFormPage() {
   const isEditMode = !!id;
   const isAdminGlobal = currentUser?.permission === Permission.AdminGlobal;
 
+  console.log('UserFormPage - Debug inicial:', {
+    id,
+    isEditMode,
+    isAdminGlobal,
+    currentUser: currentUser?.name
+  });
+
   // Query para carregar usuário em modo de edição
   const { data: user, isLoading: isLoadingUser, error: userError } = useQuery({
     queryKey: ['user', id],
-    queryFn: () => usersApi.getById(id!),
+    queryFn: async () => {
+      console.log('UserFormPage - Carregando usuário com ID:', id);
+      const result = await usersApi.getById(id!);
+      console.log('UserFormPage - Usuário carregado:', result);
+      return result;
+    },
     enabled: isEditMode,
   });
 
@@ -132,7 +144,14 @@ export function UserFormPage() {
 
   // Preencher form quando carregar usuário (modo edição)
   useEffect(() => {
+    console.log('UserFormPage - useEffect para preencher form:', {
+      user,
+      isEditMode,
+      hasUser: !!user
+    });
+    
     if (user && isEditMode) {
+      console.log('UserFormPage - Preenchendo form com dados do usuário:', user);
       reset({
         name: user.name,
         email: user.email,
@@ -201,6 +220,7 @@ export function UserFormPage() {
 
   // Loading state
   if (isEditMode && isLoadingUser) {
+    console.log('UserFormPage - Estado de loading, aguardando dados do usuário');
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <Loading />
@@ -210,6 +230,7 @@ export function UserFormPage() {
 
   // Error state
   if (isEditMode && userError) {
+    console.log('UserFormPage - Erro ao carregar usuário:', userError);
     return (
       <div className="space-y-4">
         <Alert type="error">

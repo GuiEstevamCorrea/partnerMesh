@@ -15,7 +15,29 @@ export const usersApi = {
 
   getById: async (id: string): Promise<User> => {
     const response = await api.get(`/users/${id}`);
-    return response.data;
+    console.log('usersApi.getById - Resposta completa:', response.data);
+    
+    // A API retorna: { isSuccess, message, user: {...} }
+    if (response.data?.user) {
+      const apiUser = response.data.user;
+      
+      // Adaptar dados da API para o tipo User esperado pelo frontend
+      const adaptedUser: User = {
+        id: apiUser.id,
+        name: apiUser.name,
+        email: apiUser.email,
+        permission: apiUser.permission as Permission,
+        vectorId: apiUser.vetores?.[0]?.vetorId || undefined,
+        vectorName: apiUser.vetores?.[0]?.vetorName || undefined,
+        isActive: apiUser.active,
+        createdAt: apiUser.createdAt,
+      };
+      
+      console.log('usersApi.getById - Usuário adaptado:', adaptedUser);
+      return adaptedUser;
+    }
+    
+    throw new Error(response.data?.message || 'Erro ao carregar usuário');
   },
 
   create: async (data: CreateUserRequest): Promise<User> => {
