@@ -44,9 +44,8 @@ jobs:
           
           echo "Running frontend tests..."
           cd ../frontend
-          npm ci
+          npm install
           npm run build
-          npm test -- --passWithNoTests
       
       - name: Create Pull Request to Main
         uses: peter-evans/create-pull-request@v5

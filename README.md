@@ -140,7 +140,6 @@ src/
 - Docker & Docker Compose
 - Git
 
-
 ---
 
 **PartnerMesh** - Partner Network Management System © 2026

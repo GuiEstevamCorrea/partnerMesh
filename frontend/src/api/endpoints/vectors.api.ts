@@ -25,7 +25,7 @@ export const vectorsApi = {
       
       return {
         items: transformedItems,
-        currentPage: apiData.currentPage,
+        page: apiData.currentPage,
         pageSize: apiData.pageSize,
         totalItems: apiData.totalVetores,
         totalPages: apiData.totalPages,

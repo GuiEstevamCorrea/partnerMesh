@@ -175,33 +175,9 @@ const PaymentsListPage = () => {
     if (confirmDialog.payments.length === 0) return '';
     
     const total = confirmDialog.payments.reduce((sum, p) => sum + p.value, 0);
+    const recipientsList = confirmDialog.payments.map(p => `${p.recipientName}: ${formatCurrency(p.value)}`).join('\n');
     
-    return (
-      <div className="space-y-4">
-        <p className="text-gray-700">
-          Tem certeza que deseja processar <span className="font-semibold">{selectedPayments.size} pagamento(s)</span>?
-        </p>
-        
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <p className="text-sm text-blue-800 font-medium mb-1">Valor Total</p>
-          <p className="text-2xl font-bold text-blue-900">{formatCurrency(total)}</p>
-        </div>
-        
-        <div>
-          <p className="text-sm font-medium text-gray-700 mb-2">Destinatários:</p>
-          <div className="bg-gray-50 rounded-lg p-3 max-h-48 overflow-y-auto">
-            <ul className="space-y-2">
-              {confirmDialog.payments.map((p) => (
-                <li key={p.id} className="flex justify-between items-center text-sm">
-                  <span className="text-gray-700">{p.recipientName}</span>
-                  <span className="font-semibold text-green-600">{formatCurrency(p.value)}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </div>
-    );
+    return `Tem certeza que deseja processar ${selectedPayments.size} pagamento(s)?\n\nValor Total: ${formatCurrency(total)}\n\nDestinatários:\n${recipientsList}`;
   }, [confirmDialog.payments, selectedPayments.size]);
 
   // Usar resumo global dos pagamentos filtrados

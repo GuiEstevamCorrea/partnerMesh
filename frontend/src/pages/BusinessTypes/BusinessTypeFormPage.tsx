@@ -67,7 +67,11 @@ export function BusinessTypeFormPage() {
 
   // Mutation: Update
   const updateMutation = useMutation({
-    mutationFn: (data: BusinessTypeFormData) => businessTypesApi.update(id!, data),
+    mutationFn: (data: BusinessTypeFormData) => businessTypesApi.update(id!, {
+      name: data.name!,
+      description: data.description,
+      isActive: data.isActive!,
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['business-types'] });
       showToast('success', 'Tipo de negócio atualizado com sucesso!');
@@ -92,7 +96,11 @@ export function BusinessTypeFormPage() {
   // Submit handler
   const onSubmit = (data: BusinessTypeFormData) => {
     if (isEditMode) {
-      updateMutation.mutate(data);
+      updateMutation.mutate({
+        name: data.name,
+        description: data.description,
+        isActive: data.isActive,
+      });
     } else {
       createMutation.mutate({
         name: data.name,

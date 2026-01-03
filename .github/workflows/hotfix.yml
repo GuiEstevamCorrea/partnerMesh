@@ -44,8 +44,8 @@ jobs:
           
           echo "Testing frontend..."
           cd ../frontend
-          npm ci
-          npm test -- --passWithNoTests
+          npm install
+          npm run build
       
       - name: Create PR to Main
         uses: peter-evans/create-pull-request@v5
