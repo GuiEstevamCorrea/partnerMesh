@@ -64,7 +64,7 @@ export function BusinessFormPage() {
   });
 
   // Query para carregar tipos de negócio (apenas em modo criação)
-  const { data: typesData, isLoading: isLoadingTypes, error: typesError } = useQuery({
+  const { data: typesData, isLoading: isLoadingTypes } = useQuery({
     queryKey: ['business-types-for-business'],
     queryFn: () => businessTypesApi.list({ pageSize: 100 }),
     enabled: !isEditMode,

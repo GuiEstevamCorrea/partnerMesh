@@ -79,7 +79,6 @@ export function PartnerFormPage() {
 
   const watchRecommenderId = watch('recommenderId');
   const watchRecommenderType = watch('recommenderType');
-  const watchVectorId = watch('vectorId');
 
   // Preencher form quando carregar parceiro (modo edição)
   useEffect(() => {

@@ -8,7 +8,6 @@ import {
   Briefcase,
   FileText,
   DollarSign,
-  BarChart3,
   FileSearch,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/auth.store';
