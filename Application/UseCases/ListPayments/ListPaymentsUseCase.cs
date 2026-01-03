@@ -101,9 +101,18 @@ public class ListPaymentsUseCase : IListPaymentsUseCase
                 // Buscar dados do negócio através da comissão
                 var business = await _businessRepository.GetByIdAsync(comission.BussinessId, cancellationToken);
 
+                // Ignorar negócios cancelados
+                if (business != null && business.Status == Domain.ValueTypes.BusinessStatus.Cancelado)
+                {
+                    continue;
+                }
+
                 // Buscar o parceiro do negócio para obter o VetorId
                 Guid vetorId = Guid.Empty;
                 string vetorName = "";
+                string recipientName = "";
+                string recipientType = "";
+                Guid recipientId = Guid.Empty;
                 
                 if (business != null)
                 {
@@ -115,6 +124,20 @@ public class ListPaymentsUseCase : IListPaymentsUseCase
                         vetorName = vetor?.Name ?? "Vetor não encontrado";
                     }
                 }
+                
+                // Determinar o destinatário baseado no tipo de pagamento
+                if (payment.TipoPagamento == Domain.ValueTypes.PaymentType.Vetor)
+                {
+                    recipientName = vetorName;
+                    recipientType = "Vector";
+                    recipientId = vetorId;
+                }
+                else
+                {
+                    recipientName = partner?.Name ?? "Parceiro não encontrado";
+                    recipientType = "Partner";
+                    recipientId = payment.PartnerId;
+                }
 
                 var paymentDto = new PaymentListDto
                 {
@@ -122,7 +145,13 @@ public class ListPaymentsUseCase : IListPaymentsUseCase
                     ComissionId = payment.ComissionId,
                     PartnerId = payment.PartnerId,
                     PartnerName = partner?.Name ?? "Parceiro não encontrado",
+                    RecipientId = recipientId,
+                    RecipientName = recipientName,
+                    RecipientType = recipientType,
                     TipoPagamento = payment.TipoPagamento.ToLegacyString(),
+                    Level = payment.TipoPagamento == Domain.ValueTypes.PaymentType.Recomendador ? 1 :
+                            payment.TipoPagamento == Domain.ValueTypes.PaymentType.Participante ? 2 :
+                            payment.TipoPagamento == Domain.ValueTypes.PaymentType.Intermediario ? 3 : 0,
                     Value = payment.Value,
                     Status = payment.Status.ToLegacyString(),
                     PaidOn = payment.PaidOn,
@@ -131,6 +160,7 @@ public class ListPaymentsUseCase : IListPaymentsUseCase
                     BusinessDescription = business?.Observations ?? "",
                     BusinessTotalValue = business?.Value ?? 0,
                     BusinessDate = business?.CreatedAt ?? DateTime.MinValue,
+                    BusinessStatus = business?.Status.ToLegacyString() ?? "",
                     VetorId = vetorId,
                     VetorName = vetorName
                 };

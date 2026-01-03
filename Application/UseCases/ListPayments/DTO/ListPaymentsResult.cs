@@ -22,7 +22,14 @@ public sealed record PaymentListDto
     public Guid ComissionId { get; init; }
     public Guid PartnerId { get; init; }
     public string PartnerName { get; init; } = string.Empty;
+    
+    // Campos para compatibilidade com frontend
+    public Guid RecipientId { get; init; }
+    public string RecipientName { get; init; } = string.Empty;
+    public string RecipientType { get; init; } = string.Empty;
+    
     public string TipoPagamento { get; init; } = string.Empty;
+    public int Level { get; init; }
     public decimal Value { get; init; }
     public string Status { get; init; } = string.Empty;
     public DateTime? PaidOn { get; init; }
@@ -33,6 +40,7 @@ public sealed record PaymentListDto
     public string BusinessDescription { get; init; } = string.Empty;
     public decimal BusinessTotalValue { get; init; }
     public DateTime BusinessDate { get; init; }
+    public string BusinessStatus { get; init; } = string.Empty;
     
     // Dados do vetor
     public Guid VetorId { get; init; }
