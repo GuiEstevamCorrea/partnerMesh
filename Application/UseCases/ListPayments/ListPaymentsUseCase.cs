@@ -49,9 +49,9 @@ public class ListPaymentsUseCase : IListPaymentsUseCase
                 return ListPaymentsResult.Failure("Página deve ser maior que zero.");
             }
 
-            if (request.PageSize < 1 || request.PageSize > 100)
+            if (request.PageSize < 1 || request.PageSize > 1000)
             {
-                return ListPaymentsResult.Failure("Tamanho da página deve estar entre 1 e 100.");
+                return ListPaymentsResult.Failure("Tamanho da página deve estar entre 1 e 1000.");
             }
 
             // Converter strings de ordenação para enums
