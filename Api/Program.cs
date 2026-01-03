@@ -47,8 +47,26 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configurar Serilog
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .Enrich.FromLogContext()
+    .WriteTo.File(
+        path: "logs/partnermesh-.log",
+        rollingInterval: RollingInterval.Day,
+        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}")
+    .CreateLogger();
+
+try
+{
+    Log.Information("Iniciando PartnerMesh API");
+
+// Adicionar Serilog
+builder.Host.UseSerilog();
 
 // Add services to the container.
 builder.Services.AddControllers()
@@ -223,3 +241,12 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "A aplicação falhou ao iniciar");
+}
+finally
+{
+    Log.CloseAndFlush();
+}
