@@ -1,8 +1,10 @@
+using Api.Extensions;
+using Api.Models;
 using Application.Interfaces.IUseCases;
 using Application.UseCases.ListPayments.DTO;
 using Application.UseCases.ProcessPayment.DTO;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;using Api.Extensions;
+using Microsoft.AspNetCore.Mvc;
 namespace Api.Controllers;
 
 [ApiController]
@@ -76,6 +78,85 @@ public class PaymentsController : ControllerBase
             };
 
             return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { 
+                IsSuccess = false, 
+                Message = "Erro interno do servidor.", 
+                Details = ex.Message 
+            });
+        }
+    }
+
+    /// <summary>
+    /// UC-61 - Processa múltiplos pagamentos em lote
+    /// </summary>
+    [HttpPost("process")]
+    public async Task<ActionResult> ProcessMultiplePayments(
+        [FromBody] ProcessMultiplePaymentsRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            if (request == null || request.PaymentIds == null || !request.PaymentIds.Any())
+            {
+                return BadRequest(new { IsSuccess = false, Message = "IDs dos pagamentos são obrigatórios." });
+            }
+
+            var errorResult = this.GetCurrentUserIdOrError(out var userId);
+            if (errorResult != null)
+                return errorResult;
+
+            var results = new List<object>();
+            var successCount = 0;
+            var errorCount = 0;
+
+            foreach (var paymentId in request.PaymentIds)
+            {
+                var processRequest = new Application.UseCases.ProcessPayment.DTO.ProcessPaymentRequest
+                {
+                    PaymentId = paymentId,
+                    Observations = request.Observations
+                };
+
+                var result = await _processPaymentUseCase.ExecuteAsync(processRequest, userId, cancellationToken);
+                
+                if (result.IsSuccess)
+                {
+                    successCount++;
+                }
+                else
+                {
+                    errorCount++;
+                    results.Add(new { PaymentId = paymentId, Error = result.Message });
+                }
+            }
+
+            if (errorCount == 0)
+            {
+                return Ok(new { 
+                    IsSuccess = true, 
+                    Message = $"{successCount} pagamento(s) processado(s) com sucesso." 
+                });
+            }
+            else if (successCount == 0)
+            {
+                return BadRequest(new { 
+                    IsSuccess = false, 
+                    Message = $"Erro ao processar todos os {errorCount} pagamento(s).",
+                    Errors = results
+                });
+            }
+            else
+            {
+                return Ok(new { 
+                    IsSuccess = true, 
+                    Message = $"{successCount} pagamento(s) processado(s) com sucesso. {errorCount} erro(s).",
+                    PartialSuccess = true,
+                    Errors = results
+                });
+            }
         }
         catch (Exception ex)
         {
