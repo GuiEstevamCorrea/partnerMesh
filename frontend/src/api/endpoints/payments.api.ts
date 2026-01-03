@@ -11,6 +11,17 @@ export interface CancelledBusinessSummary {
   paidBeforeCancellationCount: number;
 }
 
+export interface PaymentsSummary {
+  totalPaid: number;
+  totalPending: number;
+  totalCancelled: number;
+  countPaid: number;
+  countPending: number;
+  countCancelled: number;
+  totalValue: number;
+  totalCount: number;
+}
+
 export const paymentsApi = {
   list: async (params?: PaymentFilter): Promise<PaginatedResponse<Payment>> => {
     const response = await api.get('/payments', { params });
@@ -24,6 +35,11 @@ export const paymentsApi = {
 
   process: async (data: ProcessPaymentRequest): Promise<void> => {
     await api.post('/payments/process', data);
+  },
+
+  getSummary: async (params?: PaymentFilter): Promise<PaymentsSummary> => {
+    const response = await api.get('/payments/summary', { params });
+    return response.data.summary;
   },
 
   getCancelledBusinessSummary: async (): Promise<CancelledBusinessSummary> => {

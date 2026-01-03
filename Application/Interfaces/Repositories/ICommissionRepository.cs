@@ -25,4 +25,13 @@ public interface ICommissionRepository
         int page = 1,
         int pageSize = 10,
         CancellationToken cancellationToken = default);
+
+    Task<(decimal totalPaid, decimal totalPending, decimal totalCancelled, int countPaid, int countPending, int countCancelled)> GetPaymentsSummaryAsync(
+        Guid? vetorId = null,
+        Guid? partnerId = null,
+        DateTime? startDate = null,
+        DateTime? endDate = null,
+        string? status = null,
+        string? tipoPagamento = null,
+        CancellationToken cancellationToken = default);
 }

@@ -85,6 +85,26 @@ const PaymentsListPage = () => {
     queryFn: () => paymentsApi.getCancelledBusinessSummary(),
   });
 
+  // Query: Resumo global dos pagamentos (sem paginação)
+  const { data: paymentsSummary } = useQuery({
+    queryKey: [
+      'payments-summary',
+      statusFilter,
+      levelFilter,
+      vectorFilter,
+      dateStart,
+      dateEnd,
+    ],
+    queryFn: () =>
+      paymentsApi.getSummary({
+        status: (statusFilter as 'Pending' | 'Paid' | undefined) || undefined,
+        level: levelFilter ? Number(levelFilter) : undefined,
+        vectorId: vectorFilter || undefined,
+        startDate: dateStart || undefined,
+        endDate: dateEnd || undefined,
+      }),
+  });
+
   // Mutation: Processar pagamentos
   const processPaymentsMutation = useMutation({
     mutationFn: (paymentIds: string[]) =>
@@ -93,6 +113,7 @@ const PaymentsListPage = () => {
       showToast('success', 'Pagamentos processados com sucesso');
       // Invalidar queries relacionadas a pagamentos
       queryClient.invalidateQueries({ queryKey: ['payments'] });
+      queryClient.invalidateQueries({ queryKey: ['payments-summary'] });
       // Invalidar queries relacionadas a negócios para atualizar status
       queryClient.invalidateQueries({ queryKey: ['businesses'] });
       queryClient.invalidateQueries({ queryKey: ['business'] });
@@ -162,9 +183,9 @@ const PaymentsListPage = () => {
     return `Tem certeza que deseja processar ${selectedPayments.size} pagamento(s)?\n\nValor Total: ${formatCurrency(total)}\n\nDestinatários:\n${recipients}`;
   }, [confirmDialog.payments, selectedPayments.size]);
 
-  // Calcular resumo - excluindo valores cancelados dos totais
+  // Usar resumo global dos pagamentos filtrados
   const summary = useMemo(() => {
-    if (!paymentsData?.items) {
+    if (!paymentsSummary) {
       return {
         totalPaid: 0,
         totalPending: 0,
@@ -173,16 +194,13 @@ const PaymentsListPage = () => {
       };
     }
 
-    const paid = paymentsData.items.filter((p) => p.status === 'Paid');
-    const pending = paymentsData.items.filter((p) => p.status === 'Pending');
-
     return {
-      totalPaid: paid.reduce((sum, p) => sum + p.value, 0),
-      totalPending: pending.reduce((sum, p) => sum + p.value, 0),
-      countPaid: paid.length,
-      countPending: pending.length,
+      totalPaid: paymentsSummary.totalPaid,
+      totalPending: paymentsSummary.totalPending,
+      countPaid: paymentsSummary.countPaid,
+      countPending: paymentsSummary.countPending,
     };
-  }, [paymentsData?.items]);
+  }, [paymentsSummary]);
 
   const payments = paymentsData?.items || [];
   const totalPages = paymentsData?.totalPages || 0;

@@ -4,6 +4,7 @@ using Application.Interfaces.IUseCases;
 using Application.UseCases.ListPayments.DTO;
 using Application.UseCases.ProcessPayment.DTO;
 using Application.UseCases.GetCancelledBusinessSummary.DTO;
+using Application.UseCases.GetPaymentsSummary.DTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 namespace Api.Controllers;
@@ -16,15 +17,18 @@ public class PaymentsController : ControllerBase
     private readonly IListPaymentsUseCase _listPaymentsUseCase;
     private readonly IProcessPaymentUseCase _processPaymentUseCase;
     private readonly ICancelledBusinessSummaryUseCase _cancelledBusinessSummaryUseCase;
+    private readonly IGetPaymentsSummaryUseCase _getPaymentsSummaryUseCase;
 
     public PaymentsController(
         IListPaymentsUseCase listPaymentsUseCase,
         IProcessPaymentUseCase processPaymentUseCase,
-        ICancelledBusinessSummaryUseCase cancelledBusinessSummaryUseCase)
+        ICancelledBusinessSummaryUseCase cancelledBusinessSummaryUseCase,
+        IGetPaymentsSummaryUseCase getPaymentsSummaryUseCase)
     {
         _listPaymentsUseCase = listPaymentsUseCase;
         _processPaymentUseCase = processPaymentUseCase;
         _cancelledBusinessSummaryUseCase = cancelledBusinessSummaryUseCase;
+        _getPaymentsSummaryUseCase = getPaymentsSummaryUseCase;
     }
 
     /// <summary>
@@ -231,6 +235,54 @@ public class PaymentsController : ControllerBase
                 return errorResult;
 
             var result = await _cancelledBusinessSummaryUseCase.ExecuteAsync(userId, cancellationToken);
+
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { 
+                IsSuccess = false, 
+                Message = "Erro interno do servidor.", 
+                Details = ex.Message 
+            });
+        }
+    }
+
+    /// <summary>
+    /// Obter resumo dos pagamentos (totais sem paginação)
+    /// </summary>
+    [HttpGet("summary")]
+    public async Task<ActionResult<GetPaymentsSummaryResult>> GetPaymentsSummary(
+        [FromQuery] Guid? vetorId = null,
+        [FromQuery] Guid? partnerId = null,
+        [FromQuery] DateTime? startDate = null,
+        [FromQuery] DateTime? endDate = null,
+        [FromQuery] string? status = null,
+        [FromQuery] string? tipoPagamento = null,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var errorResult = this.GetCurrentUserIdOrError(out var userId);
+            if (errorResult != null)
+                return errorResult;
+
+            var request = new GetPaymentsSummaryRequest
+            {
+                VetorId = vetorId,
+                PartnerId = partnerId,
+                StartDate = startDate,
+                EndDate = endDate,
+                Status = status,
+                TipoPagamento = tipoPagamento
+            };
+
+            var result = await _getPaymentsSummaryUseCase.ExecuteAsync(request, userId, cancellationToken);
 
             if (!result.IsSuccess)
             {

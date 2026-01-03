@@ -176,4 +176,105 @@ public class CommissionRepository : ICommissionRepository
 
         return (pagedPayments.AsEnumerable(), totalCount);
     }
+
+    public async Task<(decimal totalPaid, decimal totalPending, decimal totalCancelled, int countPaid, int countPending, int countCancelled)> GetPaymentsSummaryAsync(
+        Guid? vetorId = null,
+        Guid? partnerId = null,
+        DateTime? startDate = null,
+        DateTime? endDate = null,
+        string? status = null,
+        string? tipoPagamento = null,
+        CancellationToken cancellationToken = default)
+    {
+        // Obter todos os pagamentos de todas as comissões
+        var allPayments = _context.Comissions
+            .Include(c => c.Bussiness)
+                .ThenInclude(b => b.Partner)
+            .SelectMany(c => c.Pagamentos)
+            .AsQueryable();
+
+        // Aplicar filtros (mesma lógica que GetPaymentsWithFiltersAsync)
+        if (partnerId.HasValue)
+        {
+            allPayments = allPayments.Where(p => p.PartnerId == partnerId);
+        }
+
+        if (!string.IsNullOrEmpty(status))
+        {
+            if (PaymentStatusExtensions.TryParse(status, out var statusEnum))
+            {
+                allPayments = allPayments.Where(p => p.Status == statusEnum);
+            }
+        }
+
+        if (!string.IsNullOrEmpty(tipoPagamento))
+        {
+            if (PaymentTypeExtensions.TryParse(tipoPagamento, out var typeEnum))
+            {
+                allPayments = allPayments.Where(p => p.TipoPagamento == typeEnum);
+            }
+        }
+
+        // Se o status for "Pago", filtrar por PaidOn ao invés de CreatedAt
+        var isPaidStatus = !string.IsNullOrEmpty(status) && 
+                          PaymentStatusExtensions.TryParse(status, out var paidStatusCheck) && 
+                          paidStatusCheck == PaymentStatus.Pago;
+
+        if (startDate.HasValue)
+        {
+            if (isPaidStatus)
+            {
+                allPayments = allPayments.Where(p => p.PaidOn.HasValue && p.PaidOn.Value.Date >= startDate.Value.Date);
+            }
+            else
+            {
+                allPayments = allPayments.Where(p => p.Comission.CreatedAt >= startDate.Value);
+            }
+        }
+
+        if (endDate.HasValue)
+        {
+            if (isPaidStatus)
+            {
+                allPayments = allPayments.Where(p => p.PaidOn.HasValue && p.PaidOn.Value.Date <= endDate.Value.Date);
+            }
+            else
+            {
+                allPayments = allPayments.Where(p => p.Comission.CreatedAt <= endDate.Value);
+            }
+        }
+
+        // Filtro por vetorId usando a relação Business -> Partner -> Vetor
+        if (vetorId.HasValue)
+        {
+            allPayments = allPayments.Where(p => 
+                p.Comission.Bussiness != null && 
+                p.Comission.Bussiness.Partner != null && 
+                p.Comission.Bussiness.Partner.VetorId == vetorId.Value);
+        }
+
+        // Calcular totais
+        var totalPaid = await allPayments
+            .Where(p => p.Status == PaymentStatus.Pago)
+            .SumAsync(p => p.Value, cancellationToken);
+
+        var totalPending = await allPayments
+            .Where(p => p.Status == PaymentStatus.APagar)
+            .SumAsync(p => p.Value, cancellationToken);
+
+        var totalCancelled = await allPayments
+            .Where(p => p.Status == PaymentStatus.Cancelado)
+            .SumAsync(p => p.Value, cancellationToken);
+
+        var countPaid = await allPayments
+            .CountAsync(p => p.Status == PaymentStatus.Pago, cancellationToken);
+
+        var countPending = await allPayments
+            .CountAsync(p => p.Status == PaymentStatus.APagar, cancellationToken);
+
+        var countCancelled = await allPayments
+            .CountAsync(p => p.Status == PaymentStatus.Cancelado, cancellationToken);
+
+        return (totalPaid, totalPending, totalCancelled, countPaid, countPending, countCancelled);
+    }
 }
