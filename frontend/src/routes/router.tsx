@@ -10,9 +10,7 @@ import { PartnersListPage, PartnerFormPage, PartnerTreePage } from '@/pages/Part
 import { BusinessTypesListPage, BusinessTypeFormPage } from '@/pages/BusinessTypes';
 import { BusinessListPage, BusinessFormPage, BusinessDetailPage } from '@/pages/Business';
 import { PaymentsListPage } from '@/pages/Payments';
-import { PartnersReportPage } from '@/pages/Reports/PartnersReportPage';
-import { FinancialReportPage } from '@/pages/Reports/FinancialReportPage';
-import { BusinessReportPage } from '@/pages/Reports/BusinessReportPage';
+import { PartnersReportPage, FinancialReportPage, BusinessReportPage, ReportsIndexPage } from '@/pages/Reports';
 import { AuditLogsPage } from '@/pages/Audit/AuditLogsPage';
 import { AuditTimelinePage } from '@/pages/Audit/AuditTimelinePage';
 
@@ -105,6 +103,7 @@ export const router = createBrowserRouter([
       {
         path: 'relatorios',
         children: [
+          { index: true, element: <ReportsIndexPage /> },
           { path: 'parceiros', element: <PartnersReportPage /> },
           { path: 'financeiro', element: <FinancialReportPage /> },
           { path: 'negocios', element: <BusinessReportPage /> },
