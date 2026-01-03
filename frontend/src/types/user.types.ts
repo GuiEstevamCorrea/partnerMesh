@@ -11,6 +11,7 @@ export interface CreateUserRequest {
 export interface UpdateUserRequest {
   name?: string;
   email?: string;
+  password?: string;
   permission?: Permission;
   vetorId?: string | null;
   isActive?: boolean;

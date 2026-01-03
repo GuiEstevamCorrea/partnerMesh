@@ -113,6 +113,19 @@ public sealed class UpdateUserUseCase : IUpdateUserUseCase
             user.UpdateName(request.Name);
         }
 
+        // Validar e atualizar senha se fornecida
+        if (!string.IsNullOrWhiteSpace(request.Password))
+        {
+            if (request.Password.Length < 6)
+            {
+                return ValidationResult.Invalid("Senha deve ter pelo menos 6 caracteres.");
+            }
+
+            // Hash da nova senha
+            var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
+            user.UpdatePassword(passwordHash);
+        }
+
         // Validar e atualizar permissão se fornecida
         if (request.Permission.HasValue)
         {
