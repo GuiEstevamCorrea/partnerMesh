@@ -1,6 +1,7 @@
 using Application.Interfaces.IUseCases;
 using Application.Interfaces.Repositories;
 using Application.UseCases.AuditLogQuery.DTO;
+using Domain.Extensions;
 
 namespace Application.UseCases.AuditLogQuery;
 
@@ -11,10 +12,23 @@ namespace Application.UseCases.AuditLogQuery;
 public class AuditLogQueryUseCase : IAuditLogQueryUseCase
 {
     private readonly IAuditLogRepository _auditLogRepository;
+    private readonly IUserRepository _userRepository;
+    private readonly IPartnerRepository _partnerRepository;
+    private readonly IBusinessRepository _businessRepository;
+    private readonly IVetorRepository _vetorRepository;
 
-    public AuditLogQueryUseCase(IAuditLogRepository auditLogRepository)
+    public AuditLogQueryUseCase(
+        IAuditLogRepository auditLogRepository,
+        IUserRepository userRepository,
+        IPartnerRepository partnerRepository,
+        IBusinessRepository businessRepository,
+        IVetorRepository vetorRepository)
     {
         _auditLogRepository = auditLogRepository;
+        _userRepository = userRepository;
+        _partnerRepository = partnerRepository;
+        _businessRepository = businessRepository;
+        _vetorRepository = vetorRepository;
     }
 
     public async Task<AuditLogQueryResult> ExecuteAsync(AuditLogQueryRequest request)
@@ -45,7 +59,7 @@ public class AuditLogQueryUseCase : IAuditLogQueryUseCase
                 orderDirection: normalizedRequest.OrderDirection);
 
             // Converter para DTOs
-            var logDtos = logs.Select(AuditLogDto.FromEntity).ToList();
+            var logDtos = await ConvertToDto(logs);
 
             // Calcular informações de paginação
             var totalPages = (int)Math.Ceiling((double)totalCount / normalizedRequest.PageSize);
@@ -119,6 +133,81 @@ public class AuditLogQueryUseCase : IAuditLogQueryUseCase
             PageSize = request.PageSize <= 0 ? 50 : Math.Min(request.PageSize, 100),
             PageNumber = request.PageNumber <= 0 ? 1 : request.PageNumber
         };
+    }
+
+    private async Task<List<AuditLogDto>> ConvertToDto(IEnumerable<Domain.Entities.AuditLog> logs)
+    {
+        var logsList = logs.ToList();
+        if (!logsList.Any())
+            return new List<AuditLogDto>();
+
+        // Buscar todos os usuários únicos
+        var userIds = logsList.Select(l => l.UserId).Distinct().ToList();
+        var userDict = new Dictionary<Guid, string>();
+        
+        foreach (var userId in userIds)
+        {
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user != null)
+                userDict[user.Id] = user.Name;
+        }
+
+        // Buscar todas as entidades únicas por tipo
+        var entityIdsByType = logsList
+            .GroupBy(l => l.Entity.ToLegacyString())
+            .ToDictionary(g => g.Key, g => g.Select(l => l.EntityId).Distinct().ToList());
+
+        var entityNames = new Dictionary<Guid, string>();
+
+        foreach (var entityType in entityIdsByType)
+        {
+            switch (entityType.Key)
+            {
+                case "User":
+                    foreach (var id in entityType.Value)
+                    {
+                        var user = await _userRepository.GetByIdAsync(id);
+                        if (user != null)
+                            entityNames[user.Id] = user.Name;
+                    }
+                    break;
+
+                case "Partner":
+                    foreach (var id in entityType.Value)
+                    {
+                        var partner = await _partnerRepository.GetByIdAsync(id);
+                        if (partner != null)
+                            entityNames[partner.Id] = partner.Name;
+                    }
+                    break;
+
+                case "Business":
+                    foreach (var id in entityType.Value)
+                    {
+                        var business = await _businessRepository.GetByIdAsync(id);
+                        if (business != null)
+                            entityNames[business.Id] = $"Negócio - R$ {business.Value:F2}";
+                    }
+                    break;
+
+                case "Vector":
+                    foreach (var id in entityType.Value)
+                    {
+                        var vector = await _vetorRepository.GetByIdAsync(id);
+                        if (vector != null)
+                            entityNames[vector.Id] = vector.Name;
+                    }
+                    break;
+            }
+        }
+
+        // Converter para DTOs
+        return logsList.Select(log =>
+        {
+            var userName = userDict.TryGetValue(log.UserId, out var name) ? name : "Usuário Desconhecido";
+            var entityName = entityNames.TryGetValue(log.EntityId, out var entName) ? entName : null;
+            return AuditLogDto.FromEntity(log, userName, entityName);
+        }).ToList();
     }
 
     private record ValidationResult(bool IsValid, string ErrorMessage);

@@ -33,6 +33,7 @@ export interface AuditLog {
   action: string;
   entity: string;
   entityId: string;
+  entityName?: string;
   details?: string;
   ipAddress?: string;
   userAgent?: string;

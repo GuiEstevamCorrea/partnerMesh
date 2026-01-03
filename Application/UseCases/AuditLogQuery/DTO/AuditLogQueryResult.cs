@@ -88,6 +88,11 @@ public record AuditLogDto
     public Guid UserId { get; init; }
 
     /// <summary>
+    /// Nome do usuário que executou a ação
+    /// </summary>
+    public string UserName { get; init; } = string.Empty;
+
+    /// <summary>
     /// Ação executada
     /// </summary>
     public string Action { get; init; } = string.Empty;
@@ -103,6 +108,11 @@ public record AuditLogDto
     public Guid EntityId { get; init; }
 
     /// <summary>
+    /// Nome/Descrição da entidade afetada (quando disponível)
+    /// </summary>
+    public string? EntityName { get; init; }
+
+    /// <summary>
     /// Dados serializados da ação
     /// </summary>
     public string Data { get; init; } = string.Empty;
@@ -116,16 +126,20 @@ public record AuditLogDto
     /// Converte de AuditLog para AuditLogDto
     /// </summary>
     /// <param name="auditLog">Entidade AuditLog</param>
+    /// <param name="userName">Nome do usuário</param>
+    /// <param name="entityName">Nome da entidade (opcional)</param>
     /// <returns>DTO para exibição</returns>
-    public static AuditLogDto FromEntity(AuditLog auditLog)
+    public static AuditLogDto FromEntity(AuditLog auditLog, string userName, string? entityName = null)
     {
         return new AuditLogDto
         {
             Id = auditLog.Id,
             UserId = auditLog.UserId,
+            UserName = userName,
             Action = auditLog.Action.ToLegacyString(),
             Entity = auditLog.Entity.ToLegacyString(),
             EntityId = auditLog.EntityId,
+            EntityName = entityName,
             Data = auditLog.Datas,
             CreatedAt = auditLog.CreatedAt
         };

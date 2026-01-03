@@ -150,9 +150,8 @@ export const AuditLogsPage = () => {
       key: 'userName',
       header: 'Usuário',
       render: (log: AuditLog) => (
-        <div className="text-sm">
-          <div className="font-medium text-gray-900">{log.userName}</div>
-          <div className="text-xs text-gray-500">ID: {log.userId.slice(0, 8)}</div>
+        <div className="font-medium text-gray-900 text-sm">
+          {log.userName}
         </div>
       ),
     },
@@ -173,15 +172,9 @@ export const AuditLogsPage = () => {
           <div className="font-medium text-gray-900">
             {ENTITY_LABELS[log.entity as keyof typeof ENTITY_LABELS] || log.entity}
           </div>
-        </div>
-      ),
-    },
-    {
-      key: 'entityId',
-      header: 'ID Entidade',
-      render: (log: AuditLog) => (
-        <div className="text-xs font-mono text-gray-600">
-          {log.entityId ? log.entityId.slice(0, 8) : '-'}
+          {log.entityName && (
+            <div className="text-xs text-gray-500">{log.entityName}</div>
+          )}
         </div>
       ),
     },
