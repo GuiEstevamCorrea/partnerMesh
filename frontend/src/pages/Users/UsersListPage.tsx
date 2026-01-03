@@ -72,7 +72,8 @@ export const UsersListPage = () => {
 
   // Mutation para ativar/inativar usuário
   const toggleActiveMutation = useMutation({
-    mutationFn: (userId: string) => usersApi.toggleActive(userId),
+    mutationFn: ({ userId, action }: { userId: string; action: 'activate' | 'deactivate' }) => 
+      action === 'activate' ? usersApi.activate(userId) : usersApi.deactivate(userId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
       showToast(
@@ -96,7 +97,10 @@ export const UsersListPage = () => {
   };
 
   const handleConfirmToggle = () => {
-    toggleActiveMutation.mutate(confirmDialog.userId);
+    toggleActiveMutation.mutate({ 
+      userId: confirmDialog.userId, 
+      action: confirmDialog.action 
+    });
   };
 
   const handleResetFilters = () => {

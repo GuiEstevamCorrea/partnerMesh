@@ -28,8 +28,12 @@ export const usersApi = {
     return response.data;
   },
 
-  toggleActive: async (id: string): Promise<void> => {
-    await api.patch(`/users/${id}/toggle-active`);
+  activate: async (id: string): Promise<void> => {
+    await api.patch(`/users/${id}/activate`);
+  },
+
+  deactivate: async (id: string): Promise<void> => {
+    await api.patch(`/users/${id}/deactivate`);
   },
 
   delete: async (id: string): Promise<void> => {
