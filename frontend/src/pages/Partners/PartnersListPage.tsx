@@ -77,6 +77,8 @@ export function PartnersListPage() {
       const newStatus = partner?.isActive ? 'inativo' : 'ativo';
       showToast('success', `Parceiro ${newStatus} com sucesso!`);
       queryClient.invalidateQueries({ queryKey: ['partners'] });
+      // Invalidar query do dashboard para atualizar parceiros ativos
+      queryClient.invalidateQueries({ queryKey: ['dashboard-partners'] });
       setConfirmDialog({ isOpen: false, partnerId: '', partnerName: '', isActive: false });
     },
     onError: (error: any) => {
