@@ -79,12 +79,6 @@ const PaymentsListPage = () => {
     enabled: isAdminGlobal,
   });
 
-  // Query: Resumo de negócios cancelados
-  const { data: cancelledSummary } = useQuery({
-    queryKey: ['cancelled-business-summary'],
-    queryFn: () => paymentsApi.getCancelledBusinessSummary(),
-  });
-
   // Query: Resumo global dos pagamentos (sem paginação)
   const { data: paymentsSummary } = useQuery({
     queryKey: [
@@ -189,16 +183,20 @@ const PaymentsListPage = () => {
       return {
         totalPaid: 0,
         totalPending: 0,
+        totalCancelled: 0,
         countPaid: 0,
         countPending: 0,
+        countCancelled: 0,
       };
     }
 
     return {
       totalPaid: paymentsSummary.totalPaid,
       totalPending: paymentsSummary.totalPending,
+      totalCancelled: paymentsSummary.totalCancelled,
       countPaid: paymentsSummary.countPaid,
       countPending: paymentsSummary.countPending,
+      countCancelled: paymentsSummary.countCancelled,
     };
   }, [paymentsSummary]);
 
@@ -269,13 +267,13 @@ const PaymentsListPage = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-red-800">
-                Negócios Cancelados
+                Pagamentos Cancelados
               </p>
               <p className="text-2xl font-bold text-red-600 mt-1">
-                {formatCurrency(cancelledSummary?.totalCancelledValue || 0)}
+                {formatCurrency(summary.totalCancelled)}
               </p>
               <p className="text-xs text-red-700 mt-1">
-                {cancelledSummary?.totalCancelledBusinesses || 0} negócio(s)
+                {summary.countCancelled} pagamento(s)
               </p>
             </div>
             <XCircle className="w-10 h-10 text-red-600 opacity-50" />
@@ -289,10 +287,10 @@ const PaymentsListPage = () => {
                 Total Geral
               </p>
               <p className="text-2xl font-bold text-blue-600 mt-1">
-                {formatCurrency(summary.totalPaid + summary.totalPending)}
+                {formatCurrency(summary.totalPaid + summary.totalPending + summary.totalCancelled)}
               </p>
               <p className="text-xs text-blue-700 mt-1">
-                {summary.countPaid + summary.countPending} pagamento(s)
+                {summary.countPaid + summary.countPending + summary.countCancelled} pagamento(s)
               </p>
             </div>
             <DollarSign className="w-10 h-10 text-blue-600 opacity-50" />
