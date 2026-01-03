@@ -115,6 +115,8 @@ const PaymentsListPage = () => {
       queryClient.invalidateQueries({ queryKey: ['business-report'] });
       queryClient.invalidateQueries({ queryKey: ['financial-report'] });
       queryClient.invalidateQueries({ queryKey: ['financial-payments'] });
+      // Invalidar auditoria para exibir logs de pagamentos processados
+      queryClient.invalidateQueries({ queryKey: ['audit-logs'] });
       setSelectedPayments(new Set());
       setConfirmDialog({ isOpen: false, payments: [] });
     },

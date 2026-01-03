@@ -3,6 +3,7 @@ using Application.Interfaces.Repositories;
 using Application.UseCases.ProcessPayment.DTO;
 using Domain.ValueObjects;
 using Domain.Extensions;
+using Domain.ValueTypes;
 
 namespace Application.UseCases.ProcessPayment;
 
@@ -13,19 +14,22 @@ public class ProcessPaymentUseCase : IProcessPaymentUseCase
     private readonly IUserRepository _userRepository;
     private readonly IVetorRepository _vetorRepository;
     private readonly IBusinessRepository _businessRepository;
+    private readonly IAuditLogRepository _auditLogRepository;
 
     public ProcessPaymentUseCase(
         ICommissionRepository commissionRepository,
         IPartnerRepository partnerRepository,
         IUserRepository userRepository,
         IVetorRepository vetorRepository,
-        IBusinessRepository businessRepository)
+        IBusinessRepository businessRepository,
+        IAuditLogRepository auditLogRepository)
     {
         _commissionRepository = commissionRepository;
         _partnerRepository = partnerRepository;
         _userRepository = userRepository;
         _vetorRepository = vetorRepository;
         _businessRepository = businessRepository;
+        _auditLogRepository = auditLogRepository;
     }
 
     public async Task<ProcessPaymentResult> ExecuteAsync(
@@ -85,6 +89,16 @@ public class ProcessPaymentUseCase : IProcessPaymentUseCase
 
             // Atualizar no repositório
             await _commissionRepository.UpdateAsync(commission, cancellationToken);
+
+            // Registrar auditoria
+            var auditLog = new Domain.Entities.AuditLog(
+                userId: userId,
+                action: AuditAction.Update,
+                entity: AuditEntityType.CommissionPayment,
+                entityId: payment.Id,
+                datas: $"Pagamento processado - Valor: {payment.Value:C}, Destinatário: {payment.PartnerId}"
+            );
+            await _auditLogRepository.CreateAsync(auditLog, cancellationToken);
 
             // Atualizar status do negócio baseado nos pagamentos
             var business = await _businessRepository.GetByIdAsync(commission.BussinessId, cancellationToken);
