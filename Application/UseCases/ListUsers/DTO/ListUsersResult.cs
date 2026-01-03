@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Application.UseCases.ListUsers.DTO;
 
 public sealed record ListUsersResult
@@ -36,7 +38,7 @@ public sealed record UserListItem(
     string Name,
     string Email,
     string Permission,
-    bool Active,
+    [property: JsonPropertyName("isActive")] bool Active,
     DateTime CreatedAt,
     IEnumerable<VetorInfo> Vetores);
 
