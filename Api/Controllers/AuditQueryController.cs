@@ -48,7 +48,17 @@ public class AuditQueryController : ControllerBase
                 });
             }
 
-            return Ok(result.Data);
+            // Retornar no formato esperado pelo frontend (compatível com PaginatedResponse)
+            var response = new
+            {
+                items = result.Data?.Logs ?? Enumerable.Empty<object>(),
+                totalItems = result.Data?.TotalRecords ?? 0,
+                page = result.Data?.CurrentPage ?? 1,
+                pageSize = result.Data?.PageSize ?? 50,
+                totalPages = result.Data?.TotalPages ?? 0
+            };
+
+            return Ok(response);
         }
         catch (Exception ex)
         {
