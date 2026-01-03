@@ -10,7 +10,6 @@ import { PartnersListPage, PartnerFormPage, PartnerTreePage } from '@/pages/Part
 import { BusinessTypesListPage, BusinessTypeFormPage } from '@/pages/BusinessTypes';
 import { BusinessListPage, BusinessFormPage, BusinessDetailPage } from '@/pages/Business';
 import { PaymentsListPage } from '@/pages/Payments';
-import { PartnersReportPage, FinancialReportPage, BusinessReportPage, ReportsIndexPage } from '@/pages/Reports';
 import { AuditLogsPage } from '@/pages/Audit/AuditLogsPage';
 import { AuditTimelinePage } from '@/pages/Audit/AuditTimelinePage';
 
@@ -97,17 +96,6 @@ export const router = createBrowserRouter([
       {
         path: 'pagamentos',
         element: <PaymentsListPage />,
-      },
-
-      // ========== ENTREGÁVEL 08 - Relatórios e Dashboard ==========
-      {
-        path: 'relatorios',
-        children: [
-          { index: true, element: <ReportsIndexPage /> },
-          { path: 'parceiros', element: <PartnersReportPage /> },
-          { path: 'financeiro', element: <FinancialReportPage /> },
-          { path: 'negocios', element: <BusinessReportPage /> },
-        ],
       },
 
       // ========== ENTREGÁVEL 09 - Auditoria e Logs ==========

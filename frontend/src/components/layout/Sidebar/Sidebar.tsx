@@ -65,12 +65,6 @@ const menuItems: MenuItem[] = [
     permissions: [Permission.AdminGlobal, Permission.AdminVetor, Permission.Operador],
   },
   {
-    path: '/relatorios',
-    label: 'Relatórios',
-    icon: <BarChart3 className="h-5 w-5" />,
-    permissions: [Permission.AdminGlobal, Permission.AdminVetor, Permission.Operador],
-  },
-  {
     path: '/auditoria',
     label: 'Auditoria',
     icon: <FileSearch className="h-5 w-5" />,
