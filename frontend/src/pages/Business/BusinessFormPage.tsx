@@ -135,7 +135,14 @@ export function BusinessFormPage() {
       // Invalidar queries relacionadas aos negócios
       queryClient.invalidateQueries({ queryKey: ['business'] });
       queryClient.invalidateQueries({ queryKey: ['payments'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      queryClient.invalidateQueries({ queryKey: ['payments-summary'] });
+      // Invalidar todas as queries do dashboard
+      queryClient.invalidateQueries({ queryKey: ['dashboard-business-month'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-pending-payments'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-recent-business'] });
+      // Invalidar relatórios
+      queryClient.invalidateQueries({ queryKey: ['business-report'] });
+      queryClient.invalidateQueries({ queryKey: ['financial-report'] });
       
       if (newBusinesses.length === 1) {
         showToast('success', 'Negócio criado com sucesso! Comissões calculadas automaticamente.');
